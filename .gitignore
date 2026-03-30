@@ -50,3 +50,9 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+
+# MSP Runtime Data
+data/*.json
+data/*.jsonl
+data/msp-clients.json
+data/contract-renewals.jsonl
