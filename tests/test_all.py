@@ -216,10 +216,10 @@ class TestCLI(unittest.TestCase):
         from cli import main
         import subprocess
         result = subprocess.run(
-            [sys.executable, "-m", "cli", "--help"],
+            [sys.executable, "-m", "modules.exchange.cli", "--help"],
             capture_output=True,
             text=True,
-            cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/scripts"
+            cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         )
         self.assertIn("imm-romania", result.stdout)
 
