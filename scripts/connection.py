@@ -1,0 +1,140 @@
+"""
+Exchange connection management.
+Handles authentication and connection to Exchange server.
+"""
+
+import sys
+import os
+from typing import Optional
+
+# Add scripts directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+try:
+    from exchangelib import (
+        Account, Configuration, Credentials, DELEGATE, IMPERSONATION,
+        Version, Build, NTLM
+    )
+    from exchangelib.errors import UnauthorizedError
+    HAS_EXCHANGELIB = True
+except ImportError:
+    HAS_EXCHANGELIB = False
+
+from config import get_connection_config, clear_config
+from utils import die, mask_email
+
+
+# Global account instance (cached)
+_account: Optional[Account] = None
+
+
+def check_dependencies() -> None:
+    """Check if required dependencies are installed."""
+    if not HAS_EXCHANGELIB:
+        die(
+            "exchangelib not installed. Run: pip3 install exchangelib requests_ntlm --break-system-packages"
+        )
+
+
+def get_account() -> Account:
+    """
+    Get authenticated Exchange account.
+    
+    Uses configuration from:
+    1. CLI arguments
+    2. Environment variables
+    3. Config file
+    4. Interactive prompts
+    
+    Returns cached account if already connected.
+    """
+    global _account
+    
+    if _account is not None:
+        return _account
+    
+    check_dependencies()
+    
+    # Get connection configuration
+    conn_config = get_connection_config()
+    
+    try:
+        # Create credentials
+        credentials = Credentials(
+            username=conn_config["username"],
+            password=conn_config["password"]
+        )
+        
+        # Create configuration
+        if conn_config.get("server"):
+            # Use provided server
+            config = Configuration(
+                service_endpoint=conn_config["server"],
+                credentials=credentials,
+            )
+            autodiscover = False
+        else:
+            # Use autodiscover
+            config = None
+            autodiscover = True
+        
+        # Access type
+        access_type = DELEGATE
+        if conn_config.get("access_type") == "impersonation":
+            access_type = IMPERSONATION
+        
+        # Create account
+        _account = Account(
+            primary_smtp_address=conn_config["email"],
+            config=config,
+            autodiscover=autodiscover,
+            access_type=access_type,
+        )
+        
+        return _account
+    
+    except UnauthorizedError:
+        die(f"Authentication failed. Check username and password for {mask_email(conn_config['email'])}")
+    except Exception as e:
+        # Clear cached config on connection failure
+        clear_config()
+        die(f"Failed to connect to Exchange: {e}")
+
+
+def test_connection() -> dict:
+    """
+    Test connection to Exchange server.
+    
+    Returns dict with connection status and account info.
+    """
+    check_dependencies()
+    
+    account = get_account()
+    
+    try:
+        # Get folder counts
+        inbox_total = account.inbox.total_count
+        inbox_unread = account.inbox.unread_count
+        calendar_count = account.calendar.total_count
+        tasks_count = account.tasks.total_count
+        contacts_count = account.contacts.total_count
+        
+        return {
+            "ok": True,
+            "email": account.primary_smtp_address,
+            "server": account.protocol.service_endpoint if hasattr(account, 'protocol') else "autodiscover",
+            "inbox_total": inbox_total,
+            "inbox_unread": inbox_unread,
+            "calendar_count": calendar_count,
+            "tasks_count": tasks_count,
+            "contacts_count": contacts_count,
+        }
+    except Exception as e:
+        die(f"Connection test failed: {e}")
+
+
+def clear_account() -> None:
+    """Clear cached account (useful for testing or reconnection)."""
+    global _account
+    _account = None
+    clear_config()

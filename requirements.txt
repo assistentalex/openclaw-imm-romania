@@ -1,0 +1,11 @@
+# IMM-Romania Dependencies
+# Install with: pip3 install -r requirements.txt
+
+# Exchange Web Services
+exchangelib>=5.0.0
+
+# NTLM authentication
+requests_ntlm>=1.1.0
+
+# Testing (optional)
+pytest>=7.0.0
