@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 """
-IMM-Romania - Main entry point for python -m imm_romania.
+IMM-Romania Exchange Module - Main entry point.
 """
+
+import sys
+import os
+
+# Add current directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from cli import main
 
