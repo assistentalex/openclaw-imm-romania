@@ -10,7 +10,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="imm-romania",
-    version="1.0.0",
+    version="0.2.0",
     author="OpenClaw Community",
     author_email="community@openclaw.ai",
     description="Email, Calendar, and Tasks for Exchange on-premises (2016/2019)",
