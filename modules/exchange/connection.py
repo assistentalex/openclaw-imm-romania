@@ -12,11 +12,9 @@ from typing import Optional
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 try:
-    from exchangelib import (
-        Account, Configuration, Credentials, DELEGATE, IMPERSONATION,
-        Version, Build, NTLM
-    )
+    from exchangelib import Account, Configuration, Credentials, DELEGATE, IMPERSONATION
     from exchangelib.errors import UnauthorizedError
+
     HAS_EXCHANGELIB = True
 except ImportError:
     HAS_EXCHANGELIB = False
@@ -24,7 +22,6 @@ except ImportError:
 from config import get_connection_config, clear_config
 from utils import die, mask_email
 from logger import get_logger
-
 
 # Global account instance (cached)
 _account: Optional[Account] = None
@@ -43,40 +40,42 @@ def check_dependencies() -> None:
 def get_account() -> Account:
     """
     Get authenticated Exchange account.
-    
+
     Uses configuration from:
     1. CLI arguments
     2. Environment variables
     3. Config file
     4. Interactive prompts
-    
+
     Returns cached account if already connected.
     """
     global _account
-    
+
     if _account is not None:
         _logger.debug("Using cached Exchange account")
         return _account
-    
+
     check_dependencies()
-    
+
     # Get connection configuration
     _logger.debug("Loading connection configuration")
     conn_config = get_connection_config()
     start_time = time.time()
-    
+
     try:
-        _logger.info("Connecting to Exchange", {
-            "server": conn_config.get("server", "autodiscover"),
-            "email": mask_email(conn_config["email"])
-        })
-        
+        _logger.info(
+            "Connecting to Exchange",
+            {
+                "server": conn_config.get("server", "autodiscover"),
+                "email": mask_email(conn_config["email"]),
+            },
+        )
+
         # Create credentials
         credentials = Credentials(
-            username=conn_config["username"],
-            password=conn_config["password"]
+            username=conn_config["username"], password=conn_config["password"]
         )
-        
+
         # Create configuration
         if conn_config.get("server"):
             # Use provided server
@@ -89,12 +88,12 @@ def get_account() -> Account:
             # Use autodiscover
             config = None
             autodiscover = True
-        
+
         # Access type
         access_type = DELEGATE
         if conn_config.get("access_type") == "impersonation":
             access_type = IMPERSONATION
-        
+
         # Create account
         _account = Account(
             primary_smtp_address=conn_config["email"],
@@ -102,29 +101,31 @@ def get_account() -> Account:
             autodiscover=autodiscover,
             access_type=access_type,
         )
-        
+
         duration = (time.time() - start_time) * 1000
         _logger.log_connection(
             server=conn_config.get("server", "autodiscover"),
             email=mask_email(conn_config["email"]),
-            success=True
+            success=True,
         )
         _logger.debug(f"Connected in {duration:.0f}ms")
-        
+
         return _account
-    
+
     except UnauthorizedError:
         _logger.log_connection(
             server=conn_config.get("server", "autodiscover"),
             email=mask_email(conn_config["email"]),
-            success=False
+            success=False,
         )
-        die(f"Authentication failed. Check username and password for {mask_email(conn_config['email'])}")
+        die(
+            f"Authentication failed. Check username and password for {mask_email(conn_config['email'])}"
+        )
     except Exception as e:
         _logger.log_connection(
             server=conn_config.get("server", "autodiscover"),
             email=mask_email(conn_config["email"]),
-            success=False
+            success=False,
         )
         # Clear cached config on connection failure
         clear_config()
@@ -134,14 +135,14 @@ def get_account() -> Account:
 def test_connection() -> dict:
     """
     Test connection to Exchange server.
-    
+
     Returns dict with connection status and account info.
     """
     check_dependencies()
-    
+
     _logger.info("Testing Exchange connection")
     account = get_account()
-    
+
     try:
         # Get folder counts
         _logger.debug("Fetching mailbox statistics")
@@ -150,24 +151,31 @@ def test_connection() -> dict:
         calendar_count = account.calendar.total_count
         tasks_count = account.tasks.total_count
         contacts_count = account.contacts.total_count
-        
+
         result = {
             "ok": True,
             "email": account.primary_smtp_address,
-            "server": account.protocol.service_endpoint if hasattr(account, 'protocol') else "autodiscover",
+            "server": (
+                account.protocol.service_endpoint
+                if hasattr(account, "protocol")
+                else "autodiscover"
+            ),
             "inbox_total": inbox_total,
             "inbox_unread": inbox_unread,
             "calendar_count": calendar_count,
             "tasks_count": tasks_count,
             "contacts_count": contacts_count,
         }
-        
-        _logger.info("Connection test successful", {
-            "email": mask_email(account.primary_smtp_address),
-            "inbox": inbox_total,
-            "unread": inbox_unread
-        })
-        
+
+        _logger.info(
+            "Connection test successful",
+            {
+                "email": mask_email(account.primary_smtp_address),
+                "inbox": inbox_total,
+                "unread": inbox_unread,
+            },
+        )
+
         return result
     except Exception as e:
         _logger.error(f"Connection test failed: {e}")

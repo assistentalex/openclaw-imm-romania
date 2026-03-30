@@ -42,58 +42,62 @@ Examples:
   %(prog)s tasks create --subject "Task" --due "+7d" --priority high
   %(prog)s sync sync
   %(prog)s sync reminders --hours 24
-        """
+        """,
     )
-    
+
     subparsers = parser.add_subparsers(dest="module", help="Module to use")
-    
+
     # Mail subparser
     mail_parser = subparsers.add_parser("mail", help="Email operations")
     mail_sub = mail_parser.add_subparsers(dest="command", help="Mail command")
-    
+
     try:
         from mail import add_parser as add_mail_parser
+
         add_mail_parser(mail_sub)
     except ImportError as e:
         print(f"Warning: Could not load mail module: {e}", file=sys.stderr)
-    
+
     # Calendar subparser
     cal_parser = subparsers.add_parser("calendar", help="Calendar operations")
     cal_sub = cal_parser.add_subparsers(dest="command", help="Calendar command")
-    
+
     try:
         from cal import add_parser as add_cal_parser
+
         add_cal_parser(cal_sub)
     except ImportError as e:
         print(f"Warning: Could not load calendar module: {e}", file=sys.stderr)
-    
+
     # Tasks subparser
     tasks_parser = subparsers.add_parser("tasks", help="Task operations")
     tasks_sub = tasks_parser.add_subparsers(dest="command", help="Tasks command")
-    
+
     try:
         from tasks import add_parser as add_tasks_parser
+
         add_tasks_parser(tasks_sub)
     except ImportError as e:
         print(f"Warning: Could not load tasks module: {e}", file=sys.stderr)
-    
+
     # Sync subparser
     sync_parser = subparsers.add_parser("sync", help="Task sync and reminders")
     sync_sub = sync_parser.add_subparsers(dest="command", help="Sync command")
-    
+
     try:
         from sync import add_parser as add_sync_parser
+
         add_sync_parser(sync_sub)
     except ImportError as e:
         print(f"Warning: Could not load sync module: {e}", file=sys.stderr)
-    
+
     args = parser.parse_args()
-    
+
     # If no module specified, show help
     if not args.module:
         parser.print_help()
         sys.exit(0)
-    
+
     # If module specified but no command, show module help
     if hasattr(args, "func"):
         args.func(args)

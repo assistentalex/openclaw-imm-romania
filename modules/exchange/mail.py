@@ -5,20 +5,16 @@ Commands: read, get, send, draft, reply, forward, mark, download-attachment.
 """
 
 import argparse
-import json
 import os
 import sys
-import tempfile
-import time
 from pathlib import Path
 
 # Add scripts dir to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from connection import get_account
-from utils import out, die, parse_datetime, parse_recipients, format_datetime, truncate
+from utils import out, die, parse_recipients
 from logger import get_logger
-
 
 _logger = get_logger()
 
@@ -49,11 +45,13 @@ def email_to_dict(item, preview_len: int = 150) -> dict:
     if item.attachments:
         for att in item.attachments:
             if hasattr(att, "name"):
-                attachments.append({
-                    "name": att.name,
-                    "size": getattr(att, "size", None),
-                    "content_id": getattr(att, "content_id", None),
-                })
+                attachments.append(
+                    {
+                        "name": att.name,
+                        "size": getattr(att, "size", None),
+                        "content_id": getattr(att, "content_id", None),
+                    }
+                )
 
     return {
         "id": item.id,
@@ -69,18 +67,10 @@ def email_to_dict(item, preview_len: int = 150) -> dict:
     }
 
 
-def parse_recipients(addr_str: str):
-    """Parse comma-separated email addresses into Mailbox objects."""
-    from exchangelib import Mailbox
-    if not addr_str:
-        return None
-    return [Mailbox(email_address=a.strip()) for a in addr_str.split(",") if a.strip()]
-
-
 def get_folder(account, folder_name: str):
     """Get folder by name (case-insensitive)."""
     folder_name = folder_name.lower()
-    
+
     # Standard folders
     folder_map = {
         "inbox": account.inbox,
@@ -94,10 +84,10 @@ def get_folder(account, folder_name: str):
         "spam": account.junk,
         "outbox": account.outbox,
     }
-    
+
     if folder_name in folder_map:
         return folder_map[folder_name]
-    
+
     # Try to find custom folder
     try:
         for folder in account.root.walk():
@@ -105,26 +95,29 @@ def get_folder(account, folder_name: str):
                 return folder
     except Exception:
         pass
-    
+
     # Default to inbox
     return account.inbox
 
 
 # ── Commands ────────────────────────────────────────────────────────────────
 
+
 def cmd_connect(_args):
     """Test connection and show mailbox stats."""
     account = get_account()
-    out({
-        "ok": True,
-        "email": str(account.primary_smtp_address),
-        "server": os.environ.get("EXCHANGE_SERVER", ""),
-        "inbox_total": account.inbox.total_count,
-        "inbox_unread": account.inbox.unread_count,
-        "calendar_count": account.calendar.total_count,
-        "tasks_count": account.tasks.total_count,
-        "contacts_count": account.contacts.total_count,
-    })
+    out(
+        {
+            "ok": True,
+            "email": str(account.primary_smtp_address),
+            "server": os.environ.get("EXCHANGE_SERVER", ""),
+            "inbox_total": account.inbox.total_count,
+            "inbox_unread": account.inbox.unread_count,
+            "calendar_count": account.calendar.total_count,
+            "tasks_count": account.tasks.total_count,
+            "contacts_count": account.contacts.total_count,
+        }
+    )
 
 
 def cmd_read(args):
@@ -141,7 +134,7 @@ def cmd_read(args):
     if args.subject:
         qs = qs.filter(subject__contains=args.subject)
 
-    qs = qs[:args.limit]
+    qs = qs[: args.limit]
 
     emails = [email_to_dict(item) for item in qs]
     out({"ok": True, "count": len(emails), "emails": emails})
@@ -152,7 +145,6 @@ def cmd_get(args):
     account = get_account()
 
     try:
-        from exchangelib.items import Message
         # Search inbox first
         try:
             item = account.inbox.get(id=args.id)
@@ -176,32 +168,48 @@ def cmd_get(args):
     attachments = []
     if item.attachments:
         for att in item.attachments:
-            attachments.append({
-                "name": getattr(att, "name", "unknown"),
-                "size": getattr(att, "size", None),
-                "content_type": getattr(att, "content_type", None),
-            })
+            attachments.append(
+                {
+                    "name": getattr(att, "name", "unknown"),
+                    "size": getattr(att, "size", None),
+                    "content_type": getattr(att, "content_type", None),
+                }
+            )
 
-    out({
-        "ok": True,
-        "email": {
-            "id": item.id,
-            "subject": item.subject or "(no subject)",
-            "from": item.sender.email_address if item.sender else "",
-            "from_name": item.sender.name if item.sender and hasattr(item.sender, "name") else None,
-            "to": [r.email_address for r in item.to_recipients] if item.to_recipients else [],
-            "cc": [r.email_address for r in item.cc_recipients] if item.cc_recipients else [],
-            "date": str(item.datetime_received) if item.datetime_received else None,
-            "body": body,
-            "attachments": attachments,
-        },
-    })
+    out(
+        {
+            "ok": True,
+            "email": {
+                "id": item.id,
+                "subject": item.subject or "(no subject)",
+                "from": item.sender.email_address if item.sender else "",
+                "from_name": (
+                    item.sender.name
+                    if item.sender and hasattr(item.sender, "name")
+                    else None
+                ),
+                "to": (
+                    [r.email_address for r in item.to_recipients]
+                    if item.to_recipients
+                    else []
+                ),
+                "cc": (
+                    [r.email_address for r in item.cc_recipients]
+                    if item.cc_recipients
+                    else []
+                ),
+                "date": str(item.datetime_received) if item.datetime_received else None,
+                "body": body,
+                "attachments": attachments,
+            },
+        }
+    )
 
 
 def cmd_send(args):
     """Send an email."""
     from exchangelib import Message, HTMLBody, FileAttachment
-    
+
     account = get_account()
 
     # Prepare body
@@ -236,7 +244,7 @@ def cmd_draft(args):
     """Create a draft email."""
     from exchangelib import Message, HTMLBody, FileAttachment
     from pathlib import Path
-    
+
     account = get_account()
 
     body = HTMLBody(args.body) if args.html else args.body
@@ -324,8 +332,7 @@ def cmd_mark(args):
 
 def cmd_download_attachment(args):
     """Download an attachment from an email."""
-    from exchangelib.items import Message
-    
+
     account = get_account()
 
     try:
@@ -351,7 +358,9 @@ def cmd_download_attachment(args):
         try:
             attachment = item.attachments[args.index]
         except IndexError:
-            die(f"Attachment index {args.index} out of range (0-{len(item.attachments)-1})")
+            die(
+                f"Attachment index {args.index} out of range (0-{len(item.attachments)-1})"
+            )
     else:
         # Default to first attachment
         attachment = item.attachments[0]
@@ -367,13 +376,15 @@ def cmd_download_attachment(args):
         content = attachment.content
         with open(output_path, "wb") as f:
             f.write(content)
-        out({
-            "ok": True,
-            "message": "Attachment downloaded",
-            "name": attachment.name,
-            "size": len(content),
-            "path": str(output_path),
-        })
+        out(
+            {
+                "ok": True,
+                "message": "Attachment downloaded",
+                "name": attachment.name,
+                "size": len(content),
+                "path": str(output_path),
+            }
+        )
     except Exception as e:
         die(f"Failed to download attachment: {e}")
 
@@ -393,17 +404,20 @@ def cmd_list_attachments(args):
 
     attachments = []
     for i, att in enumerate(item.attachments):
-        attachments.append({
-            "index": i,
-            "name": getattr(att, "name", "unknown"),
-            "size": getattr(att, "size", None),
-            "content_type": getattr(att, "content_type", None),
-        })
+        attachments.append(
+            {
+                "index": i,
+                "name": getattr(att, "name", "unknown"),
+                "size": getattr(att, "size", None),
+                "content_type": getattr(att, "content_type", None),
+            }
+        )
 
     out({"ok": True, "count": len(attachments), "attachments": attachments})
 
 
 # ── CLI ───────────────────────────────────────────────────────────────────────
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -527,7 +541,9 @@ def add_parser(subparsers):
     p_send.add_argument("--cc", "-c", help="CC recipients")
     p_send.add_argument("--bcc", help="BCC recipients")
     p_send.add_argument("--html", action="store_true", help="HTML body")
-    p_send.add_argument("--attach", "-a", metavar="FILE", help="Attachments (comma-separated)")
+    p_send.add_argument(
+        "--attach", "-a", metavar="FILE", help="Attachments (comma-separated)"
+    )
     p_send.set_defaults(func=cmd_send)
 
     # draft
@@ -537,14 +553,18 @@ def add_parser(subparsers):
     p_draft.add_argument("--to", "-t", help="Recipient(s)")
     p_draft.add_argument("--cc", "-c", help="CC recipients")
     p_draft.add_argument("--html", action="store_true", help="HTML body")
-    p_draft.add_argument("--attach", "-a", metavar="FILE", help="Attachments (comma-separated)")
+    p_draft.add_argument(
+        "--attach", "-a", metavar="FILE", help="Attachments (comma-separated)"
+    )
     p_draft.set_defaults(func=cmd_draft)
 
     # reply
     p_reply = subparsers.add_parser("reply", help="Reply to email")
     p_reply.add_argument("--id", "-i", required=True, help="Email ID")
     p_reply.add_argument("--body", "-b", required=True, help="Reply text")
-    p_reply.add_argument("--all", "-a", action="store_true", dest="reply_all", help="Reply to all")
+    p_reply.add_argument(
+        "--all", "-a", action="store_true", dest="reply_all", help="Reply to all"
+    )
     p_reply.set_defaults(func=cmd_reply)
 
     # forward

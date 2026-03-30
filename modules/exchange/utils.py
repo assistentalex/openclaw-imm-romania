@@ -25,19 +25,19 @@ def die(message: str) -> None:
 def parse_datetime(date_str: Optional[str]) -> Optional[datetime]:
     """
     Parse various date formats into datetime object.
-    
+
     Supports:
     - ISO format: 2024-01-15T10:30:00
     - Date only: 2024-01-15
     - Relative: +1d, +7d, -1d (days from now)
-    
+
     Returns None if input is None or empty.
     """
     if not date_str:
         return None
-    
+
     date_str = date_str.strip()
-    
+
     # Handle relative dates
     if date_str.startswith("+") or date_str.startswith("-"):
         try:
@@ -46,11 +46,11 @@ def parse_datetime(date_str: Optional[str]) -> Optional[datetime]:
                 days = int(date_str[1:-1])
             else:
                 days = int(date_str[:-1]) * -1
-            
-            return datetime.now() + __import__('datetime').timedelta(days=days)
+
+            return datetime.now() + __import__("datetime").timedelta(days=days)
         except (ValueError, IndexError):
             pass
-    
+
     # Try various date formats
     formats = [
         "%Y-%m-%dT%H:%M:%S",
@@ -59,43 +59,43 @@ def parse_datetime(date_str: Optional[str]) -> Optional[datetime]:
         "%Y-%m-%d %H:%M",
         "%Y-%m-%d",
     ]
-    
+
     for fmt in formats:
         try:
             return datetime.strptime(date_str, fmt)
         except ValueError:
             continue
-    
+
     # Try parsing as timestamp
     try:
         return datetime.fromisoformat(date_str)
     except ValueError:
         pass
-    
+
     die(f"Invalid date format: {date_str}. Use YYYY-MM-DD or YYYY-MM-DD HH:MM")
 
 
 def parse_recipients(recipients_str: Optional[str]) -> List[str]:
     """
     Parse comma or semicolon separated email addresses.
-    
+
     Examples:
     - "user@example.com"
     - "user1@example.com, user2@example.com"
     - "user1@example.com; user2@example.com"
-    
+
     Returns empty list if input is None or empty.
     """
     if not recipients_str:
         return []
-    
+
     # Split by comma or semicolon
     recipients = []
     for r in recipients_str.replace(";", ",").split(","):
         r = r.strip()
         if r and "@" in r:
             recipients.append(r)
-    
+
     return recipients
 
 
@@ -112,7 +112,7 @@ def truncate(text: Optional[str], max_length: int = 100) -> Optional[str]:
         return None
     if len(text) <= max_length:
         return text
-    return text[:max_length - 3] + "..."
+    return text[: max_length - 3] + "..."
 
 
 def validate_email(email: str) -> bool:
