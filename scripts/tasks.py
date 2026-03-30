@@ -8,6 +8,7 @@ import argparse
 import sys
 import os
 from datetime import datetime, timedelta
+from decimal import Decimal
 from typing import List, Optional, Dict, Any
 
 # Add scripts directory to path for imports FIRST
@@ -206,8 +207,8 @@ def cmd_update(args: argparse.Namespace) -> None:
         
         # If completed, set completion
         if args.status.lower() == "completed":
-            task.percent_complete = 100
-            task.date_completed = datetime.now()
+            task.percent_complete = Decimal("100")
+            # complete_date is read-only - Exchange sets it automatically
     
     if args.percent:
         task.percent_complete = min(100, max(0, args.percent))
@@ -216,7 +217,8 @@ def cmd_update(args: argparse.Namespace) -> None:
         # Auto-update status based on percent
         if task.percent_complete == 100:
             task.status = "Completed"
-            task.date_completed = datetime.now()
+            task.percent_complete = Decimal("100")
+            # complete_date is read-only - Exchange sets it automatically
         elif task.percent_complete > 0:
             task.status = "InProgress"
     
@@ -246,11 +248,11 @@ def cmd_complete(args: argparse.Namespace) -> None:
         die(f"Task not found: {args.id}")
     
     task.status = "Completed"
-    task.percent_complete = 100
-    task.date_completed = datetime.now()
+    task.percent_complete = Decimal("100")
+    # complete_date is read-only - Exchange sets it automatically
     
     try:
-        task.save(update_fields=["status", "percent_complete", "date_completed"])
+        task.save(update_fields=["status", "percent_complete"])
     except Exception as e:
         die(f"Failed to complete task: {e}")
     
