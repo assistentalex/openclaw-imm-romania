@@ -6,12 +6,15 @@ Commands:
   mail      - Email operations (read, send, reply, etc.)
   calendar  - Calendar operations (events, meetings)
   tasks     - Task operations (create, list, update)
+  sync      - Task sync and reminders (bidirectional sync with Exchange)
 
 Usage:
   imm-romania mail connect
   imm-romania mail read --limit 10
   imm-romania calendar today
   imm-romania tasks list --overdue
+  imm-romania sync sync
+  imm-romania sync reminders --hours 24
 """
 
 import argparse
@@ -37,6 +40,8 @@ Examples:
   %(prog)s calendar create --subject "Meeting" --start "2024-01-15 14:00"
   %(prog)s tasks list --overdue
   %(prog)s tasks create --subject "Task" --due "+7d" --priority high
+  %(prog)s sync sync
+  %(prog)s sync reminders --hours 24
         """
     )
     
@@ -72,6 +77,16 @@ Examples:
     except ImportError as e:
         print(f"Warning: Could not load tasks module: {e}", file=sys.stderr)
     
+    # Sync subparser
+    sync_parser = subparsers.add_parser("sync", help="Task sync and reminders")
+    sync_sub = sync_parser.add_subparsers(dest="command", help="Sync command")
+    
+    try:
+        from sync import add_parser as add_sync_parser
+        add_sync_parser(sync_sub)
+    except ImportError as e:
+        print(f"Warning: Could not load sync module: {e}", file=sys.stderr)
+    
     args = parser.parse_args()
     
     # If no module specified, show help
@@ -90,6 +105,8 @@ Examples:
             cal_parser.print_help()
         elif args.module == "tasks":
             tasks_parser.print_help()
+        elif args.module == "sync":
+            sync_parser.print_help()
         else:
             parser.print_help()
         sys.exit(1)

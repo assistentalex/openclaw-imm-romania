@@ -104,6 +104,43 @@ imm-romania tasks complete --id TASK_ID
 imm-romania tasks delete --id TASK_ID
 ```
 
+### Sincronizare Task-uri
+
+```bash
+# Sincronizează task-uri cu Exchange
+imm-romania sync sync
+
+# Vezi status sincronizare
+imm-romania sync status
+
+# Trimite reminder pentru task-uri overdue/upcoming
+imm-romania sync reminders --hours 24
+
+# Dry-run (arată ce s-ar trimite)
+imm-romania sync reminders --hours 24 --dry-run
+
+# Creează eveniment calendar din task
+imm-romania sync link-calendar --id TASK_ID --time "14:00" --duration 60
+
+# Cu invitație la sine
+imm-romania sync link-calendar --id TASK_ID --time "14:00" --invite
+```
+
+#### Funcționalități Sync
+
+| Comandă | Descriere |
+|---------|-----------|
+| `sync sync` | Sincronizează bidirecțional cu Exchange |
+| `sync status` | Afișează statistici și status sincronizare |
+| `sync reminders` | Trimite email cu task-uri overdue/upcoming |
+| `sync link-calendar` | Creează eveniment calendar din task |
+
+#### State Tracking
+
+- Sincronizarea salvează state în `~/.openclaw/workspace/memory/task-sync-state.json`
+- Tracking prin `changekey` pentru detectare modificări
+- Istoric complet al task-urilor sincronizate
+
 ## Module
 
 | Modul | Comandă | Descriere |
@@ -111,6 +148,7 @@ imm-romania tasks delete --id TASK_ID
 | Email | `mail` | Operații email complete |
 | Calendar | `calendar` sau `cal` | Gestionare evenimente și întâlniri |
 | Tasks | `tasks` | Gestionare sarcini |
+| Sync | `sync` | Sincronizare task-uri și reminder-uri |
 
 ## Triggers
 
