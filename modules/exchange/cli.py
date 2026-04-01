@@ -6,6 +6,7 @@ Commands:
   mail      - Email operations (read, send, reply, etc.)
   calendar  - Calendar operations (events, meetings)
   tasks     - Task operations (create, list, update)
+  analytics - Email analytics and statistics
   sync      - Task sync and reminders (bidirectional sync with Exchange)
 
 Usage:
@@ -91,6 +92,17 @@ Examples:
     except ImportError as e:
         print(f"Warning: Could not load sync module: {e}", file=sys.stderr)
 
+    # Analytics subparser
+    analytics_parser = subparsers.add_parser("analytics", help="Email analytics and statistics")
+    analytics_sub = analytics_parser.add_subparsers(dest="command", help="Analytics command")
+
+    try:
+        from analytics import add_parser as add_analytics_parser
+
+        add_analytics_parser(analytics_sub)
+    except ImportError as e:
+        print(f"Warning: Could not load analytics module: {e}", file=sys.stderr)
+
     args = parser.parse_args()
 
     # If no module specified, show help
@@ -111,6 +123,8 @@ Examples:
             tasks_parser.print_help()
         elif args.module == "sync":
             sync_parser.print_help()
+        elif args.module == "analytics":
+            analytics_parser.print_help()
         else:
             parser.print_help()
         sys.exit(1)

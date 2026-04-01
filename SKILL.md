@@ -1,7 +1,7 @@
 ---
 name: imm-romania
-version: 0.2.1
-description: Complete business assistant for Romanian SMEs (IMM-uri). Integrates Exchange (email, calendar, tasks), Nextcloud (file management), and persistent memory via LCM plugin. Use when the user needs email operations, calendar management, task tracking, file operations, or combined workflows like "send report and archive copy", "create task from email", "schedule meeting with file attachment", "search conversation history".
+version: 0.3.0
+description: Complete business assistant for Romanian SMEs (IMM-uri). Integrates Exchange (email, calendar, tasks, analytics), Nextcloud (file management), and persistent memory via LCM plugin. Use when the user needs email operations, calendar management, task tracking, file operations, email analytics, or combined workflows like "send report and archive copy", "create task from email", "schedule meeting with file attachment", "search conversation history", "show email statistics".
 ---
 
 # IMM-Romania
@@ -16,7 +16,7 @@ Asistent complet pentru IMM-uri din România care integrează:
 
 | Modul | Descriere | Comandă |
 |-------|-----------|---------|
-| **Exchange** | Email, Calendar, Tasks | `imm-romania <mail\|cal\|tasks\|sync>` |
+| **Exchange** | Email, Calendar, Tasks, Analytics | `imm-romania <mail\|cal\|tasks\|analytics\|sync>` |
 | **Nextcloud** | Gestionare fișiere | `imm-romania files <list\|upload\|download\|...>` |
 | **Memory** | Context persistent | Automat via LCM plugin |
 
@@ -66,6 +66,28 @@ imm-romania tasks create --subject "Review proposal" --due "+7d" --priority high
 
 # Completează
 imm-romania tasks complete --id TASK_ID
+```
+
+### Analytics (Email Statistics)
+
+```bash
+# Statistici generale
+imm-romania analytics stats --days 30
+
+# Timp mediu de răspuns
+imm-romania analytics response-time --days 7
+
+# Top expeditori
+imm-romania analytics top-senders --limit 20
+
+# Activity heatmap
+imm-romania analytics heatmap --days 30
+
+# Statistici per folder
+imm-romania analytics folders
+
+# Raport complet
+imm-romania analytics report --days 30
 ```
 
 ### Fișiere (Nextcloud)

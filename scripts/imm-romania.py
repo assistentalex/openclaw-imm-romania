@@ -23,7 +23,7 @@ def main():
     module = sys.argv[1]
     args = sys.argv[2:]
 
-    if module in ('mail', 'cal', 'calendar', 'tasks', 'sync'):
+    if module in ('mail', 'cal', 'calendar', 'tasks', 'analytics', 'sync'):
         # Route to Exchange module
         from modules.exchange.cli import main as exchange_main
         # Normalize 'cal' to 'calendar'
@@ -108,6 +108,7 @@ Modules:
     mail        Email operations (Exchange)
     cal         Calendar operations (Exchange)
     tasks       Task management (Exchange)
+    analytics   Email analytics and statistics (Exchange)
     sync        Task sync and reminders (Exchange)
     files       File operations (Nextcloud)
 
@@ -134,6 +135,14 @@ Sync Commands:
     imm-romania sync sync                 Sync tasks with Exchange
     imm-romania sync status               Show sync status
     imm-romania sync reminders [--hours N] [--dry-run]
+
+Analytics Commands:
+    imm-romania analytics stats --days N     Email statistics
+    imm-romania analytics response-time      Response time analysis
+    imm-romania analytics top-senders        Top senders by count
+    imm-romania analytics heatmap            Activity heatmap
+    imm-romania analytics folders            Folder statistics
+    imm-romania analytics report             Full analytics report
 
 File Commands:
     imm-romania files list [PATH]         List files in directory
