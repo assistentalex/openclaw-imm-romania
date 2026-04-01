@@ -312,13 +312,17 @@ def get_folder_stats(account: Account) -> List[Dict[str, Any]]:
     folders = []
     
     # Get main folders
+    # Note: account.deleted may not exist on all Exchange versions
     main_folders = [
         ("Inbox", account.inbox),
         ("Sent", account.sent),
         ("Drafts", account.drafts),
-        ("Deleted", account.deleted),
         ("Junk", account.junk),
     ]
+    
+    # Try to get deleted items folder (may not exist)
+    if hasattr(account, 'deleted'):
+        main_folders.append(("Deleted", account.deleted))
     
     for name, folder in main_folders:
         try:
