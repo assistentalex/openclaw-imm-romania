@@ -8,10 +8,10 @@ Orchestrates Exchange (mail, calendar, tasks) and Nextcloud (files) operations.
 import sys
 import os
 
-# Add modules to path
+# Add skill root to path so 'modules' package is importable
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-MODULES_DIR = os.path.join(SCRIPT_DIR, '..', 'modules')
-sys.path.insert(0, MODULES_DIR)
+SKILL_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
+sys.path.insert(0, SKILL_ROOT)
 
 
 def main():
@@ -26,9 +26,11 @@ def main():
     if module in ('mail', 'cal', 'calendar', 'tasks', 'sync'):
         # Route to Exchange module
         from modules.exchange.cli import main as exchange_main
-        # Reconstruct args for exchange module
-        sys.argv = [sys.argv[0]] + args
-        exchange_main(args=[module] + args)
+        # Normalize 'cal' to 'calendar'
+        normalized_module = 'calendar' if module == 'cal' else module
+        # Set sys.argv for exchange module and call main()
+        sys.argv = [sys.argv[0], normalized_module] + args
+        exchange_main()
 
     elif module in ('files', 'nextcloud', 'nc'):
         # Route to Nextcloud module
