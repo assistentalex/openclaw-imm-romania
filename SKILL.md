@@ -2,6 +2,7 @@
 name: imm-romania
 version: 0.3.0
 description: Complete business assistant for Romanian SMEs (IMM-uri). Integrates Exchange (email, calendar, tasks, analytics), Nextcloud (file management), and persistent memory via LCM plugin. Use when the user needs email operations, calendar management, task tracking, file operations, email analytics, or combined workflows like "send report and archive copy", "create task from email", "schedule meeting with file attachment", "search conversation history", "show email statistics".
+validation: scripts/validate.sh
 ---
 
 # IMM-Romania

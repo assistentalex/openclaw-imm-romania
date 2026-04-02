@@ -47,7 +47,12 @@ def main():
         # Map commands to methods
         if command == 'list':
             path = command_args[0] if command_args else '/'
-            client.list(path)
+            results = client.list(path)
+            if results:
+                from modules.nextcloud.nextcloud import print_list
+                print_list(results)
+            else:
+                print("(empty)")
         elif command == 'upload':
             if len(command_args) < 2:
                 print("Error: upload requires <local_file> <remote_path>")
