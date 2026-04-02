@@ -26,9 +26,11 @@ def main():
     if module in ('mail', 'cal', 'calendar', 'tasks', 'sync'):
         # Route to Exchange module
         from modules.exchange.cli import main as exchange_main
-        # Reconstruct args for exchange module
-        sys.argv = [sys.argv[0]] + args
-        exchange_main(args=[module] + args)
+        # Normalize 'cal' to 'calendar'
+        normalized_module = 'calendar' if module == 'cal' else module
+        # Set sys.argv for exchange module and call main()
+        sys.argv = [sys.argv[0], normalized_module] + args
+        exchange_main()
 
     elif module in ('files', 'nextcloud', 'nc'):
         # Route to Nextcloud module
