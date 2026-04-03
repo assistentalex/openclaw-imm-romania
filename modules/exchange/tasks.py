@@ -327,29 +327,6 @@ def cmd_complete(args: argparse.Namespace) -> None:
     out({"ok": True, "message": "Task marked as completed", "task": task_to_dict(task)})
 
 
-def cmd_delete(args: argparse.Namespace) -> None:
-    """Delete a task.
-    
-    Note: Tasks do not support soft-delete (move_to_trash) via delegate access.
-    Using hard delete by default. Use --hard only for permanent deletion (same behavior).
-    """
-    account = get_account()
-
-    try:
-        task = account.tasks.get(id=args.id)
-    except Exception:
-        die(f"Task not found: {args.id}")
-
-    subject = task.subject
-
-    # Tasks don't have a proper trash folder behavior like email.
-    # move_to_trash fails with ErrorCannotDeleteObject via delegate access.
-    # Use delete() which works correctly.
-    task.delete()
-
-    out({"ok": True, "message": f"Task '{subject}' deleted", "id": args.id})
-
-
 def task_to_dict(task: Task, detailed: bool = False) -> Dict[str, Any]:
     """Convert Task object to dictionary."""
     result = {
@@ -485,11 +462,6 @@ def add_parser(subparsers: argparse.ArgumentParser) -> None:
     p_complete = subparsers.add_parser("complete", help="Mark task as completed")
     p_complete.add_argument("--id", "-i", required=True, help="Task ID")
     p_complete.set_defaults(func=cmd_complete)
-
-    # delete
-    p_delete = subparsers.add_parser("delete", help="Delete a task")
-    p_delete.add_argument("--id", "-i", required=True, help="Task ID")
-    p_delete.set_defaults(func=cmd_delete)
 
 
 def main() -> None:

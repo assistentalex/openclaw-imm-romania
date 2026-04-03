@@ -100,9 +100,6 @@ python3 -m modules.exchange tasks assign --to user@example.com --subject "Review
 # Update/Complete
 python3 -m modules.exchange tasks update --id TASK_ID --status in_progress
 python3 -m modules.exchange tasks complete --id TASK_ID
-
-# Delete
-python3 -m modules.exchange tasks delete --id TASK_ID
 ```
 
 ### Sync (sync)
