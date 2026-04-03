@@ -182,6 +182,53 @@ def test_connection() -> dict:
         die(f"Connection test failed: {e}")
 
 
+def get_account_for(smtp_address: str) -> Account:
+    """
+    Get authenticated Exchange account for a specific mailbox.
+
+    Uses the same credentials as get_account() but connects to a different
+    user's mailbox via delegate access. Requires the service account to have
+    delegate permissions on the target mailbox.
+
+    Args:
+        smtp_address: Target mailbox email address (e.g., user@domain.com)
+
+    Returns:
+        Account connected to the target mailbox
+
+    Raises:
+        Exception if connection fails or no delegate access
+    """
+    from exchangelib import DELEGATE as ACCESS_TYPE
+
+    conn_config = get_connection_config()
+
+    credentials = Credentials(
+        username=conn_config["username"], password=conn_config["password"]
+    )
+
+    if conn_config.get("server"):
+        config = Configuration(
+            service_endpoint=conn_config["server"],
+            credentials=credentials,
+        )
+        autodiscover = False
+    else:
+        config = None
+        autodiscover = True
+
+    try:
+        account = Account(
+            primary_smtp_address=smtp_address,
+            config=config,
+            autodiscover=autodiscover,
+            access_type=ACCESS_TYPE,
+        )
+        return account
+    except Exception as e:
+        raise Exception(f"Failed to access mailbox {smtp_address}: {e}")
+
+
 def clear_account() -> None:
     """Clear cached account (useful for testing or reconnection)."""
     global _account

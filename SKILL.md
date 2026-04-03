@@ -63,6 +63,10 @@ imm-romania tasks list --overdue
 # Creează
 imm-romania tasks create --subject "Review proposal" --due "+7d" --priority high
 
+# Assign task to another user (requires delegate permissions)
+imm-romania tasks create --assign-to user@example.com --subject "Review report" --due "2024-01-20"
+imm-romania tasks assign --to user@example.com --subject "Review report" --due "2024-01-20"
+
 # Completează
 imm-romania tasks complete --id TASK_ID
 ```

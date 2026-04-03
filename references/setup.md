@@ -52,10 +52,10 @@ pip install -r requirements.txt
 
 ```bash
 # Adaugă în ~/.bashrc sau ~/.zshrc
-export EXCHANGE_SERVER="https://mail.firmade.it/EWS/Exchange.asmx"
-export EXCHANGE_USERNAME="asistent.alex"
+export EXCHANGE_SERVER="https://mail.your-domain.com/EWS/Exchange.asmx"
+export EXCHANGE_USERNAME="service-account"
 export EXCHANGE_PASSWORD="your-password"
-export EXCHANGE_EMAIL="asistent.alex@firmade.it"
+export EXCHANGE_EMAIL="service-account@your-domain.com"
 
 # Pentru self-signed certificates
 export EXCHANGE_VERIFY_SSL="false"
@@ -67,10 +67,10 @@ Creează `config.yaml` în directorul skill-ului:
 
 ```yaml
 exchange:
-  server: https://mail.firmade.it/EWS/Exchange.asmx
+  server: https://mail.your-domain.com/EWS/Exchange.asmx
   username: ${EXCHANGE_USERNAME}
   password: ${EXCHANGE_PASSWORD}
-  email: asistent.alex@firmade.it
+  email: service-account@your-domain.com
   verify_ssl: false
 ```
 
@@ -97,8 +97,8 @@ Dacă conexiunea eșuează cu SSL error, verifică:
 ### 2. Variabile de Mediu
 
 ```bash
-export NEXTCLOUD_URL="https://cloud.firmade.it"
-export NEXTCLOUD_USERNAME="alex.bogdan"
+export NEXTCLOUD_URL="https://cloud.your-domain.com"
+export NEXTCLOUD_USERNAME="your-username"
 export NEXTCLOUD_APP_PASSWORD="your-app-password"
 ```
 
@@ -232,15 +232,15 @@ python3 -m modules.exchange mail connect
 # ~/.openclaw/skills/imm-romania/config.yaml
 
 exchange:
-  server: https://mail.firmade.it/EWS/Exchange.asmx
-  username: asistent.alex
+  server: https://mail.your-domain.com/EWS/Exchange.asmx
+  username: service-account
   password: ${EXCHANGE_PASSWORD}
-  email: asistent.alex@firmade.it
+  email: service-account@your-domain.com
   verify_ssl: false
 
 nextcloud:
-  url: https://cloud.firmade.it
-  username: alex.bogdan
+  url: https://cloud.your-domain.com
+  username: your-username
   app_password: ${NEXTCLOUD_APP_PASSWORD}
 
 # LCM se configurează în openclaw.json
@@ -250,14 +250,14 @@ nextcloud:
 # ~/.bashrc sau ~/.zshrc
 
 # Exchange
-export EXCHANGE_SERVER="https://mail.firmade.it/EWS/Exchange.asmx"
-export EXCHANGE_USERNAME="asistent.alex"
+export EXCHANGE_SERVER="https://mail.your-domain.com/EWS/Exchange.asmx"
+export EXCHANGE_USERNAME="service-account"
 export EXCHANGE_PASSWORD="your-password"
-export EXCHANGE_EMAIL="asistent.alex@firmade.it"
+export EXCHANGE_EMAIL="service-account@your-domain.com"
 export EXCHANGE_VERIFY_SSL="false"
 
 # Nextcloud
-export NEXTCLOUD_URL="https://cloud.firmade.it"
-export NEXTCLOUD_USERNAME="alex.bogdan"
+export NEXTCLOUD_URL="https://cloud.your-domain.com"
+export NEXTCLOUD_USERNAME="your-username"
 export NEXTCLOUD_APP_PASSWORD="your-app-password"
 ```

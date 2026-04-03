@@ -104,8 +104,20 @@ def cmd_get(args: argparse.Namespace) -> None:
 
 
 def cmd_create(args: argparse.Namespace) -> None:
-    """Create a new task in the account's Tasks folder."""
-    account = get_account()
+    """Create a new task in the account's Tasks folder.
+    
+    Use --assign-to to create a task directly in another user's mailbox.
+    This requires delegate permissions on the target mailbox.
+    """
+    # Determine which account to use
+    if args.assign_to:
+        from connection import get_account_for
+        try:
+            account = get_account_for(args.assign_to)
+        except Exception as e:
+            die(f"Failed to access mailbox {args.assign_to}: {e}")
+    else:
+        account = get_account()
 
     # Parse dates - EWS requires EWSDate for tasks (not EWSDateTime)
     from exchangelib import EWSDate
@@ -143,10 +155,6 @@ def cmd_create(args: argparse.Namespace) -> None:
         priority_map = {"low": "Low", "normal": "Normal", "high": "High"}
         task.importance = priority_map.get(args.priority.lower(), "Normal")
 
-    # Note: Task assignment to others requires TaskRequest which is not fully
-    # supported by exchangelib. Tasks are created locally in the account's Tasks folder.
-    # If you need to notify someone about a task, send a separate email.
-
     # Save
     try:
         task.save()
@@ -154,7 +162,73 @@ def cmd_create(args: argparse.Namespace) -> None:
         die(f"Failed to create task: {e}")
 
     out(
-        {"ok": True, "message": "Task created successfully", "task": task_to_dict(task)}
+        {
+            "ok": True,
+            "message": f"Task created{' in ' + args.assign_to if args.assign_to else ''}",
+            "task": task_to_dict(task),
+            "mailbox": account.primary_smtp_address if args.assign_to else None
+        }
+    )
+
+
+def cmd_assign(args: argparse.Namespace) -> None:
+    """Assign a task to another user via delegate access.
+    
+    Creates the task directly in the target user's Exchange mailbox.
+    Requires the service account to have delegate permissions on the target mailbox.
+    """
+    from connection import get_account_for
+    from exchangelib import EWSDate
+
+    try:
+        account = get_account_for(args.to)
+    except Exception as e:
+        die(f"Failed to access mailbox {args.to}: {e}")
+
+    # Parse dates
+    if args.start:
+        start_dt = parse_datetime(args.start)
+        if start_dt:
+            start_date = EWSDate(start_dt.year, start_dt.month, start_dt.day)
+    else:
+        start_date = None
+
+    if args.due:
+        due_dt = parse_datetime(args.due)
+        if due_dt:
+            due_date = EWSDate(due_dt.year, due_dt.month, due_dt.day)
+    else:
+        due_date = None
+
+    # Create task in target user's mailbox
+    task = Task(
+        account=account,
+        folder=account.tasks,
+        subject=args.subject,
+        body=args.body or "",
+    )
+
+    if start_date:
+        task.start_date = start_date
+    if due_date:
+        task.due_date = due_date
+
+    if args.priority:
+        priority_map = {"low": "Low", "normal": "Normal", "high": "High"}
+        task.importance = priority_map.get(args.priority.lower(), "Normal")
+
+    try:
+        task.save()
+    except Exception as e:
+        die(f"Failed to assign task to {args.to}: {e}")
+
+    out(
+        {
+            "ok": True,
+            "message": f"Task assigned to {args.to}",
+            "task": task_to_dict(task),
+            "assigned_to": args.to
+        }
     )
 
 
@@ -354,7 +428,36 @@ def add_parser(subparsers: argparse.ArgumentParser) -> None:
         default="normal",
         help="Task priority",
     )
+    p_create.add_argument(
+        "--assign-to",
+        help="Assign task to another user (email address). Requires delegate permissions.",
+    )
     p_create.set_defaults(func=cmd_create)
+
+    # assign
+    p_assign = subparsers.add_parser(
+        "assign",
+        help="Assign a task to another user via delegate access",
+        description="Create a task directly in another user's Exchange mailbox. Requires the service account to have delegate permissions on the target mailbox.",
+    )
+    p_assign.add_argument(
+        "--to",
+        "-t",
+        required=True,
+        help="Target user email address (must have delegate access)",
+    )
+    p_assign.add_argument("--subject", "-s", required=True, help="Task subject")
+    p_assign.add_argument("--body", "-b", help="Task body/description")
+    p_assign.add_argument("--due", "-d", help="Due date (YYYY-MM-DD or +Nd for N days)")
+    p_assign.add_argument("--start", help="Start date (YYYY-MM-DD)")
+    p_assign.add_argument(
+        "--priority",
+        "-p",
+        choices=["low", "normal", "high"],
+        default="normal",
+        help="Task priority",
+    )
+    p_assign.set_defaults(func=cmd_assign)
 
     # update
     p_update = subparsers.add_parser("update", help="Update a task")

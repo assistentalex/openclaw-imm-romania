@@ -47,18 +47,18 @@ Utilizatorul poate încărca fișiere de input în Nextcloud:
 ### Exchange
 
 ```bash
-export EXCHANGE_SERVER="https://mail.firmade.it/EWS/Exchange.asmx"
-export EXCHANGE_USERNAME="asistent.alex"
+export EXCHANGE_SERVER="https://mail.your-domain.com/EWS/Exchange.asmx"
+export EXCHANGE_USERNAME="service-account"
 export EXCHANGE_PASSWORD="your-password"
-export EXCHANGE_EMAIL="asistent.alex@firmade.it"
+export EXCHANGE_EMAIL="service-account@your-domain.com"
 export EXCHANGE_VERIFY_SSL="false"  # pentru self-signed certs
 ```
 
 ### Nextcloud
 
 ```bash
-export NEXTCLOUD_URL="https://cloud.firmade.it"
-export NEXTCLOUD_USERNAME="alex.bogdan"
+export NEXTCLOUD_URL="https://cloud.your-domain.com"
+export NEXTCLOUD_USERNAME="your-username"
 export NEXTCLOUD_APP_PASSWORD="your-app-password"  # din Nextcloud > Settings > Security
 ```
 

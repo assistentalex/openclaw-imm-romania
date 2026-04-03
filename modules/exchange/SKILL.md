@@ -90,8 +90,12 @@ python3 -m modules.exchange tasks list
 python3 -m modules.exchange tasks list --overdue
 python3 -m modules.exchange tasks list --status in_progress
 
-# Create task
+# Create task (in your own mailbox)
 python3 -m modules.exchange tasks create --subject "Review proposal" --due "+7d" --priority high
+
+# Assign task to another user (requires delegate permissions)
+python3 -m modules.exchange tasks create --assign-to user@example.com --subject "Review report" --due "2024-01-20"
+python3 -m modules.exchange tasks assign --to user@example.com --subject "Review report" --due "2024-01-20"
 
 # Update/Complete
 python3 -m modules.exchange tasks update --id TASK_ID --status in_progress
@@ -122,8 +126,8 @@ python3 -m modules.exchange sync link-calendar --id TASK_ID --time "14:00" --dur
 
 ## Notes
 
-- Tasks are created in the assistant's Tasks folder on behalf of the user
-- EWS does not support task assignment (delegation to other users)
+- Tasks are created in your own Tasks folder by default
+- **Task Assignment**: Use `--assign-to user@example.com` to create tasks directly in another user's Exchange mailbox. This requires the service account to have delegate permissions on the target mailbox (configured on the Exchange server).
 - For collaborative tasks, use calendar events with attendees
 - For Exchange Online (Office 365), configuration may differ
 - Self-signed certificates require `verify_ssl: false`
