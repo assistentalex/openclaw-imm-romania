@@ -16,9 +16,16 @@ def out(data: Dict[str, Any]) -> None:
     sys.exit(0)
 
 
-def die(message: str) -> None:
-    """Output error JSON to stdout and exit with error code."""
-    print(json.dumps({"ok": False, "error": message}, indent=2))
+def die(message) -> None:
+    """Output error JSON to stdout and exit with error code.
+    
+    Args:
+        message: String error message or dict with error details
+    """
+    if isinstance(message, dict):
+        print(json.dumps(message, indent=2, default=str))
+    else:
+        print(json.dumps({"ok": False, "error": message}, indent=2))
     sys.exit(1)
 
 

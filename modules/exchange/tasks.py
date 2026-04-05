@@ -36,6 +36,78 @@ STATUS_MAP = {
 STATUS_REVERSE = {v: k for k, v in STATUS_MAP.items()}
 
 
+def get_error_response(error: Exception, action: str, task_id: str = None, mailbox: str = None) -> Dict[str, Any]:
+    """Generate informative error response with alternatives.
+    
+    Args:
+        error: The exception that occurred
+        action: The action that failed (trash, update, complete)
+        task_id: Task ID if available
+        mailbox: Target mailbox if delegate access
+    
+    Returns:
+        Dict with error, cause, and alternatives
+    """
+    error_str = str(error)
+    
+    # Permission denied errors
+    if "cannot be deleted" in error_str.lower() or "delete" in error_str.lower():
+        return {
+            "ok": False,
+            "error": f"Nu ai permisiuni de ștergere pentru acest mailbox.",
+            "cause": f"Service account are permisiuni de Editor, nu de Delete pe mailbox-ul {mailbox or 'propriu'}.",
+            "alternatives": [
+                {
+                    "action": "complete",
+                    "description": "Marchează task-ul ca finalizat (necesită permisiuni de Editor)",
+                    "command": f"tasks complete --mailbox {mailbox} --id {task_id}" if mailbox else f"tasks complete --id {task_id}"
+                },
+                {
+                    "action": "ask_admin",
+                    "description": "Cere permisiuni de Delete de la administratorul Exchange"
+                }
+            ]
+        }
+    
+    # Change key mismatch (concurrent modification)
+    if "change key" in error_str.lower():
+        return {
+            "ok": False,
+            "error": "Task-ul a fost modificat de altcineva. Reîncarcă și încearcă din nou.",
+            "cause": "Exchange detectează o versiune mai nouă a task-ului (race condition).",
+            "alternatives": [
+                {
+                    "action": "refresh",
+                    "description": "Reîncarcă task-ul și aplică modificarea din nou",
+                    "command": f"tasks list --mailbox {mailbox}" if mailbox else "tasks list"
+                }
+            ]
+        }
+    
+    # Not found or invalid ID
+    if "not found" in error_str.lower() or "malformed" in error_str.lower():
+        return {
+            "ok": False,
+            "error": f"Task-ul nu a fost găsit.",
+            "cause": f"Task ID {task_id} nu există sau este invalid.",
+            "alternatives": [
+                {
+                    "action": "list",
+                    "description": "Listează task-urile disponibile",
+                    "command": f"tasks list --mailbox {mailbox}" if mailbox else "tasks list"
+                }
+            ]
+        }
+    
+    # Generic error
+    return {
+        "ok": False,
+        "error": f"Operațiunea '{action}' a eșuat: {error_str}",
+        "cause": "Eroare necunoscută. Verifică log-urile pentru detalii.",
+        "alternatives": []
+    }
+
+
 def cmd_connect(args: argparse.Namespace) -> None:
     """Test connection to Exchange and show task folder info."""
     from connection import test_connection
@@ -277,8 +349,9 @@ def cmd_update(args: argparse.Namespace) -> None:
 
     try:
         task = account.tasks.get(id=args.id)
-    except Exception:
-        die(f"Task not found: {args.id}")
+    except Exception as e:
+        error_resp = get_error_response(e, "get", args.id, getattr(args, 'mailbox', None))
+        die(error_resp)
 
     # Update fields
     updated = []
@@ -333,12 +406,14 @@ def cmd_update(args: argparse.Namespace) -> None:
     try:
         task.save(update_fields=updated)
     except Exception as e:
-        die(f"Failed to update task: {e}")
+        error_resp = get_error_response(e, "update", args.id, getattr(args, 'mailbox', None))
+        die(error_resp)
 
     out(
         {
             "ok": True,
             "message": "Task updated successfully",
+            "mailbox": account.primary_smtp_address,
             "updated_fields": updated,
             "task": task_to_dict(task),
         }
@@ -362,8 +437,9 @@ def cmd_complete(args: argparse.Namespace) -> None:
 
     try:
         task = account.tasks.get(id=args.id)
-    except Exception:
-        die(f"Task not found: {args.id}")
+    except Exception as e:
+        error_resp = get_error_response(e, "get", args.id, getattr(args, 'mailbox', None))
+        die(error_resp)
 
     task.status = "Completed"
     task.percent_complete = Decimal("100")
@@ -372,7 +448,8 @@ def cmd_complete(args: argparse.Namespace) -> None:
     try:
         task.save(update_fields=["status", "percent_complete"])
     except Exception as e:
-        die(f"Failed to complete task: {e}")
+        error_resp = get_error_response(e, "complete", args.id, getattr(args, 'mailbox', None))
+        die(error_resp)
 
     out({"ok": True, "message": "Task marked as completed", "mailbox": account.primary_smtp_address, "task": task_to_dict(task)})
 
@@ -395,15 +472,17 @@ def cmd_trash(args: argparse.Namespace) -> None:
 
     try:
         task = account.tasks.get(id=args.id)
-    except Exception:
-        die(f"Task not found: {args.id}")
+    except Exception as e:
+        error_resp = get_error_response(e, "get", args.id, getattr(args, 'mailbox', None))
+        die(error_resp)
 
     task_info = task_to_dict(task)
 
     try:
         task.move_to_trash()
     except Exception as e:
-        die(f"Failed to move task to trash: {e}")
+        error_resp = get_error_response(e, "trash", args.id, getattr(args, 'mailbox', None))
+        die(error_resp)
 
     out({"ok": True, "message": "Task moved to Deleted Items", "mailbox": account.primary_smtp_address, "task": task_info})
 
