@@ -127,8 +127,8 @@ def cmd_get(args: argparse.Namespace) -> None:
     try:
         task = account.tasks.get(id=args.id)
         out({"ok": True, "mailbox": account.primary_smtp_address, "task": task_to_dict(task, detailed=True)})
-    except Exception:
-        die(f"Task not found: {args.id}")
+    except Exception as e:
+        die(f"Task not found: {args.id} ({e})")
 
 
 def cmd_create(args: argparse.Namespace) -> None:
@@ -427,7 +427,7 @@ def task_to_dict(task: Task, detailed: bool = False) -> Dict[str, Any]:
                 "delegation_state": (
                     str(task.delegation_state) if task.delegation_state else None
                 ),
-                "date_completed": format_datetime(task.date_completed),
+                "complete_date": format_datetime(task.complete_date),
                 "importance": str(task.importance),
                 "created": format_datetime(task.datetime_created),
                 "modified": format_datetime(task.datetime_received),
