@@ -17,7 +17,7 @@ Email · Calendar · Task-uri · Fișiere — totul din terminalul tău
 
 ## Ce face?
 
-Ții un IMM în România? Folosești Exchange on-premises și Nextcloud? 
+Ai un mic business în România? Folosești Exchange și Nextcloud? 
 
 IMM-Romania îți aduce **totul într-un singur loc** — direct din chat sau terminal. Citești emailuri, programezi întâlniri, gestionezi task-uri și accesezi fișiere — **fără să deschizi 5 tab-uri**.
 
