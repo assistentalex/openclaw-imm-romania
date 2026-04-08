@@ -117,20 +117,9 @@ pip3 install exchangelib requests requests_ntlm
 - [ ] Calendar Scheduling (find free slots)
 - [ ] Multi-language support (RO/EN)
 
-## 🤝 Contribuie
-
-Pull requests sunt binevenite! Codul urmează [Hardshell Coding Standards](https://github.com/assistentalex/openclaw-hardshell).
-
-```bash
-# Fork → Branch → PR
-git checkout -b feature/nume-feature
-git commit -m "feat: ce adaugi"
-git push origin feature/nume-feature
-```
-
 ## 📄 Licență
 
-MIT — vezi [LICENSE](LICENSE)
+MIT — vezi [LICENSE](LICENSE). Codul urmează [Hardshell Coding Standards](https://github.com/assistentalex/openclaw-hardshell).
 
 ---
 
