@@ -105,41 +105,6 @@ pip3 install exchangelib requests requests_ntlm
 
 </details>
 
-## 📸 Cum arată
-
-```json
-// 📋 tasks list
-{
-  "ok": true,
-  "tasks": [
-    {"subject": "Facturi aprilie", "status": "InProgress", "due": "2026-04-15"},
-    {"subject": "Raport lunar", "status": "NotStarted", "due": "2026-04-30"}
-  ]
-}
-```
-
-```json
-// 📅 cal today
-{
-  "ok": true,
-  "events": [
-    {"subject": "Întâlnire echipă", "start": "10:00", "end": "11:00", "location": "Sala A"},
-    {"subject": "Call client", "start": "14:00", "end": "15:00", "location": "Online"}
-  ]
-}
-```
-
-```json
-// 📧 mail list --limit 2
-{
-  "ok": true,
-  "messages": [
-    {"subject": "Re: Ofertă proiect", "sender": "client@firma.ro", "is_read": false},
-    {"subject": "Factura #1234", "sender": "contabilitate@firma.ro", "is_read": true}
-  ]
-}
-```
-
 ## 🗺️ Roadmap
 
 - [x] Exchange Email (read, send, draft, search)
