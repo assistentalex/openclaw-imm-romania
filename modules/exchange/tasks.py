@@ -22,7 +22,7 @@ except ImportError:
     HAS_EXCHANGELIB = False
 
 from connection import get_account
-from utils import out, die, parse_datetime, format_datetime
+from utils import out, die, parse_datetime, format_datetime, task_to_dict
 
 # Task status mapping
 STATUS_MAP = {
@@ -485,35 +485,6 @@ def cmd_trash(args: argparse.Namespace) -> None:
         die(error_resp)
 
     out({"ok": True, "message": "Task moved to Deleted Items", "mailbox": account.primary_smtp_address, "task": task_info})
-
-
-def task_to_dict(task: Task, detailed: bool = False) -> Dict[str, Any]:
-    """Convert Task object to dictionary."""
-    result = {
-        "id": task.id,
-        "subject": task.subject,
-        "status": STATUS_REVERSE.get(str(task.status), str(task.status)),
-        "percent_complete": task.percent_complete or 0,
-        "due_date": format_datetime(task.due_date),
-        "start_date": format_datetime(task.start_date),
-    }
-
-    if detailed:
-        result.update(
-            {
-                "body": task.body if task.body else None,
-                "owner": task.owner,
-                "delegation_state": (
-                    str(task.delegation_state) if task.delegation_state else None
-                ),
-                "complete_date": format_datetime(task.complete_date),
-                "importance": str(task.importance),
-                "created": format_datetime(task.datetime_created),
-                "modified": format_datetime(task.datetime_received),
-            }
-        )
-
-    return result
 
 
 def add_parser(subparsers: argparse.ArgumentParser) -> None:

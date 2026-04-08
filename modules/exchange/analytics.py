@@ -135,23 +135,22 @@ def get_response_time(account: Account, days: int = 30) -> Dict[str, Any]:
     response_times = []
     total_replies = 0
     
+    # TODO: Implement accurate response time calculation by correlating
+    # sent emails with original received emails via conversation_id
+    # For now, we count replies but cannot measure time without original timestamps
     try:
         # Sample to avoid timeout
         for sent_email in sent_items.all()[:500]:
             # Check if this is a reply (has In-Reply-To header or conversation)
             if hasattr(sent_email, 'conversation_id') and sent_email.conversation_id:
-                # Find the original email in conversation
-                # This is a simplified approach
                 total_replies += 1
-                
                 # Note: Accurate response time calculation requires
                 # correlating with original message timestamps
                 # This is a placeholder for the algorithm
-                
     except Exception as e:
         _logger.warning(f"Error analyzing response times: {e}")
     
-    # Calculate stats if we have data
+    # Calculate stats if we have data (placeholder)
     if response_times:
         return {
             "avg_minutes": round(mean(response_times), 1),
@@ -167,8 +166,8 @@ def get_response_time(account: Account, days: int = 30) -> Dict[str, Any]:
             "min_minutes": 0,
             "max_minutes": 0,
             "sample_count": 0,
-            "note": "No reply data available. Response time calculation requires "
-                    "conversation tracking which needs more complex analysis.",
+            "note": "Response time calculation not yet implemented. "
+                   "Returns reply count only. See TODO in get_response_time().",
         }
 
 

@@ -6,7 +6,7 @@ Handles authentication and connection to Exchange server.
 import sys
 import os
 import time
-from typing import Optional
+from typing import Optional, Dict
 
 # Add scripts directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -23,8 +23,9 @@ from config import get_connection_config, clear_config
 from utils import die, mask_email
 from logger import get_logger
 
-# Global account instance (cached)
+# Global account instances (cached)
 _account: Optional[Account] = None
+_accounts_for: Dict[str, Account] = {}  # smtp_address -> Account
 _logger = get_logger()
 
 
@@ -199,6 +200,13 @@ def get_account_for(smtp_address: str) -> Account:
     Raises:
         Exception if connection fails or no delegate access
     """
+    global _accounts_for
+    
+    # Return cached account if available
+    if smtp_address in _accounts_for:
+        _logger.debug(f"Using cached account for {smtp_address}")
+        return _accounts_for[smtp_address]
+    
     from exchangelib import DELEGATE as ACCESS_TYPE
 
     conn_config = get_connection_config()
@@ -224,6 +232,9 @@ def get_account_for(smtp_address: str) -> Account:
             autodiscover=autodiscover,
             access_type=ACCESS_TYPE,
         )
+        # Cache the account
+        _accounts_for[smtp_address] = account
+        _logger.debug(f"Created and cached account for {smtp_address}")
         return account
     except Exception as e:
         raise Exception(f"Failed to access mailbox {smtp_address}: {e}")

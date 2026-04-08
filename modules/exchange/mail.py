@@ -19,7 +19,7 @@ from logger import get_logger
 _logger = get_logger()
 
 
-def email_to_dict(item, preview_len: int = 150) -> dict:
+def email_to_dict(item, preview_len: int = 150, folder_name: str = "") -> dict:
     """Serialize an exchangelib Message to a plain dict."""
     sender = ""
     if item.sender:
@@ -64,6 +64,7 @@ def email_to_dict(item, preview_len: int = 150) -> dict:
         "preview": preview,
         "has_attachments": len(attachments) > 0,
         "attachments": attachments,
+        "folder": folder_name,
     }
 
 
@@ -136,7 +137,7 @@ def cmd_read(args):
 
     qs = qs[: args.limit]
 
-    emails = [email_to_dict(item) for item in qs]
+    emails = [email_to_dict(item, folder_name=args.folder) for item in qs]
     out({"ok": True, "count": len(emails), "emails": emails})
 
 
@@ -145,15 +146,19 @@ def cmd_get(args):
     account = get_account()
 
     try:
-        # Search inbox first
+        # Search inbox first (most common)
         try:
             item = account.inbox.get(id=args.id)
         except Exception:
-            # Search all folders
-            items = list(account.root.walk().get_items([args.id]))
-            if not items:
-                die(f"Email not found: {args.id}")
-            item = items[0]
+            # Search sent items (second most common)
+            try:
+                item = account.sent.get(id=args.id)
+            except Exception:
+                # Fallback: search all folders (slow)
+                items = list(account.root.walk().get_items([args.id]))
+                if not items:
+                    die(f"Email not found: {args.id}")
+                item = items[0]
     except Exception as e:
         die(f"Email not found: {e}")
 
@@ -242,7 +247,6 @@ def cmd_send(args):
 
 def cmd_draft(args):
     """Create a draft email."""
-    from exchangelib import Message, HTMLBody, FileAttachment
     from pathlib import Path
 
     account = get_account()
@@ -345,21 +349,36 @@ def cmd_mark_all_read(args):
     skipped = 0
     errors = []
 
+    # Prepare Message objects for bulk update
+    message_items = []
     for item in unread:
         # Skip non-Message items (calendar, etc.)
         if not isinstance(item, Message):
             skipped += 1
             _logger.debug(f"Skipping non-message: {item.subject[:50]}")
             continue
-
+        
+        item.is_read = True
+        message_items.append(item)
+    
+    # Bulk update all messages at once
+    if message_items:
         try:
-            item.is_read = True
-            item.save(update_fields=["is_read"])
-            marked += 1
-            _logger.debug(f"Marked: {item.subject[:50]}")
+            updated_count = account.bulk_update(message_items, update_fields=["is_read"])
+            marked = updated_count
+            _logger.info(f"Bulk updated {marked} messages as read")
         except Exception as e:
-            errors.append(f"{item.subject[:30]}: {str(e)[:50]}")
-            _logger.warning(f"Error marking {item.subject[:30]}: {e}")
+            # Fallback to individual saves on bulk failure
+            _logger.warning(f"Bulk update failed: {e}, falling back to individual saves")
+            for item in message_items:
+                try:
+                    item.is_read = True
+                    item.save(update_fields=["is_read"])
+                    marked += 1
+                    _logger.debug(f"Marked: {item.subject[:50]}")
+                except Exception as e2:
+                    errors.append(f"{item.subject[:30]}: {str(e2)[:50]}")
+                    _logger.warning(f"Error marking {item.subject[:30]}: {e2}")
 
     out({
         "ok": True,

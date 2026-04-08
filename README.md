@@ -1,229 +1,186 @@
-# IMM-Romania
+<div align="center">
 
-**Asistent complet pentru IMM-uri din România - Email, Calendar, Tasks și Fișiere**
+# 🇷🇴 IMM-Romania
 
+**Asistentul tău digital pentru business-ul din România**
+
+Email · Calendar · Task-uri · Fișiere — totul din terminalul tău
+
+[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](https://github.com/assistentalex/openclaw-imm-romania)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![OpenClaw Skill](https://img.shields.io/badge/OpenClaw-Skill-green.svg)](https://clawhub.ai)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-brightgreen.svg)](https://www.python.org/)
 
-## Descriere
+</div>
 
-IMM-Romania este un skill OpenClaw care integrează toate serviciile necesare pentru un IMM:
+---
 
-- 📧 **Exchange** - Email, Calendar, Tasks (on-premises 2016/2019)
-- 📁 **Nextcloud** - Gestionare fișiere și colaborare
-- 🧠 **Memory** - Context persistent prin LCM plugin
+## Ce face?
 
-Ideal pentru întreprinderile mici și mijlocii din România care folosesc infrastructură on-premises.
+Ții un IMM în România? Folosești Exchange on-premises și Nextcloud? 
 
-## Module
+IMM-Romania îți aduce **totul într-un singur loc** — direct din chat sau terminal. Citești emailuri, programezi întâlniri, gestionezi task-uri și accesezi fișiere — **fără să deschizi 5 tab-uri**.
 
-| Modul | Serviciu | Descriere |
-|-------|----------|-----------|
-| **Exchange** | Email, Calendar, Tasks | Operații complete pentru Exchange on-premises |
-| **Nextcloud** | Fișiere | Upload, download, organizare fișiere |
-| **Memory** | Context | Istoric conversații persistente (LCM plugin) |
-
-## Instalare
+## ⚡ În 30 de secunde
 
 ```bash
-# Instalează în OpenClaw skills directory
-cd ~/.openclaw/skills/
-git clone https://github.com/assistentalex/imm-romania.git
+# Instalează
+clawhub install imm-romania
 
-# Instalează dependențe
-pip3 install exchangelib requests requests_ntlm
+# Configurează (o singură dată)
+imm-romania exchange connect
+imm-romania nextcloud connect
+
+# Gata — folosește-l
+imm-romania exchange mail list --limit 5
+imm-romania exchange cal today
+imm-romania exchange tasks list
+imm-romania nextcloud files list
 ```
 
-## Configurare
+## 🧩 Module
 
-### Input Files
+### 📧 Exchange — Email, Calendar & Tasks
 
-Utilizatorul poate încărca fișiere de input în Nextcloud:
+Conecțiune completă la Exchange on-premises (2016/2019) prin EWS.
 
-- **Folder pattern:** `Input from {owner_name}` unde `{owner_name}` este numele utilizatorului din USER.md
-- **Locație:** `/{shared_folder}/Input from {owner_name}/`
-- **Exemplu:** `/Alex's Assistant/Input from Alex/`
-- Verificați acest folder când utilizatorul menționează fișiere încărcate
+| Ce poți face | Comandă |
+|---|---|
+| Citește emailuri | `mail list` · `mail read` · `mail get --id X` |
+| Trimite email | `mail send --to x@y.com --subject "Salut"` |
+| Calendar azi | `cal today` |
+| Calendar săptămână | `cal week` |
+| Creează task | `tasks create --subject "Facturi" --due 2026-04-15` |
+| Listează task-uri | `tasks list` · `tasks list --mailbox coleg@firma.ro` |
+| Marchează ca citit | `mail mark-all-read` |
+| Statistici inbox | `analytics stats` |
 
-### Exchange
+> 💡 **Acces delegat** — Folosește `--mailbox` pentru a lucra cu mailbox-ul unui coleg (cu permisiuni Editor)
+
+### 📁 Nextcloud — Fișiere & Partajări
+
+Gestionează fișiere pe Nextcloud prin WebDAV + OCS API.
+
+| Ce poți face | Comandă |
+|---|---|
+| Listează fișiere | `nextcloud files list /calea/catre/folder` |
+| Upload fișier | `nextcloud files upload local.pdf /Documente/` |
+| Download fișier | `nextcloud files download /Documente/raport.pdf` |
+| Creează folder | `nextcloud files mkdir /Documente/Nou` |
+| Partajări | `nextcloud share list` |
+
+### 🧠 Memory — Context Persistent
+
+Păstrează istoria conversațiilor între sesiuni prin LCM plugin. Nu configurezi nimic — funcționează automat.
+
+## 🛠️ Configurare
+
+<details>
+<summary><b>Exchange</b></summary>
 
 ```bash
-export EXCHANGE_SERVER="https://mail.your-domain.com/EWS/Exchange.asmx"
-export EXCHANGE_USERNAME="service-account"
-export EXCHANGE_PASSWORD="your-password"
-export EXCHANGE_EMAIL="service-account@your-domain.com"
-export EXCHANGE_VERIFY_SSL="false"  # pentru self-signed certs
-```
-
-### Nextcloud
-
-```bash
-export NEXTCLOUD_URL="https://cloud.your-domain.com"
-export NEXTCLOUD_USERNAME="your-username"
-export NEXTCLOUD_APP_PASSWORD="your-app-password"  # din Nextcloud > Settings > Security
-```
-
-### Memory (LCM Plugin)
-
-```bash
-openclaw plugins install @martian-engineering/lossless-claw
-```
-
-Vezi [references/setup.md](references/setup.md) pentru configurare completă.
-
-## Utilizare
-
-### Email
-
-```bash
-# Conexiune
-imm-romania mail connect
-
-# Listează
-imm-romania mail read --limit 10 --unread
-
-# Trimite
-imm-romania mail send --to "client@ex.com" --subject "Ofertă" --body "Mesaj"
-```
-
-### Calendar
-
-```bash
-# Azi
-imm-romania cal today
-
-# Creează
-imm-romania cal create --subject "Meeting" --start "2024-01-15 14:00" --duration 60
-```
-
-### Tasks
-
-```bash
-# Listează
-imm-romania tasks list --overdue
-
-# Creează
-imm-romania tasks create --subject "Follow-up" --due "+7d" --priority high
-
-# Completează
-imm-romania tasks complete --id TASK_ID
-```
-
-### Fișiere
-
-```bash
-# Listează
-imm-romania files list /Documents/
-
-# Upload
-imm-romania files upload /local/report.pdf /Documents/
-
-# Download
-imm-romania files download /Documents/report.pdf /local/
-```
-
-### Workflow-uri Combinate
-
-```bash
-# Download din Nextcloud și trimite pe email
-imm-romania files download /Documents/offer.pdf /tmp/
-imm-romania mail send --to "client@example.com" --subject "Ofertă" --attach /tmp/offer.pdf
-
-# Creează task din email (manual, bazat pe conținut)
-# LCM memorează contextul pentru referință ulterioară
-```
-
-## Structură
-
-```
-imm-romania/
-├── SKILL.md              # Documentație OpenClaw (meta-skill)
-├── README.md             # Acest fișier
-├── LICENSE               # MIT License
-├── CHANGELOG.md          # Istoric schimbări
-├── requirements.txt      # Dependențe Python
-├── config.template.yaml  # Template configurație
-├── modules/
-│   ├── exchange/          # Email, Calendar, Tasks
-│   │   ├── SKILL.md
-│   │   ├── mail.py
-│   │   ├── cal.py
-│   │   ├── tasks.py
-│   │   └── sync.py
-│   └── nextcloud/         # Fișiere
-│       ├── SKILL.md
-│       └── nextcloud.py
-├── references/
-│   └── setup.md          # Ghid instalare detaliat
-├── assets/
-│   └── config.template.yaml
-├── scripts/
-│   ├── imm-romania.py    # Orchestrator CLI
-│   └── tests/
-└── tests/
-    └── test_all.py
-```
-
-## Testare
-
-```bash
-# Rulează toate testele
-python3 -m pytest tests/
-
-# Teste specifice
-python3 -m pytest tests/test_all.py -v -k "mail"
-python3 -m pytest tests/test_all.py -v -k "calendar"
-python3 -m pytest tests/test_all.py -v -k "tasks"
-```
-
-## Troubleshooting
-
-### Exchange SSL Error
-
-```bash
+export EXCHANGE_SERVER="https://mail.firma.ro/EWS/Exchange.asmx"
+export EXCHANGE_USERNAME="cont@firma.ro"
+export EXCHANGE_PASSWORD="parola"
+export EXCHANGE_EMAIL="cont@firma.ro"
+# Pentru self-signed certs:
 export EXCHANGE_VERIFY_SSL="false"
 ```
 
-### Exchange Authentication Failed
+Sau rulează `imm-romania exchange connect` pentru configurare interactivă.
 
-1. Verifică username (încearcă `DOMAIN\username` sau doar `username`)
-2. Verifică password
-3. Verifică că utilizatorul are mailbox
+</details>
 
-### Nextcloud 401 Unauthorized
-
-1. Generează app password din Nextcloud > Settings > Security
-2. Nu folosi password-ul principal
-
-### Module Import Error
+<details>
+<summary><b>Nextcloud</b></summary>
 
 ```bash
-cd ~/.openclaw/skills/imm-romania
-python3 -m modules.exchange mail connect
+export NEXTCLOUD_URL="https://cloud.firma.ro"
+export NEXTCLOUD_USERNAME="utilizator"
+export NEXTCLOUD_APP_PASSWORD="parola-app"  # Settings > Security > App Password
 ```
 
-## Limitări
+</details>
 
-- Tasks sunt create în inbox-ul asistentului (EWS nu suportă task assignment)
-- Pentru task-uri collaborative, folosiți calendar events
-- Self-signed certificates necesită `verify_ssl: false`
+<details>
+<summary><b>Instalare manuală (fără ClawHub)</b></summary>
 
-## Contributing
+```bash
+cd ~/.openclaw/skills/
+git clone https://github.com/assistentalex/openclaw-imm-romania.git
+pip3 install exchangelib requests requests_ntlm
+```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development standards and PR process.
+</details>
 
-This project follows the [Hardshell Coding Standards](https://github.com/assistentalex/openclaw-hardshell).
+## 📸 Cum arată
 
-## Licență
+```json
+// 📋 tasks list
+{
+  "ok": true,
+  "tasks": [
+    {"subject": "Facturi aprilie", "status": "InProgress", "due": "2026-04-15"},
+    {"subject": "Raport lunar", "status": "NotStarted", "due": "2026-04-30"}
+  ]
+}
+```
 
-MIT License - vezi [LICENSE](LICENSE)
+```json
+// 📅 cal today
+{
+  "ok": true,
+  "events": [
+    {"subject": "Întâlnire echipă", "start": "10:00", "end": "11:00", "location": "Sala A"},
+    {"subject": "Call client", "start": "14:00", "end": "15:00", "location": "Online"}
+  ]
+}
+```
 
-## Autori
+```json
+// 📧 mail list --limit 2
+{
+  "ok": true,
+  "messages": [
+    {"subject": "Re: Ofertă proiect", "sender": "client@firma.ro", "is_read": false},
+    {"subject": "Factura #1234", "sender": "contabilitate@firma.ro", "is_read": true}
+  ]
+}
+```
 
-- Dezvoltat pentru comunitatea OpenClaw
-- Publicat pe ClawHub
-- Repository: https://github.com/assistentalex/openclaw-imm-romania
+## 🗺️ Roadmap
 
-## Suport
+- [x] Exchange Email (read, send, draft, search)
+- [x] Exchange Calendar (list, create, today, week)
+- [x] Exchange Tasks (CRUD + delegat)
+- [x] Nextcloud Files (upload, download, organize)
+- [x] MSP Client Management
+- [ ] Exchange Contacts
+- [ ] Email Templates
+- [ ] Calendar Scheduling (find free slots)
+- [ ] Multi-language support (RO/EN)
 
-- GitHub Issues: https://github.com/assistentalex/openclaw-imm-romania/issues
-- Discord: [OpenClaw Community](https://discord.com/invite/clawd)
+## 🤝 Contribuie
+
+Pull requests sunt binevenite! Codul urmează [Hardshell Coding Standards](https://github.com/assistentalex/openclaw-hardshell).
+
+```bash
+# Fork → Branch → PR
+git checkout -b feature/nume-feature
+git commit -m "feat: ce adaugi"
+git push origin feature/nume-feature
+```
+
+## 📄 Licență
+
+MIT — vezi [LICENSE](LICENSE)
+
+---
+
+<div align="center">
+
+**Făcut cu ☕ pentru comunitatea OpenClaw din România**
+
+[Report Bug](https://github.com/assistentalex/openclaw-imm-romania/issues) · [Request Feature](https://github.com/assistentalex/openclaw-imm-romania/issues) · [Discord](https://discord.com/invite/clawd)
+
+</div>

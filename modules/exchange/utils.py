@@ -9,6 +9,21 @@ import os
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 
+# Try to import exchangelib for type hints
+try:
+    from exchangelib.items import Task
+    HAS_EXCHANGELIB = True
+except ImportError:
+    HAS_EXCHANGELIB = False
+    Task = None  # type: ignore
+
+# Add scripts dir to path for imports
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from logger import get_logger
+
+_logger = get_logger()
+
 
 def out(data: Dict[str, Any]) -> None:
     """Output JSON to stdout and exit successfully."""
@@ -30,108 +45,32 @@ def die(message) -> None:
 
 
 def parse_datetime(date_str: Optional[str]) -> Optional[datetime]:
-    """
-    Parse various date formats into datetime object.
-
-    Supports:
-    - ISO format: 2024-01-15T10:30:00
-    - Date only: 2024-01-15
-    - Relative: +1d, +7d, -1d (days from now)
-
-    Returns None if input is None or empty.
-    """
+    """Parse date string in various formats."""
     if not date_str:
         return None
-
-    date_str = date_str.strip()
-
-    # Handle relative dates
-    if date_str.startswith("+") or date_str.startswith("-"):
-        try:
-            # Parse +1d, -7d, etc.
-            if date_str.startswith("+"):
-                days = int(date_str[1:-1])
-            else:
-                days = int(date_str[:-1]) * -1
-
-            return datetime.now() + __import__("datetime").timedelta(days=days)
-        except (ValueError, IndexError):
-            pass
-
-    # Try various date formats
+    
     formats = [
-        "%Y-%m-%dT%H:%M:%S",
-        "%Y-%m-%dT%H:%M",
-        "%Y-%m-%d %H:%M:%S",
-        "%Y-%m-%d %H:%M",
         "%Y-%m-%d",
+        "%Y-%m-%d %H:%M",
+        "%Y-%m-%d %H:%M:%S",
+        "%Y-%m-%dT%H:%M",
+        "%Y-%m-%dT%H:%M:%S",
+        "%Y-%m-%dT%H:%M:%S.%f",
     ]
-
     for fmt in formats:
         try:
             return datetime.strptime(date_str, fmt)
         except ValueError:
             continue
-
-    # Try parsing as timestamp
-    try:
-        return datetime.fromisoformat(date_str)
-    except ValueError:
-        pass
-
-    die(f"Invalid date format: {date_str}. Use YYYY-MM-DD or YYYY-MM-DD HH:MM")
-
-
-def parse_recipients(recipients_str: Optional[str]) -> List[str]:
-    """
-    Parse comma or semicolon separated email addresses.
-
-    Examples:
-    - "user@example.com"
-    - "user1@example.com, user2@example.com"
-    - "user1@example.com; user2@example.com"
-
-    Returns empty list if input is None or empty.
-    """
-    if not recipients_str:
-        return []
-
-    # Split by comma or semicolon
-    recipients = []
-    for r in recipients_str.replace(";", ",").split(","):
-        r = r.strip()
-        if r and "@" in r:
-            recipients.append(r)
-
-    return recipients
+    return None
 
 
 def format_datetime(dt: Optional[datetime]) -> Optional[str]:
-    """Format datetime for display."""
-    if not dt:
+    """Format datetime for JSON output."""
+    if dt is None:
         return None
-    return dt.strftime("%Y-%m-%d %H:%M")
-
-
-def truncate(text: Optional[str], max_length: int = 100) -> Optional[str]:
-    """Truncate text with ellipsis."""
-    if not text:
-        return None
-    if len(text) <= max_length:
-        return text
-    return text[: max_length - 3] + "..."
-
-
-def validate_email(email: str) -> bool:
-    """Basic email validation."""
-    if not email:
-        return False
-    return "@" in email and "." in email.split("@")[1]
-
-
-def get_env(key: str, default: Optional[str] = None) -> Optional[str]:
-    """Get environment variable with optional default."""
-    return os.environ.get(key, default)
+    
+    return dt.isoformat()
 
 
 def mask_email(email: str) -> str:
@@ -140,3 +79,61 @@ def mask_email(email: str) -> str:
         return "***"
     local, domain = email.split("@", 1)
     return f"{local[0]}***@{domain}"
+
+
+def parse_recipients(recipient_str: Optional[str]) -> List[str]:
+    """Parse comma-separated recipient string into list."""
+    if not recipient_str:
+        return []
+    return [addr.strip() for addr in recipient_str.split(",") if addr.strip()]
+
+
+def task_to_dict(task: Task, detailed: bool = False) -> Dict[str, Any]:
+    """
+    Convert Task object to dictionary.
+    
+    Args:
+        task: exchangelib Task object
+        detailed: If True, include extended fields (body, owner, etc.)
+    
+    Returns:
+        Dictionary representation of the task
+    """
+    if not HAS_EXCHANGELIB or task is None:
+        return {}
+    
+    # Status mapping (same as in tasks.py)
+    STATUS_REVERSE = {v: k for k, v in {
+        "NotStarted": 1,
+        "InProgress": 2,
+        "Completed": 3,
+        "WaitingOnOthers": 4,
+        "Deferred": 5,
+    }.items()}
+    
+    result = {
+        "id": task.id,
+        "subject": task.subject or "",
+        "status": STATUS_REVERSE.get(str(task.status), str(task.status)),
+        "percent_complete": task.percent_complete or 0,
+        "due_date": format_datetime(task.due_date),
+        "start_date": format_datetime(task.start_date),
+    }
+    
+    if detailed:
+        result.update(
+            {
+                "body": task.body if task.body else None,
+                "owner": task.owner,
+                "delegation_state": (
+                    str(task.delegation_state) if task.delegation_state else None
+                ),
+                "complete_date": format_datetime(task.complete_date),
+                "importance": str(task.importance) if task.importance else None,
+                "changekey": task.changekey,
+                "datetime_created": format_datetime(task.datetime_created),
+                "datetime_received": format_datetime(task.datetime_received),
+            }
+        )
+    
+    return result

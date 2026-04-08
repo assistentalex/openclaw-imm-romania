@@ -207,8 +207,6 @@ class Config:
         if not self._config.get("password"):
             if sys.stdin.isatty():
                 self._config["password"] = getpass.getpass("Enter password: ")
-            elif os.environ.get("EXCHANGE_PASSWORD"):
-                self._config["password"] = os.environ["EXCHANGE_PASSWORD"]
             else:
                 die(
                     "Missing required configuration: password. Set EXCHANGE_PASSWORD environment variable"
