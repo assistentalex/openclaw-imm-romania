@@ -424,7 +424,20 @@ def cmd_availability(args):
 
 
 # ── CLI ───────────────────────────────────────────────────────────────────────
+def cmd_today(args):
+    """List today's events."""
+    today = datetime.now().strftime("%Y-%m-%d")
+    list_args = argparse.Namespace(start=today, end=None, days=1, limit=args.limit or 20)
+    return cmd_list(list_args)
 
+
+def cmd_week(args):
+    """List this week's events."""
+    now = datetime.now()
+    start_of_week = (now - timedelta(days=now.weekday())).strftime("%Y-%m-%d")
+    end_of_week = (now + timedelta(days=7 - now.weekday())).strftime("%Y-%m-%d")
+    list_args = argparse.Namespace(start=start_of_week, end=end_of_week, days=7, limit=args.limit or 50)
+    return cmd_list(list_args)
 
 def main():
     parser = argparse.ArgumentParser(
