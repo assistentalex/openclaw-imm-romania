@@ -15,7 +15,7 @@ Email · Calendar · Task-uri · Fișiere — totul din terminalul tău
 
 ---
 
-## Ce face?
+## Ce rezolvă acest skill OpenClaw?
 
 Ai un mic business în România? Folosești Exchange și Nextcloud? 
 
