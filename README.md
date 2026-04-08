@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🇷🇴 IMM-Romania
+# IMM-Romania: Asistentul pentru business românesc
 
 **Asistentul tău digital pentru business-ul din România**
 
@@ -10,8 +10,6 @@ Email · Calendar · Task-uri · Fișiere — totul din terminalul tău
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![OpenClaw Skill](https://img.shields.io/badge/OpenClaw-Skill-green.svg)](https://clawhub.ai)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-brightgreen.svg)](https://www.python.org/)
-
-</div>
 
 ---
 
