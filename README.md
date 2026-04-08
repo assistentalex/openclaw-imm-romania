@@ -2,7 +2,6 @@
 
 # IMM-Romania: Asistentul pentru business românesc
 
-**Asistentul tău digital pentru business-ul din România**
 
 Email · Calendar · Task-uri · Fișiere — totul din terminalul tău
 
