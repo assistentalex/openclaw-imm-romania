@@ -19,7 +19,7 @@ Email · Calendar · Task-uri · Fișiere — totul din terminalul tău
 
 Ai un mic business în România? Folosești Exchange și Nextcloud? 
 
-IMM-Romania îți aduce **totul într-un singur loc** — direct din chat sau terminal. Citești emailuri, programezi întâlniri, gestionezi task-uri și accesezi fișiere — **fără să deschizi 5 tab-uri**.
+Conectează Exchange și Nextcloud la OpenClaw. Citești și trimiți emailuri, programezi întâlniri, gestionezi task-uri și operezi fișiere pe Nextcloud — totul din terminal sau chat, fără interfață grafică.
 
 ## ⚡ În 30 de secunde
 
