@@ -447,8 +447,8 @@ def main():
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     # connect
-    sub.add_parser("connect", help="Test calendar connection")
-    sub.add_parser("connect").set_defaults(func=cmd_connect)
+    p_connect = sub.add_parser("connect", help="Test calendar connection")
+    p_connect.set_defaults(func=cmd_connect)
 
     # list
     p_list = sub.add_parser("list", help="List events in date range")
@@ -471,7 +471,7 @@ def main():
     # get
     p_get = sub.add_parser("get", help="Get event details")
     p_get.add_argument("--id", "-i", required=True, help="Event ID")
-    p_set_defaults(func=cmd_get)
+    p_get.set_defaults(func=cmd_get)
 
     # create
     p_create = sub.add_parser("create", help="Create event")
