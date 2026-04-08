@@ -15,8 +15,7 @@ try:
     import requests
     from requests.auth import HTTPBasicAuth
 except ImportError:
-    print("Error: 'requests' library required. Install with: pip install requests")
-    sys.exit(1)
+    raise ImportError("'requests' library required. Install with: pip install requests")
 
 
 class NextcloudClient:
@@ -29,9 +28,10 @@ class NextcloudClient:
         self.app_password = os.environ.get('NEXTCLOUD_APP_PASSWORD', '')
 
         if not all([self.url, self.username, self.app_password]):
-            print("Error: Missing environment variables.")
-            print("Required: NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_APP_PASSWORD")
-            sys.exit(1)
+            raise EnvironmentError(
+                "Missing required environment variables: "
+                "NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_APP_PASSWORD"
+            )
 
         self.auth = HTTPBasicAuth(self.username, self.app_password)
         self.user_id = None
@@ -553,7 +553,7 @@ def print_shared(shares):
         
         print(f"{name:<{max_name}}  {owner:<{max_owner}}  {perms:<{max_perms}}  {path}")
     
-    print(f"\nTo access a shared folder, use path: {path}")
+    print(f"\nTo access a shared folder, use its path from the list above.")
 
 
 def main():

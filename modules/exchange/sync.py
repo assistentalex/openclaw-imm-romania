@@ -409,10 +409,10 @@ def cmd_status(args: argparse.Namespace) -> None:
     # Get counts from Exchange
     total_tasks = account.tasks.total_count
 
-    # Count by status
-    all_tasks = list(account.tasks.all())
+    # Count by status — fetch only needed fields to reduce payload
+    status_only_tasks = list(account.tasks.all().only('status', 'due_date'))
     status_counts = {}
-    for task in all_tasks:
+    for task in status_only_tasks:
         status = str(task.status)
         status_counts[status] = status_counts.get(status, 0) + 1
 
@@ -420,7 +420,7 @@ def cmd_status(args: argparse.Namespace) -> None:
     now = datetime.now()
     overdue = sum(
         1
-        for t in all_tasks
+        for t in status_only_tasks
         if t.due_date
         and datetime(t.due_date.year, t.due_date.month, t.due_date.day) < now
         and str(t.status) != "Completed"
