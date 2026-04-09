@@ -55,6 +55,8 @@ fi
 DIGEST_JSON=$(python3 "$IMM_CLI" msp github-check digest --check "${CONFIG_ARGS[@]}" "${REPO_ARGS[@]}")
 SUBJECT=$(printf '%s' "$DIGEST_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin)["subject"])')
 BODY=$(printf '%s' "$DIGEST_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin)["body"])')
+# Render HTML from digest via in-repo renderer
+HTML=$(printf '%s' "$DIGEST_JSON" | python3 "$PROJECT_DIR/modules/msp/render_digest.py")
 ENABLED=$(printf '%s' "$DIGEST_JSON" | python3 -c 'import json,sys; data=json.load(sys.stdin); print("yes" if data.get("results") or data.get("has_updates") or "No GitHub repositories are configured" not in data.get("body", "") else "no")')
 
 if [[ "$ENABLED" != "yes" ]]; then
@@ -62,4 +64,9 @@ if [[ "$ENABLED" != "yes" ]]; then
   exit 0
 fi
 
-python3 "$IMM_CLI" mail send --to "$RECIPIENT" --subject "$SUBJECT" --body "$BODY"
+# Prefer HTML if renderer produced content
+if [[ -n "$HTML" && "$HTML" != "<p>Invalid digest</p>" ]]; then
+  python3 "$IMM_CLI" mail send --to "$RECIPIENT" --subject "$SUBJECT" --html "$HTML"
+else
+  python3 "$IMM_CLI" mail send --to "$RECIPIENT" --subject "$SUBJECT" --body "$BODY"
+fi
