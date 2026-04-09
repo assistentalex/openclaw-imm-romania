@@ -63,6 +63,16 @@ Gestionează fișiere pe Nextcloud prin WebDAV + OCS API.
 
 Păstrează istoria conversațiilor între sesiuni prin LCM plugin. Nu configurezi nimic — funcționează automat.
 
+### 🐙 MSP GitHub Checker — Optional
+
+Monitorizează release-uri publicate pentru repo-uri configurate și generează digest-uri utile pentru workflow-uri MSP.
+
+```bash
+imm-romania msp github-check repos
+imm-romania msp github-check check --repo openclaw/openclaw --repo Martian-Engineering/lossless-claw
+imm-romania msp github-check digest --check
+```
+
 ## 🛠️ Configurare
 
 <details>
@@ -110,6 +120,7 @@ pip3 install exchangelib requests requests_ntlm
 - [x] Exchange Tasks (CRUD + delegat)
 - [x] Nextcloud Files (upload, download, organize)
 - [x] MSP Client Management
+- [x] Optional GitHub Releases Checker (MSP-scoped)
 - [ ] Exchange Contacts
 - [ ] Email Templates
 - [ ] Calendar Scheduling (find free slots)

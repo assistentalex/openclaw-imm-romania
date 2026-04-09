@@ -7,6 +7,7 @@ __version__ = "0.1.0"
 
 from .clients import ClientDB
 from .contracts import ContractManager
+from .github_checker import GitHubReleaseChecker
 from .reminders import RenewalReminder
 
-__all__ = ["ClientDB", "ContractManager", "RenewalReminder"]
+__all__ = ["ClientDB", "ContractManager", "RenewalReminder", "GitHubReleaseChecker"]

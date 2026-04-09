@@ -32,6 +32,11 @@ def main():
         sys.argv = [sys.argv[0], normalized_module] + args
         exchange_main()
 
+    elif module in ('msp',):
+        from modules.msp.cli import main as msp_main
+        sys.argv = [sys.argv[0]] + args
+        msp_main()
+
     elif module in ('files', 'nextcloud', 'nc'):
         # Route to Nextcloud module
         from modules.nextcloud.nextcloud import NextcloudClient
@@ -116,6 +121,7 @@ Modules:
     analytics   Email analytics and statistics (Exchange)
     sync        Task sync and reminders (Exchange)
     files       File operations (Nextcloud)
+    msp         MSP operations (clients, contracts, reminders, github-check)
 
 Email Commands:
     imm-romania mail connect              Test Exchange connection
