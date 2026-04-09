@@ -12,6 +12,7 @@ Asistent complet pentru IMM-uri din România care integrează:
 - **Exchange**: Email, Calendar, Tasks (on-premises 2016/2019)
 - **Nextcloud**: Gestionare fișiere și colaborare
 - **Memory**: Context persistent prin LCM plugin
+- **MSP GitHub Checker**: Monitorizare opțională pentru release-uri GitHub
 
 ## Module Disponibile
 
@@ -94,6 +95,18 @@ imm-romania analytics folders
 # Raport complet
 imm-romania analytics report --days 30
 ```
+
+### MSP GitHub Checker (Optional)
+
+```bash
+# Repo-uri configurate / override
+imm-romania msp github-check repos
+imm-romania msp github-check check --repo openclaw/openclaw --repo Martian-Engineering/lossless-claw
+imm-romania msp github-check digest --check
+imm-romania msp github-check status
+```
+
+Checker-ul monitorizează doar release-uri publicate și produce digest JSON/text pentru automatizări și email.
 
 ### Fișiere (Nextcloud)
 
