@@ -115,6 +115,17 @@ pip3 install exchangelib requests requests_ntlm
 
 </details>
 
+## 🧰 Ecosistem
+
+Skill-uri din aceeași familie, construite sub umbrela [Firma de AI](https://firmade.ai) și [Firma de IT](https://firmade.it):
+
+| Skill | Ce face | Link |
+|-------|----------|------|
+| **Hardshell** | Coding standards pentru OpenClaw skills — PEP 8, type hints, testing, git workflow. Referință obligatorie pentru codul din acest proiect. | [openclaw-hardshell](https://github.com/assistentalex/openclaw-hardshell) |
+| **prompt-to-pr** | Workflow complet de la prompt la PR gata de merge. 6 moduri (feature, fix, review, refactor, test, docs), token tracking, context budget, repo registry. | [openclaw-prompt-to-pr](https://github.com/assistentalex/openclaw-prompt-to-pr) |
+
+---
+
 ## 🗺️ Roadmap
 
 - [x] Exchange Email (read, send, draft, search)
@@ -138,6 +149,6 @@ MIT — vezi [LICENSE](LICENSE). Codul urmează [Hardshell Coding Standards](htt
 
 **[Built by Firma de AI](https://firmade.ai) · [Supported by Firma de IT](https://firmade.it) · Made with ☕ in România**
 
-[Report Bug](https://github.com/assistentalex/openclaw-imm-romania/issues) · [Request Feature](https://github.com/assistentalex/openclaw-imm-romania/issues) · [Discord](https://discord.com/invite/clawd)
+[Hardshell](https://github.com/assistentalex/openclaw-hardshell) · [prompt-to-pr](https://github.com/assistentalex/openclaw-prompt-to-pr) · [Report Bug](https://github.com/assistentalex/openclaw-imm-romania/issues) · [Request Feature](https://github.com/assistentalex/openclaw-imm-romania/issues)
 
 </div>
