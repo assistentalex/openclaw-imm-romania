@@ -62,12 +62,14 @@ def test_render_digest_contains_key_sections():
     assert 'Updated' in out
     assert 'firmade.it' in out
     assert 'firmade.ai' in out
+    assert '#1d4ed8' in out or '#38bdf8' in out
 
 
 def test_render_empty_digest_has_stable_message():
     out = render(EMPTY_DIGEST)
     assert 'Empty Digest' in out
     assert 'No tracked repositories yet.' in out or 'No new releases were detected' in out
+    assert '#134e4a' in out or '#5eead4' in out
 
 
 if __name__ == '__main__':
