@@ -216,7 +216,6 @@ class GitHubReleaseChecker:
                 dates = [h.get("published_at") for h in history if h.get("published_at")]
                 # compute average days between consecutive releases (most recent first)
                 if len(dates) >= 2:
-                    from datetime import datetime
                     parsed = []
                     for d in dates:
                         try:
@@ -241,7 +240,6 @@ class GitHubReleaseChecker:
 
                 # days since last release
                 try:
-                    from datetime import datetime, timezone
                     if repo_state.get("published_at"):
                         last = datetime.fromisoformat(repo_state["published_at"].replace("Z", "+00:00"))
                         delta_days = (datetime.now(timezone.utc) - last).total_seconds() / 86400.0
