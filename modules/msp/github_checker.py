@@ -202,6 +202,56 @@ class GitHubReleaseChecker:
                 "status": status,
                 "error": None,
             }
+
+            # Fetch additional metadata: repo description and recent release history to compute average interval
+            try:
+                repo_info = self.get_repo_info(repo)
+                repo_state["description"] = repo_info.get("description") if isinstance(repo_info, dict) else None
+            except Exception:
+                repo_state["description"] = None
+
+            try:
+                history = self.get_release_history(repo, per_page=50)
+                # history: list of dicts with 'published_at' ISO timestamps
+                dates = [h.get("published_at") for h in history if h.get("published_at")]
+                # compute average days between consecutive releases (most recent first)
+                if len(dates) >= 2:
+                    parsed = []
+                    for d in dates:
+                        try:
+                            parsed.append(datetime.fromisoformat(d.replace("Z", "+00:00")))
+                        except Exception:
+                            pass
+                    if len(parsed) >= 2:
+                        deltas = []
+                        for i in range(len(parsed) - 1):
+                            delta = (parsed[i] - parsed[i + 1]).total_seconds() / 86400.0
+                            if delta >= 0:
+                                deltas.append(delta)
+                        if deltas:
+                            avg_interval = sum(deltas) / len(deltas)
+                            repo_state["avg_release_interval_days"] = round(avg_interval, 1)
+                        else:
+                            repo_state["avg_release_interval_days"] = None
+                    else:
+                        repo_state["avg_release_interval_days"] = None
+                else:
+                    repo_state["avg_release_interval_days"] = None
+
+                # days since last release
+                try:
+                    if repo_state.get("published_at"):
+                        last = datetime.fromisoformat(repo_state["published_at"].replace("Z", "+00:00"))
+                        delta_days = (datetime.now(timezone.utc) - last).total_seconds() / 86400.0
+                        repo_state["days_since_last_release"] = round(delta_days, 1)
+                    else:
+                        repo_state["days_since_last_release"] = None
+                except Exception:
+                    repo_state["days_since_last_release"] = None
+            except Exception:
+                repo_state["avg_release_interval_days"] = None
+                repo_state["days_since_last_release"] = None
+
             state["repos"][repo] = repo_state
             results.append({"repo": repo, "status": status, **repo_state, "rate_limit": release.get("rate_limit", {})})
 
@@ -296,3 +346,17 @@ class GitHubReleaseChecker:
             "failures": sum(1 for item in results if item.get("status") == "error"),
             "last_run": state.get("last_run"),
         }
+
+    def get_release_history(self, repo: str, per_page: int = 50) -> List[Dict[str, Any]]:
+        """Fetch recent releases for a repository (up to per_page). Returns list of release dicts."""
+        result = self._request_json(f"https://api.github.com/repos/{repo}/releases?per_page={per_page}")
+        if not result.get("ok"):
+            return []
+        return result.get("data", [])
+
+    def get_repo_info(self, repo: str) -> Dict[str, Any]:
+        """Fetch repository info (description, etc.)."""
+        result = self._request_json(f"https://api.github.com/repos/{repo}")
+        if not result.get("ok"):
+            return {}
+        return result.get("data", {})
