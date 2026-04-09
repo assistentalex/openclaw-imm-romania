@@ -52,13 +52,17 @@ def render(payload: dict) -> str:
 def test_render_digest_contains_key_sections():
     out = render(TEST_DIGEST)
     assert 'Test Digest' in out
-    assert 'GitHub Releases Monitor' in out
+    assert 'Firma de AI' in out
+    assert 'powered by' in out
+    assert 'GitHub Releases Digest' in out
     assert 'Highlights' in out
     assert 'Repository Status' in out
     assert 'owner/repo' in out
     assert 'owner/updated' in out
     assert 'First seen' in out or 'first seen' in out
     assert 'Updated' in out
+    assert 'firmade.it' in out
+    assert 'firmade.ai' in out
 
 
 def test_render_empty_digest_has_stable_message():
