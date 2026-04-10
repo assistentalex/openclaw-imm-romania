@@ -12,6 +12,7 @@ import urllib.parse
 import xml.etree.ElementTree as ET
 import zipfile
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -74,6 +75,69 @@ STOPWORDS = {
     "din", "pentru", "care", "este", "sunt", "sau", "ceva", "asta", "acest", "aceasta",
     "prin", "fara", "după", "dupa", "când", "cand", "care", "iar", "mai", "foarte",
 }
+ACTION_KEYWORDS = (
+    "send",
+    "confirm",
+    "create",
+    "review",
+    "approve",
+    "follow up",
+    "follow-up",
+    "schedule",
+    "call",
+    "prepare",
+    "reply",
+)
+MONTHS = {
+    "jan": 1,
+    "january": 1,
+    "feb": 2,
+    "february": 2,
+    "mar": 3,
+    "march": 3,
+    "apr": 4,
+    "april": 4,
+    "may": 5,
+    "jun": 6,
+    "june": 6,
+    "jul": 7,
+    "july": 7,
+    "aug": 8,
+    "august": 8,
+    "sep": 9,
+    "sept": 9,
+    "september": 9,
+    "oct": 10,
+    "october": 10,
+    "nov": 11,
+    "november": 11,
+    "dec": 12,
+    "december": 12,
+}
+
+
+def get_exchange_account(mailbox: str | None = None) -> Any:
+    """Get an Exchange account for task creation."""
+    from modules.exchange.connection import get_account, get_account_for
+
+    return get_account_for(mailbox) if mailbox else get_account()
+
+
+
+def build_exchange_task(account: Any, subject: str, body: str) -> Any:
+    """Build a new Exchange task instance."""
+    from exchangelib.items import Task
+
+    return Task(account=account, folder=account.tasks, subject=subject, body=body)
+
+
+
+def build_ews_date(date_value: str) -> Any:
+    """Convert an ISO date string into an EWSDate."""
+    from exchangelib import EWSDate
+
+    parsed = datetime.strptime(date_value, "%Y-%m-%d")
+    return EWSDate(parsed.year, parsed.month, parsed.day)
 
 
 class NextcloudClient:
@@ -880,6 +944,125 @@ class NextcloudClient:
             "truncated": extracted["truncated"],
         }
 
+    def _extract_due_hint(self, sentence: str) -> str | None:
+        """Extract a simple ISO due-date hint from a sentence."""
+        match = re.search(r"\b(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})\b", sentence)
+        if not match:
+            return None
+
+        day = int(match.group(1))
+        month_token = match.group(2).lower()
+        year = int(match.group(3))
+        month = MONTHS.get(month_token)
+        if month is None:
+            return None
+
+        try:
+            return datetime(year, month, day).strftime("%Y-%m-%d")
+        except ValueError:
+            return None
+
+    def _extract_owner_hint(self, sentence: str) -> str | None:
+        """Extract a lightweight owner hint from a sentence."""
+        match = re.search(r"\b([A-ZĂÂÎȘȚ][a-zăâîșț]+)\s+(?:should|will|must|owns)\b", sentence)
+        return match.group(1) if match else None
+
+    def _make_action_title(self, sentence: str) -> str:
+        """Turn a sentence into a short task title."""
+        title = sentence.strip().rstrip(".?!")
+        title = re.sub(r"^please\s+", "", title, flags=re.IGNORECASE)
+        title = re.sub(r"\s+by\s+\d{1,2}\s+[A-Za-z]+\s+\d{4}$", "", title, flags=re.IGNORECASE)
+        title = re.sub(r"\s+this\s+week$", "", title, flags=re.IGNORECASE)
+        title = re.sub(r"\s+for\s+approval$", "", title, flags=re.IGNORECASE)
+        if title:
+            title = title[0].upper() + title[1:]
+        return title
+
+    def extract_actions(self, remote_path: str, max_chars: int = 12000) -> dict[str, Any] | None:
+        """Extract grounded action suggestions from one file."""
+        extracted = self.extract_text(remote_path, max_chars=max_chars)
+        if extracted is None:
+            return None
+
+        actions: list[dict[str, Any]] = []
+        for sentence in self._split_sentences(extracted["text"]):
+            lowered = sentence.lower()
+            if not any(keyword in lowered for keyword in ACTION_KEYWORDS):
+                continue
+
+            title = self._make_action_title(sentence)
+            if not title:
+                continue
+
+            actions.append(
+                {
+                    "title": title,
+                    "details": sentence,
+                    "due_hint": self._extract_due_hint(sentence),
+                    "owner_hint": self._extract_owner_hint(sentence),
+                    "source_excerpt": sentence,
+                }
+            )
+
+        return {
+            "path": extracted["path"],
+            "count": len(actions),
+            "actions": actions,
+            "truncated": extracted["truncated"],
+        }
+
+    def create_tasks_from_file(
+        self,
+        remote_path: str,
+        mailbox: str | None = None,
+        priority: str = "normal",
+        dry_run: bool = False,
+    ) -> dict[str, Any] | None:
+        """Create Exchange tasks from actions extracted from one file."""
+        extracted = self.extract_actions(remote_path)
+        if extracted is None:
+            return None
+
+        account = get_exchange_account(mailbox)
+        created_tasks: list[dict[str, Any]] = []
+        priority_map = {"low": "Low", "normal": "Normal", "high": "High"}
+
+        for action in extracted["actions"]:
+            body_lines = [
+                f"Source file: {extracted['path']}",
+                f"Source excerpt: {action['source_excerpt']}",
+            ]
+            if action.get("owner_hint"):
+                body_lines.append(f"Owner hint: {action['owner_hint']}")
+            if action.get("due_hint"):
+                body_lines.append(f"Due hint: {action['due_hint']}")
+
+            task = build_exchange_task(account, action["title"], "\n".join(body_lines))
+            task.importance = priority_map.get(priority.lower(), "Normal")
+            if action.get("due_hint"):
+                task.due_date = build_ews_date(action["due_hint"])
+
+            if not dry_run:
+                task.save()
+
+            created_tasks.append(
+                {
+                    "subject": action["title"],
+                    "due_hint": action.get("due_hint"),
+                    "owner_hint": action.get("owner_hint"),
+                    "mailbox": str(getattr(account, "primary_smtp_address", mailbox or "")),
+                    "id": getattr(task, "id", None),
+                }
+            )
+
+        return {
+            "path": extracted["path"],
+            "created_count": len(created_tasks),
+            "mailbox": str(getattr(account, "primary_smtp_address", mailbox or "")),
+            "dry_run": dry_run,
+            "tasks": created_tasks,
+        }
+
 
 def print_json(data: Any) -> None:
     """Print data as formatted JSON."""
@@ -1017,6 +1200,8 @@ def print_usage() -> None:
     print("  extract-text <remote_path>            Extract readable text")
     print("  summarize <remote_path>               Summarize one file")
     print("  ask-file <remote_path> <question>     Answer a question from one file")
+    print("  extract-actions <remote_path>         Extract workflow actions from one file")
+    print("  create-tasks-from-file <path> [options]  Create Exchange tasks from one file")
     print("  mkdir <remote_path>                   Create directory")
     print("  delete <remote_path>                  Delete file or directory")
     print("  move <source> <dest>                  Move/rename")
@@ -1031,6 +1216,11 @@ def print_usage() -> None:
     print("  --password <value>                    Protect link with password")
     print("  --expire-date YYYY-MM-DD              Set link expiry date")
     print("  --public-upload                       Allow public upload on folder shares")
+    print()
+    print("Options for create-tasks-from-file:")
+    print("  --mailbox <email>                     Target delegate mailbox for created tasks")
+    print("  --priority <low|normal|high>          Task priority (default: normal)")
+    print("  --dry-run                             Show tasks without creating them")
     print()
     print(
         "Set environment variables: NEXTCLOUD_URL, NEXTCLOUD_USERNAME, "
@@ -1114,6 +1304,52 @@ def run_cli(argv: list[str] | None = None) -> int:
             print("Usage: nextcloud.py ask-file <remote_path> <question>")
             return 1
         result = client.ask_file(command_args[0], " ".join(command_args[1:]))
+        if result is None:
+            return 3
+        print_json(result)
+        return 0
+
+    if command == "extract-actions":
+        if not command_args:
+            print("Usage: nextcloud.py extract-actions <remote_path>")
+            return 1
+        result = client.extract_actions(command_args[0])
+        if result is None:
+            return 3
+        print_json(result)
+        return 0
+
+    if command == "create-tasks-from-file":
+        if not command_args:
+            print("Usage: nextcloud.py create-tasks-from-file <remote_path>")
+            return 1
+        remote_path = command_args[0]
+        mailbox = None
+        priority = "normal"
+        dry_run = False
+        index = 1
+        while index < len(command_args):
+            token = command_args[index]
+            if token == "--mailbox" and index + 1 < len(command_args):
+                mailbox = command_args[index + 1]
+                index += 2
+                continue
+            if token == "--priority" and index + 1 < len(command_args):
+                priority = command_args[index + 1]
+                index += 2
+                continue
+            if token == "--dry-run":
+                dry_run = True
+                index += 1
+                continue
+            print(f"Unknown create-tasks-from-file option: {token}")
+            return 1
+        result = client.create_tasks_from_file(
+            remote_path,
+            mailbox=mailbox,
+            priority=priority,
+            dry_run=dry_run,
+        )
         if result is None:
             return 3
         print_json(result)

@@ -91,6 +91,8 @@ imm-romania files search QUERY [PATH]        # Search files/folders by name
 imm-romania files extract-text PATH          # Extract readable text from one file
 imm-romania files summarize PATH             # Summarize one file
 imm-romania files ask-file PATH QUESTION     # Answer a question from one file
+imm-romania files extract-actions PATH       # Extract workflow actions from one file
+imm-romania files create-tasks-from-file PATH [--mailbox EMAIL] [--priority LEVEL] [--dry-run]
 imm-romania files upload LOCAL REMOTE        # Upload file
 imm-romania files download REMOTE LOCAL      # Download file
 imm-romania files mkdir PATH                 # Create directory
@@ -150,6 +152,8 @@ if command == 'list':
 | Extract text | `files extract-text /Clients/contract.docx` | ⏳ Not tested |
 | Summarize | `files summarize /Clients/contract.docx` | ⏳ Not tested |
 | Ask file | `files ask-file /Clients/contract.docx "When is the renewal due?"` | ⏳ Not tested |
+| Extract actions | `files extract-actions /Clients/contract.txt` | ⏳ Not tested |
+| Create tasks from file | `files create-tasks-from-file /Clients/contract.txt --dry-run` | ⏳ Not tested |
 | Share list | `files share-list` | ⏳ Not tested |
 | Upload | `files upload` | ⏳ Not tested |
 | Download | `files download` | ⏳ Not tested |
@@ -182,6 +186,8 @@ imm-romania files search contract /Clients/
 imm-romania files extract-text /Clients/contract.docx
 imm-romania files summarize /Clients/contract.docx
 imm-romania files ask-file /Clients/contract.docx "When is the renewal due?"
+imm-romania files extract-actions /Clients/contract.txt
+imm-romania files create-tasks-from-file /Clients/contract.txt --dry-run
 imm-romania files share-list
 imm-romania files info /some-file.txt
 ```

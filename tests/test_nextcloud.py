@@ -269,6 +269,73 @@ class TestNextcloudClient(NextcloudTestCase):
                 result = client.extract_text("/Docs/report.pdf")
         self.assertIsNone(result)
 
+    def test_extract_actions_returns_grounded_action_items(self):
+        client = self.create_client()
+        response = FakeResponse(
+            content=(
+                b"Please send the updated quote by 15 May 2026. "
+                b"Ana should confirm the pricing with finance this week. "
+                b"Create a follow-up for the renewal call."
+            )
+        )
+
+        with patch.object(client, "_request", return_value=response):
+            result = client.extract_actions("/Clients/contract.txt")
+
+        self.assertEqual(result["path"], "/Clients/contract.txt")
+        self.assertGreaterEqual(result["count"], 2)
+        self.assertTrue(any(item["due_hint"] == "2026-05-15" for item in result["actions"]))
+        self.assertTrue(any(item["owner_hint"] == "Ana" for item in result["actions"]))
+
+    def test_create_tasks_from_file_uses_exchange_task_creation(self):
+        client = self.create_client()
+        created = []
+
+        class FakeTask:
+            def __init__(self, account=None, folder=None, subject=None, body=None):
+                self.account = account
+                self.folder = folder
+                self.subject = subject
+                self.body = body
+                self.importance = None
+                self.due_date = None
+                self.id = f"task-{len(created) + 1}"
+
+            def save(self):
+                created.append(self)
+
+        fake_account = type("Account", (), {"tasks": object(), "primary_smtp_address": "owner@example.com"})()
+        extracted = {
+            "path": "/Clients/contract.txt",
+            "count": 2,
+            "actions": [
+                {
+                    "title": "Send the updated quote",
+                    "details": "Please send the updated quote by 15 May 2026.",
+                    "due_hint": "2026-05-15",
+                    "owner_hint": "Ana",
+                    "source_excerpt": "Please send the updated quote by 15 May 2026.",
+                },
+                {
+                    "title": "Create a follow-up for the renewal call",
+                    "details": "Create a follow-up for the renewal call.",
+                    "due_hint": None,
+                    "owner_hint": None,
+                    "source_excerpt": "Create a follow-up for the renewal call.",
+                },
+            ],
+        }
+
+        with patch.object(client, "extract_actions", return_value=extracted):
+            with patch("modules.nextcloud.nextcloud.get_exchange_account", return_value=fake_account):
+                with patch("modules.nextcloud.nextcloud.build_exchange_task", side_effect=lambda account, subject, body: FakeTask(account=account, folder=account.tasks, subject=subject, body=body)):
+                    with patch("modules.nextcloud.nextcloud.build_ews_date", return_value="ews-date"):
+                        result = client.create_tasks_from_file("/Clients/contract.txt")
+
+        self.assertEqual(result["created_count"], 2)
+        self.assertEqual(len(created), 2)
+        self.assertEqual(created[0].subject, "Send the updated quote")
+        self.assertEqual(created[0].due_date, "ews-date")
 
 
 class TestNextcloudCli(NextcloudTestCase):
@@ -307,6 +374,14 @@ class TestNextcloudCli(NextcloudTestCase):
 
         self.assertEqual(exit_code, 1)
         self.assertIn("Usage: nextcloud.py ask-file <remote_path> <question>", stdout.getvalue())
+
+    def test_run_cli_requires_path_for_create_tasks_from_file(self):
+        with patch.dict(os.environ, self.ENV, clear=False):
+            with patch("sys.stdout", new_callable=StringIO) as stdout:
+                exit_code = run_cli(["create-tasks-from-file"])
+
+        self.assertEqual(exit_code, 1)
+        self.assertIn("Usage: nextcloud.py create-tasks-from-file <remote_path>", stdout.getvalue())
 
 
 if __name__ == "__main__":

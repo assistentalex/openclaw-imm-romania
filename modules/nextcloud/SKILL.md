@@ -1,6 +1,6 @@
 ---
 name: nextcloud
-description: File management and document understanding for Nextcloud via WebDAV and OCS APIs. Use for uploading, downloading, listing, searching, extracting text, summarizing files, Q&A over files, sharing, moving, and copying files and folders on Nextcloud. Triggers on phrases like "upload to nextcloud", "download from nextcloud", "list files on nextcloud", "search nextcloud", "summarize nextcloud file", "ask nextcloud file", "create nextcloud share link", "nextcloud file operations".
+description: File management, document understanding, and workflow intelligence for Nextcloud via WebDAV and OCS APIs. Use for uploading, downloading, listing, searching, extracting text, summarizing files, Q&A over files, extracting workflow actions, creating Exchange tasks from files, sharing, moving, and copying files and folders on Nextcloud. Triggers on phrases like "upload to nextcloud", "download from nextcloud", "list files on nextcloud", "search nextcloud", "summarize nextcloud file", "ask nextcloud file", "extract actions from file", "create tasks from file", "create nextcloud share link", "nextcloud file operations".
 ---
 
 # Nextcloud Module
@@ -71,6 +71,23 @@ Answer a question using one file as the source.
 
 ```bash
 python3 -m modules.nextcloud ask-file /Clients/contract.docx "When is the renewal due?"
+```
+
+### extract-actions
+Extract grounded workflow actions from one file.
+
+```bash
+python3 -m modules.nextcloud extract-actions /Clients/contract.txt
+```
+
+Returns: action items, due-date hints, owner hints, and source excerpts.
+
+### create-tasks-from-file
+Create Exchange tasks from extracted file actions.
+
+```bash
+python3 -m modules.nextcloud create-tasks-from-file /Clients/contract.txt --dry-run
+python3 -m modules.nextcloud create-tasks-from-file /Clients/contract.txt --mailbox user@example.com
 ```
 
 ### upload
@@ -156,8 +173,9 @@ python3 -m modules.nextcloud share-revoke 42
 
 - Nextcloud WebDAV uses user ID (not username) in paths - the script resolves this automatically
 - Search currently matches file/folder names and paths, not document content
-- `extract-text`, `summarize`, and `ask-file` operate on one file at a time
+- `extract-text`, `summarize`, `ask-file`, `extract-actions`, and `create-tasks-from-file` operate on one file at a time
 - PDF extraction uses `pdfplumber` (recommended, MIT license, best table/layout handling) with `pypdf` as fallback; install `pdfplumber` for best results
+- Task creation uses Exchange delegate access when `--mailbox` is supplied
 - Share-link commands use the Nextcloud OCS sharing API
 - For large files, ensure sufficient timeout settings
 - Self-signed certificates may require additional configuration
