@@ -1,209 +1,27 @@
 #!/usr/bin/env python3
-"""
-Nextcloud WebDAV file management client.
+"""Nextcloud WebDAV file management client."""
 
-Uses user ID (not username) for WebDAV paths as per Nextcloud requirements.
-"""
+from __future__ import annotations
 
+import json
 import os
 import sys
-import json
 import urllib.parse
+import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Any
 
 try:
     import requests
     from requests.auth import HTTPBasicAuth
-except ImportError:
-    raise ImportError("'requests' library required. Install with: pip install requests")
+    from requests.exceptions import RequestException
+except ImportError as exc:
+    raise ImportError(
+        "'requests' library required. Install with: pip install requests"
+    ) from exc
 
 
-class NextcloudClient:
-    """Client for Nextcloud WebDAV operations."""
-
-    def __init__(self):
-        """Initialize client from environment variables."""
-        self.url = os.environ.get('NEXTCLOUD_URL', '').rstrip('/')
-        self.username = os.environ.get('NEXTCLOUD_USERNAME', '')
-        self.app_password = os.environ.get('NEXTCLOUD_APP_PASSWORD', '')
-
-        if not all([self.url, self.username, self.app_password]):
-            raise EnvironmentError(
-                "Missing required environment variables: "
-                "NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_APP_PASSWORD"
-            )
-
-        self.auth = HTTPBasicAuth(self.username, self.app_password)
-        self.user_id = None
-        self._resolve_user_id()
-
-    def _resolve_user_id(self):
-        """Resolve the numeric user ID from Nextcloud OCS API."""
-        # Try to get user info from OCS API
-        ocs_url = f"{self.url}/ocs/v1.php/cloud/user"
-        headers = {'OCS-APIRequest': 'true'}
-
-        try:
-            response = requests.get(ocs_url, auth=self.auth, headers=headers, timeout=30)
-            if response.status_code == 200:
-                # Parse the XML response to get user ID
-                import xml.etree.ElementTree as ET
-                root = ET.fromstring(response.content)
-                # Try to find the id element
-                id_elem = root.find('.//id')
-                if id_elem is not None and id_elem.text:
-                    self.user_id = id_elem.text
-                else:
-                    # Fallback to username if ID not found
-                    self.user_id = self.username
-            else:
-                # Fallback to username if API fails
-                self.user_id = self.username
-        except Exception:
-            # Fallback to username on any error
-            self.user_id = self.username
-
-    def _ocs_request(self, endpoint, params=None):
-        """Make an OCS API request.
-        
-        Args:
-            endpoint: OCS endpoint (e.g., '/apps/files_sharing/api/v1/shares')
-            params: Optional query parameters
-            
-        Returns:
-            Parsed XML root element or None on error
-        """
-        import xml.etree.ElementTree as ET
-        
-        ocs_url = f"{self.url}/ocs/v1.php{endpoint}"
-        headers = {'OCS-APIRequest': 'true'}
-        
-        try:
-            response = requests.get(ocs_url, auth=self.auth, headers=headers, 
-                                   params=params, timeout=30)
-            if response.status_code == 200:
-                return ET.fromstring(response.content)
-            else:
-                print(f"OCS API error: HTTP {response.status_code}")
-                return None
-        except ET.ParseError as e:
-            print(f"OCS XML parse error: {e}")
-            return None
-        except Exception as e:
-            print(f"OCS request error: {e}")
-            return None
-
-    def get_shared_with_me(self):
-        """Get list of shares shared with the current user.
-        
-        Returns:
-            List of dicts with share info: name, owner, permissions, path, share_type
-        """
-        import xml.etree.ElementTree as ET
-        
-        # OCS endpoint for shares shared with me
-        root = self._ocs_request('/apps/files_sharing/api/v1/shares', 
-                                params={'shared_with_me': 'true'})
-        
-        if root is None:
-            return []
-        
-        shares = []
-        
-        # Parse the OCS response
-        # Structure: <ocs><data><element>...</element></data></ocs>
-        data = root.find('.//data')
-        if data is None:
-            return []
-        
-        for elem in data.findall('.//element'):
-            share = {}
-            
-            # Get share ID
-            id_elem = elem.find('.//id')
-            share['id'] = id_elem.text if id_elem is not None else ''
-            
-            # Get file target (path in user's filesystem)
-            file_target = elem.find('.//file_target')
-            share['path'] = file_target.text if file_target is not None else ''
-            
-            # Get share type (0=user, 1=group, 3=public link, 6=federated)
-            share_type = elem.find('.//share_type')
-            share['share_type'] = share_type.text if share_type is not None else '0'
-            
-            # Get owner info
-            uid_owner = elem.find('.//uid_owner')
-            share['owner'] = uid_owner.text if uid_owner is not None else 'Unknown'
-            
-            displayname_owner = elem.find('.//displayname_owner')
-            share['owner_display'] = displayname_owner.text if displayname_owner is not None else share['owner']
-            
-            # Get permissions (1=read, 2=update, 4=create, 8=delete, 16=share)
-            permissions = elem.find('.//permissions')
-            share['permissions'] = self._parse_permissions(permissions.text if permissions is not None else '1')
-            
-            # Get name (for directory shares, this is the mount point name)
-            name_elem = elem.find('.//name')
-            if name_elem is not None and name_elem.text:
-                share['name'] = name_elem.text
-            else:
-                # Fallback to path basename
-                share['name'] = os.path.basename(share['path'].rstrip('/'))
-            
-            # Get share time
-            stime = elem.find('.//stime')
-            share['shared_at'] = stime.text if stime is not None else ''
-            
-            shares.append(share)
-        
-        return shares
-
-    def _parse_permissions(self, perm_value):
-        """Parse permission bitmask into readable string."""
-        try:
-            perm = int(perm_value)
-        except (ValueError, TypeError):
-            return 'unknown'
-        
-        perms = []
-        if perm & 1:
-            perms.append('read')
-        if perm & 2:
-            perms.append('write')
-        if perm & 4:
-            perms.append('create')
-        if perm & 8:
-            perms.append('delete')
-        if perm & 16:
-            perms.append('share')
-        
-        return '/'.join(perms) if perms else 'none'
-
-    def _get_webdav_base_url(self):
-        """Get the WebDAV base URL using user ID."""
-        return f"{self.url}/remote.php/dav/files/{urllib.parse.quote(self.user_id, safe='')}"
-
-    def _get_full_url(self, remote_path):
-        """Get full WebDAV URL for a remote path."""
-        base = self._get_webdav_base_url()
-        # Ensure path starts with /
-        if not remote_path.startswith('/'):
-            remote_path = '/' + remote_path
-        # Remove duplicate slashes
-        remote_path = '/' + '/'.join(part for part in remote_path.split('/') if part)
-        return f"{base}{urllib.parse.quote(remote_path, safe='/')}"
-
-    def list(self, remote_path='/'):
-        """List files and folders in a directory."""
-        url = self._get_full_url(remote_path)
-
-        headers = {
-            'Depth': '1',
-            'Content-Type': 'application/xml'
-        }
-
-        # PROPFIND request for listing
-        propfind_body = '''<?xml version="1.0" encoding="utf-8"?>
+LIST_PROPFIND_BODY = """<?xml version="1.0" encoding="utf-8"?>
 <d:propfind xmlns:d="DAV:">
     <d:prop>
         <d:displayname/>
@@ -212,199 +30,9 @@ class NextcloudClient:
         <d:getlastmodified/>
         <d:getcontenttype/>
     </d:prop>
-</d:propfind>'''
+</d:propfind>"""
 
-        response = requests.request('PROPFIND', url, auth=self.auth, headers=headers,
-                                   data=propfind_body, timeout=60)
-
-        if response.status_code not in (200, 207):
-            print(f"Error listing directory: HTTP {response.status_code}")
-            return None
-
-        return self._parse_list_response(response.content, remote_path)
-
-    def _parse_list_response(self, content, base_path):
-        """Parse WebDAV PROPFIND response."""
-        import xml.etree.ElementTree as ET
-
-        try:
-            root = ET.fromstring(content)
-        except ET.ParseError:
-            return []
-
-        results = []
-        base_url = self._get_webdav_base_url() + urllib.parse.quote(base_path, safe='/')
-
-        for response_elem in root.findall('.//{DAV:}response'):
-            href = response_elem.find('.//{DAV:}href')
-            if href is None:
-                continue
-
-            # Decode the href
-            href_text = urllib.parse.unquote(href.text)
-
-            # Skip the directory itself (only want contents)
-            if href_text.rstrip('/') == base_url.rstrip('/'):
-                continue
-
-            # Get the filename from href
-            name = os.path.basename(urllib.parse.unquote(href.text.rstrip('/')))
-
-            # Check if it's a collection (folder)
-            resourcetype = response_elem.find('.//{DAV:}resourcetype')
-            is_folder = resourcetype is not None and resourcetype.find('{DAV:}collection') is not None
-
-            # Get content length
-            content_length = response_elem.find('.//{DAV:}getcontentlength')
-            size = int(content_length.text) if content_length is not None and content_length.text else 0
-
-            # Get last modified
-            last_modified = response_elem.find('.//{DAV:}getlastmodified')
-            modified = last_modified.text if last_modified is not None else 'Unknown'
-
-            # Get content type
-            content_type = response_elem.find('.//{DAV:}getcontenttype')
-            mime_type = content_type.text if content_type is not None else ''
-
-            results.append({
-                'name': name,
-                'type': 'folder' if is_folder else 'file',
-                'size': size,
-                'modified': modified,
-                'mime_type': mime_type,
-                'path': href_text
-            })
-
-        return results
-
-    def upload(self, local_path, remote_path):
-        """Upload a local file to Nextcloud."""
-        local_path = Path(local_path)
-        if not local_path.exists():
-            print(f"Error: Local file not found: {local_path}")
-            return False
-
-        url = self._get_full_url(remote_path)
-
-        # If remote path is a directory, append local filename
-        if remote_path.endswith('/'):
-            remote_path = remote_path + local_path.name
-            url = self._get_full_url(remote_path)
-
-        with open(local_path, 'rb') as f:
-            response = requests.put(url, auth=self.auth, data=f, timeout=300)
-
-        if response.status_code in (200, 201, 204):
-            print(f"Uploaded: {local_path} -> {remote_path}")
-            return True
-        else:
-            print(f"Error uploading file: HTTP {response.status_code}")
-            print(response.text)
-            return False
-
-    def download(self, remote_path, local_path):
-        """Download a file from Nextcloud."""
-        url = self._get_full_url(remote_path)
-
-        response = requests.get(url, auth=self.auth, timeout=300, stream=True)
-
-        if response.status_code != 200:
-            print(f"Error downloading file: HTTP {response.status_code}")
-            return False
-
-        local_path = Path(local_path)
-
-        # If local path is a directory, use remote filename
-        if local_path.is_dir():
-            remote_name = os.path.basename(urllib.parse.unquote(remote_path))
-            local_path = local_path / remote_name
-
-        # Create parent directories if needed
-        local_path.parent.mkdir(parents=True, exist_ok=True)
-
-        with open(local_path, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
-
-        print(f"Downloaded: {remote_path} -> {local_path}")
-        return True
-
-    def mkdir(self, remote_path):
-        """Create a directory on Nextcloud."""
-        url = self._get_full_url(remote_path)
-
-        # Ensure path ends with /
-        if not url.endswith('/'):
-            url += '/'
-
-        response = requests.request('MKCOL', url, auth=self.auth, timeout=60)
-
-        if response.status_code in (200, 201):
-            print(f"Created directory: {remote_path}")
-            return True
-        else:
-            print(f"Error creating directory: HTTP {response.status_code}")
-            print(response.text)
-            return False
-
-    def delete(self, remote_path):
-        """Delete a file or directory on Nextcloud."""
-        url = self._get_full_url(remote_path)
-
-        response = requests.delete(url, auth=self.auth, timeout=60)
-
-        if response.status_code in (200, 204):
-            print(f"Deleted: {remote_path}")
-            return True
-        else:
-            print(f"Error deleting: HTTP {response.status_code}")
-            print(response.text)
-            return False
-
-    def move(self, source_path, dest_path):
-        """Move/rename a file or directory."""
-        source_url = self._get_full_url(source_path)
-        dest_url = self._get_full_url(dest_path)
-
-        headers = {'Destination': dest_url}
-
-        response = requests.request('MOVE', source_url, auth=self.auth, headers=headers, timeout=60)
-
-        if response.status_code in (200, 201, 204):
-            print(f"Moved: {source_path} -> {dest_path}")
-            return True
-        else:
-            print(f"Error moving: HTTP {response.status_code}")
-            print(response.text)
-            return False
-
-    def copy(self, source_path, dest_path):
-        """Copy a file or directory."""
-        source_url = self._get_full_url(source_path)
-        dest_url = self._get_full_url(dest_path)
-
-        headers = {'Destination': dest_url}
-
-        response = requests.request('COPY', source_url, auth=self.auth, headers=headers, timeout=120)
-
-        if response.status_code in (200, 201, 204):
-            print(f"Copied: {source_path} -> {dest_path}")
-            return True
-        else:
-            print(f"Error copying: HTTP {response.status_code}")
-            print(response.text)
-            return False
-
-    def info(self, remote_path):
-        """Get detailed information about a file or directory."""
-        url = self._get_full_url(remote_path)
-
-        headers = {
-            'Depth': '0',
-            'Content-Type': 'application/xml'
-        }
-
-        propfind_body = '''<?xml version="1.0" encoding="utf-8"?>
+INFO_PROPFIND_BODY = """<?xml version="1.0" encoding="utf-8"?>
 <d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns" xmlns:nc="http://nextcloud.org/ns">
     <d:prop>
         <d:displayname/>
@@ -416,100 +44,642 @@ class NextcloudClient:
         <oc:fileid/>
         <oc:size/>
     </d:prop>
-</d:propfind>'''
+</d:propfind>"""
 
-        response = requests.request('PROPFIND', url, auth=self.auth, headers=headers,
-                                   data=propfind_body, timeout=60)
+DEFAULT_TIMEOUT = 60
+TRANSFER_TIMEOUT = 300
+WEBDAV_SUCCESS_CODES = {200, 201, 204, 207}
+PUBLIC_LINK_SHARE_TYPE = "3"
 
-        if response.status_code not in (200, 207):
-            print(f"Error getting info: HTTP {response.status_code}")
+
+class NextcloudClient:
+    """Client for Nextcloud WebDAV and OCS operations."""
+
+    def __init__(self) -> None:
+        """Initialize client from environment variables."""
+        self.url = os.environ.get("NEXTCLOUD_URL", "").rstrip("/")
+        self.username = os.environ.get("NEXTCLOUD_USERNAME", "")
+        self.app_password = os.environ.get("NEXTCLOUD_APP_PASSWORD", "")
+
+        if not all([self.url, self.username, self.app_password]):
+            raise EnvironmentError(
+                "Missing required environment variables: "
+                "NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_APP_PASSWORD"
+            )
+
+        self.auth = HTTPBasicAuth(self.username, self.app_password)
+        self.user_id: str | None = None
+        self._resolve_user_id()
+
+    def _resolve_user_id(self) -> None:
+        """Resolve the effective user ID from Nextcloud OCS API."""
+        ocs_url = f"{self.url}/ocs/v1.php/cloud/user"
+        headers = {"OCS-APIRequest": "true"}
+
+        try:
+            response = requests.get(
+                ocs_url,
+                auth=self.auth,
+                headers=headers,
+                timeout=30,
+            )
+            if response.status_code != 200:
+                self.user_id = self.username
+                return
+
+            root = ET.fromstring(response.content)
+            id_elem = root.find(".//id")
+            self.user_id = id_elem.text if id_elem is not None and id_elem.text else self.username
+        except (ET.ParseError, RequestException):
+            self.user_id = self.username
+
+    def _ocs_url(self, endpoint: str) -> str:
+        """Build a full OCS URL for an API endpoint."""
+        return f"{self.url}/ocs/v1.php{endpoint}"
+
+    def _request(
+        self,
+        method: str,
+        url: str,
+        *,
+        operation: str,
+        timeout: int = DEFAULT_TIMEOUT,
+        expected_statuses: set[int] | None = None,
+        **kwargs: Any,
+    ) -> requests.Response | None:
+        """Send an HTTP request and normalize transport errors."""
+        expected = expected_statuses or {200}
+
+        try:
+            response = requests.request(
+                method,
+                url,
+                auth=self.auth,
+                timeout=timeout,
+                **kwargs,
+            )
+        except RequestException as exc:
+            print(f"Error {operation}: connection failed ({exc})")
+            return None
+
+        if response.status_code not in expected:
+            print(
+                f"Error {operation}: HTTP {response.status_code}"
+                f"{self._describe_status(response.status_code)}"
+            )
+            return None
+
+        return response
+
+    def _ocs_request(
+        self,
+        method: str,
+        endpoint: str,
+        *,
+        params: dict[str, Any] | None = None,
+        data: dict[str, Any] | None = None,
+        operation: str,
+        expected_statuses: set[int] | None = None,
+    ) -> ET.Element | None:
+        """Make an OCS API request and return parsed XML on success."""
+        headers = {"OCS-APIRequest": "true"}
+        response = self._request(
+            method,
+            self._ocs_url(endpoint),
+            operation=operation,
+            timeout=DEFAULT_TIMEOUT,
+            expected_statuses=expected_statuses or {200, 201},
+            headers=headers,
+            params=params,
+            data=data,
+        )
+        if response is None:
+            return None
+
+        try:
+            root = ET.fromstring(response.content)
+        except ET.ParseError as exc:
+            print(f"Error {operation}: invalid OCS XML response ({exc})")
+            return None
+
+        meta = root.find(".//meta")
+        status_code = meta.findtext("statuscode", default="") if meta is not None else ""
+        message = meta.findtext("message", default="") if meta is not None else ""
+
+        if status_code and status_code != "100":
+            friendly = f": {message}" if message else ""
+            print(f"Error {operation}: OCS status {status_code}{friendly}")
+            return None
+
+        return root
+
+    def _describe_status(self, status_code: int) -> str:
+        """Return a short status description for common HTTP codes."""
+        descriptions = {
+            401: " (authentication failed)",
+            403: " (forbidden)",
+            404: " (not found)",
+            409: " (conflict)",
+            423: " (resource locked)",
+            507: " (insufficient storage)",
+        }
+        return descriptions.get(status_code, "")
+
+    def _parse_permissions(self, perm_value: str | None) -> str:
+        """Parse a permission bitmask into a readable string."""
+        try:
+            perm = int(perm_value or "")
+        except (TypeError, ValueError):
+            return "unknown"
+
+        labels = []
+        if perm & 1:
+            labels.append("read")
+        if perm & 2:
+            labels.append("write")
+        if perm & 4:
+            labels.append("create")
+        if perm & 8:
+            labels.append("delete")
+        if perm & 16:
+            labels.append("share")
+        return "/".join(labels) if labels else "none"
+
+    def _get_webdav_base_url(self) -> str:
+        """Get the WebDAV base URL using the resolved user ID."""
+        user_id = self.user_id or self.username
+        return f"{self.url}/remote.php/dav/files/{urllib.parse.quote(user_id, safe='')}"
+
+    def _normalize_remote_path(self, remote_path: str) -> str:
+        """Normalize a remote path to a canonical absolute path."""
+        if not remote_path or remote_path == "/":
+            return "/"
+
+        cleaned = "/" + "/".join(part for part in remote_path.split("/") if part)
+        return cleaned or "/"
+
+    def _get_full_url(self, remote_path: str) -> str:
+        """Build the full WebDAV URL for a remote path."""
+        normalized_path = self._normalize_remote_path(remote_path)
+        return f"{self._get_webdav_base_url()}{urllib.parse.quote(normalized_path, safe='/')}"
+
+    def _href_to_remote_path(self, href: str) -> str:
+        """Convert a WebDAV href into a canonical remote path."""
+        parsed = urllib.parse.urlparse(urllib.parse.unquote(href))
+        remote_prefix = urllib.parse.urlparse(self._get_webdav_base_url()).path
+        raw_path = parsed.path if parsed.scheme else urllib.parse.unquote(href)
+
+        if remote_prefix and raw_path.startswith(remote_prefix):
+            suffix = raw_path[len(remote_prefix) :]
+            return self._normalize_remote_path(suffix)
+
+        return self._normalize_remote_path(raw_path)
+
+    def _list_directory(self, remote_path: str) -> list[dict[str, Any]] | None:
+        """List a single directory level."""
+        normalized_path = self._normalize_remote_path(remote_path)
+        response = self._request(
+            "PROPFIND",
+            self._get_full_url(normalized_path),
+            operation=f"listing directory '{normalized_path}'",
+            timeout=DEFAULT_TIMEOUT,
+            expected_statuses={200, 207},
+            headers={"Depth": "1", "Content-Type": "application/xml"},
+            data=LIST_PROPFIND_BODY,
+        )
+        if response is None:
+            return None
+        return self._parse_list_response(response.content, normalized_path)
+
+    def list(self, remote_path: str = "/", recursive: bool = False) -> list[dict[str, Any]] | None:
+        """List files and folders in a directory."""
+        normalized_path = self._normalize_remote_path(remote_path)
+        if not recursive:
+            return self._list_directory(normalized_path)
+
+        queue = [normalized_path]
+        visited: set[str] = set()
+        results: list[dict[str, Any]] = []
+
+        while queue:
+            current_path = queue.pop(0)
+            if current_path in visited:
+                continue
+            visited.add(current_path)
+
+            current_results = self._list_directory(current_path)
+            if current_results is None:
+                return None
+
+            results.extend(current_results)
+            for item in current_results:
+                if item["type"] == "folder":
+                    queue.append(item["path"])
+
+        return results
+
+    def _parse_list_response(
+        self,
+        content: bytes,
+        base_path: str,
+    ) -> list[dict[str, Any]]:
+        """Parse a WebDAV PROPFIND response."""
+        try:
+            root = ET.fromstring(content)
+        except ET.ParseError:
+            return []
+
+        normalized_base = self._normalize_remote_path(base_path)
+        results: list[dict[str, Any]] = []
+
+        for response_elem in root.findall(".//{DAV:}response"):
+            href_elem = response_elem.find(".//{DAV:}href")
+            if href_elem is None or not href_elem.text:
+                continue
+
+            item_path = self._href_to_remote_path(href_elem.text)
+            if item_path == normalized_base:
+                continue
+
+            name = item_path.rstrip("/").split("/")[-1] if item_path != "/" else "/"
+            resourcetype = response_elem.find(".//{DAV:}resourcetype")
+            is_folder = (
+                resourcetype is not None
+                and resourcetype.find("{DAV:}collection") is not None
+            )
+            content_length = response_elem.find(".//{DAV:}getcontentlength")
+            last_modified = response_elem.find(".//{DAV:}getlastmodified")
+            content_type = response_elem.find(".//{DAV:}getcontenttype")
+
+            results.append(
+                {
+                    "name": name,
+                    "type": "folder" if is_folder else "file",
+                    "size": int(content_length.text) if content_length is not None and content_length.text else 0,
+                    "modified": last_modified.text if last_modified is not None and last_modified.text else "Unknown",
+                    "mime_type": content_type.text if content_type is not None and content_type.text else "",
+                    "path": item_path,
+                }
+            )
+
+        return results
+
+    def search(self, query: str, remote_path: str = "/") -> list[dict[str, Any]] | None:
+        """Search for files or folders by name."""
+        normalized_query = query.strip().lower()
+        if not normalized_query:
+            print("Error search: query cannot be empty")
+            return None
+
+        results = self.list(remote_path, recursive=True)
+        if results is None:
+            return None
+
+        return [
+            item
+            for item in results
+            if normalized_query in item["name"].lower() or normalized_query in item["path"].lower()
+        ]
+
+    def upload(self, local_path: str, remote_path: str) -> bool:
+        """Upload a local file to Nextcloud."""
+        source_path = Path(local_path)
+        if not source_path.exists() or not source_path.is_file():
+            print(f"Error upload: local file not found: {source_path}")
+            return False
+
+        target_path = remote_path
+        if remote_path.endswith("/"):
+            target_path = f"{remote_path}{source_path.name}"
+
+        try:
+            with source_path.open("rb") as handle:
+                response = self._request(
+                    "PUT",
+                    self._get_full_url(target_path),
+                    operation=f"uploading '{source_path.name}'",
+                    timeout=TRANSFER_TIMEOUT,
+                    expected_statuses={200, 201, 204},
+                    data=handle,
+                )
+        except OSError as exc:
+            print(f"Error upload: failed to read local file ({exc})")
+            return False
+
+        if response is None:
+            return False
+
+        print(f"Uploaded: {source_path} -> {self._normalize_remote_path(target_path)}")
+        return True
+
+    def download(self, remote_path: str, local_path: str) -> bool:
+        """Download a file from Nextcloud."""
+        response = self._request(
+            "GET",
+            self._get_full_url(remote_path),
+            operation=f"downloading '{self._normalize_remote_path(remote_path)}'",
+            timeout=TRANSFER_TIMEOUT,
+            expected_statuses={200},
+            stream=True,
+        )
+        if response is None:
+            return False
+
+        destination = Path(local_path)
+        if destination.is_dir():
+            destination = destination / Path(self._normalize_remote_path(remote_path)).name
+
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            with destination.open("wb") as handle:
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:
+                        handle.write(chunk)
+        except OSError as exc:
+            print(f"Error download: failed to write local file ({exc})")
+            return False
+
+        print(f"Downloaded: {self._normalize_remote_path(remote_path)} -> {destination}")
+        return True
+
+    def mkdir(self, remote_path: str) -> bool:
+        """Create a directory on Nextcloud."""
+        target_url = self._get_full_url(remote_path)
+        if not target_url.endswith("/"):
+            target_url += "/"
+
+        response = self._request(
+            "MKCOL",
+            target_url,
+            operation=f"creating directory '{self._normalize_remote_path(remote_path)}'",
+            timeout=DEFAULT_TIMEOUT,
+            expected_statuses={200, 201},
+        )
+        if response is None:
+            return False
+
+        print(f"Created directory: {self._normalize_remote_path(remote_path)}")
+        return True
+
+    def delete(self, remote_path: str) -> bool:
+        """Delete a file or directory on Nextcloud."""
+        response = self._request(
+            "DELETE",
+            self._get_full_url(remote_path),
+            operation=f"deleting '{self._normalize_remote_path(remote_path)}'",
+            timeout=DEFAULT_TIMEOUT,
+            expected_statuses={200, 204},
+        )
+        if response is None:
+            return False
+
+        print(f"Deleted: {self._normalize_remote_path(remote_path)}")
+        return True
+
+    def move(self, source_path: str, dest_path: str) -> bool:
+        """Move or rename a file or directory."""
+        response = self._request(
+            "MOVE",
+            self._get_full_url(source_path),
+            operation=f"moving '{self._normalize_remote_path(source_path)}'",
+            timeout=DEFAULT_TIMEOUT,
+            expected_statuses={200, 201, 204},
+            headers={"Destination": self._get_full_url(dest_path)},
+        )
+        if response is None:
+            return False
+
+        print(
+            f"Moved: {self._normalize_remote_path(source_path)}"
+            f" -> {self._normalize_remote_path(dest_path)}"
+        )
+        return True
+
+    def copy(self, source_path: str, dest_path: str) -> bool:
+        """Copy a file or directory."""
+        response = self._request(
+            "COPY",
+            self._get_full_url(source_path),
+            operation=f"copying '{self._normalize_remote_path(source_path)}'",
+            timeout=DEFAULT_TIMEOUT,
+            expected_statuses={200, 201, 204},
+            headers={"Destination": self._get_full_url(dest_path)},
+        )
+        if response is None:
+            return False
+
+        print(
+            f"Copied: {self._normalize_remote_path(source_path)}"
+            f" -> {self._normalize_remote_path(dest_path)}"
+        )
+        return True
+
+    def info(self, remote_path: str) -> dict[str, Any] | None:
+        """Get detailed information about a file or directory."""
+        response = self._request(
+            "PROPFIND",
+            self._get_full_url(remote_path),
+            operation=f"getting info for '{self._normalize_remote_path(remote_path)}'",
+            timeout=DEFAULT_TIMEOUT,
+            expected_statuses={200, 207},
+            headers={"Depth": "0", "Content-Type": "application/xml"},
+            data=INFO_PROPFIND_BODY,
+        )
+        if response is None:
             return None
 
         return self._parse_info_response(response.content)
 
-    def _parse_info_response(self, content):
-        """Parse WebDAV PROPFIND response for single item."""
-        import xml.etree.ElementTree as ET
-
+    def _parse_info_response(self, content: bytes) -> dict[str, Any] | None:
+        """Parse WebDAV PROPFIND response for a single item."""
         try:
             root = ET.fromstring(content)
         except ET.ParseError:
             return None
 
-        response_elem = root.find('.//{DAV:}response')
+        response_elem = root.find(".//{DAV:}response")
         if response_elem is None:
             return None
 
-        info = {}
+        resourcetype = response_elem.find(".//{DAV:}resourcetype")
+        content_length = response_elem.find(".//{DAV:}getcontentlength")
+        oc_size = response_elem.find(".//{http://owncloud.org/ns}size")
+        last_modified = response_elem.find(".//{DAV:}getlastmodified")
+        content_type = response_elem.find(".//{DAV:}getcontenttype")
+        etag = response_elem.find(".//{DAV:}getetag")
+        file_id = response_elem.find(".//{http://owncloud.org/ns}fileid")
+        displayname = response_elem.find(".//{DAV:}displayname")
 
-        # Get display name
-        displayname = response_elem.find('.//{DAV:}displayname')
-        info['name'] = displayname.text if displayname is not None else 'Unknown'
-
-        # Check if folder
-        resourcetype = response_elem.find('.//{DAV:}resourcetype')
-        info['type'] = 'folder' if resourcetype is not None and resourcetype.find('{DAV:}collection') is not None else 'file'
-
-        # Get size
-        content_length = response_elem.find('.//{DAV:}getcontentlength')
-        info['size'] = int(content_length.text) if content_length is not None and content_length.text else 0
-
-        # For folders, try oc:size
-        oc_size = response_elem.find('.//{http://owncloud.org/ns}size')
+        size = int(content_length.text) if content_length is not None and content_length.text else 0
         if oc_size is not None and oc_size.text:
-            info['size'] = int(oc_size.text)
+            size = int(oc_size.text)
 
-        # Get last modified
-        last_modified = response_elem.find('.//{DAV:}getlastmodified')
-        info['modified'] = last_modified.text if last_modified is not None else 'Unknown'
+        return {
+            "name": displayname.text if displayname is not None and displayname.text else "Unknown",
+            "type": "folder" if resourcetype is not None and resourcetype.find("{DAV:}collection") is not None else "file",
+            "size": size,
+            "modified": last_modified.text if last_modified is not None and last_modified.text else "Unknown",
+            "mime_type": content_type.text if content_type is not None and content_type.text else "",
+            "etag": etag.text if etag is not None and etag.text else "",
+            "file_id": file_id.text if file_id is not None and file_id.text else "",
+        }
 
-        # Get content type
-        content_type = response_elem.find('.//{DAV:}getcontenttype')
-        info['mime_type'] = content_type.text if content_type is not None else ''
+    def get_shared_with_me(self) -> list[dict[str, Any]]:
+        """Get folders or files shared with the current user."""
+        root = self._ocs_request(
+            "GET",
+            "/apps/files_sharing/api/v1/shares",
+            params={"shared_with_me": "true"},
+            operation="listing items shared with me",
+        )
+        if root is None:
+            return []
 
-        # Get etag
-        etag = response_elem.find('.//{DAV:}getetag')
-        info['etag'] = etag.text if etag is not None else ''
+        shares: list[dict[str, Any]] = []
+        data = root.find(".//data")
+        if data is None:
+            return shares
 
-        # Get file ID
-        file_id = response_elem.find('.//{http://owncloud.org/ns}fileid')
-        info['file_id'] = file_id.text if file_id is not None else ''
+        for elem in data.findall(".//element"):
+            path = elem.findtext("file_target", default="")
+            owner = elem.findtext("uid_owner", default="Unknown")
+            shares.append(
+                {
+                    "id": elem.findtext("id", default=""),
+                    "path": self._normalize_remote_path(path),
+                    "share_type": elem.findtext("share_type", default="0"),
+                    "owner": owner,
+                    "owner_display": elem.findtext("displayname_owner", default=owner),
+                    "permissions": self._parse_permissions(elem.findtext("permissions", default="1")),
+                    "name": elem.findtext("name", default=Path(path).name or "/"),
+                    "shared_at": elem.findtext("stime", default=""),
+                }
+            )
 
-        return info
+        return shares
+
+    def create_share_link(
+        self,
+        remote_path: str,
+        *,
+        password: str | None = None,
+        expire_date: str | None = None,
+        public_upload: bool = False,
+    ) -> dict[str, Any] | None:
+        """Create a public share link for a file or folder."""
+        payload: dict[str, Any] = {
+            "path": self._normalize_remote_path(remote_path),
+            "shareType": PUBLIC_LINK_SHARE_TYPE,
+            "permissions": "15" if public_upload else "1",
+        }
+        if password:
+            payload["password"] = password
+        if expire_date:
+            payload["expireDate"] = expire_date
+
+        root = self._ocs_request(
+            "POST",
+            "/apps/files_sharing/api/v1/shares",
+            data=payload,
+            operation=f"creating share link for '{payload['path']}'",
+        )
+        if root is None:
+            return None
+
+        data = root.find(".//data")
+        if data is None:
+            print("Error creating share link: missing OCS data payload")
+            return None
+
+        return {
+            "id": data.findtext("id", default=""),
+            "path": self._normalize_remote_path(data.findtext("path", default=payload["path"])),
+            "url": data.findtext("url", default=""),
+            "token": data.findtext("token", default=""),
+            "permissions": self._parse_permissions(data.findtext("permissions", default=payload["permissions"])),
+            "password_protected": bool(password),
+            "expire_date": expire_date or data.findtext("expiration", default=""),
+        }
+
+    def list_share_links(self, remote_path: str | None = None) -> list[dict[str, Any]]:
+        """List public share links, optionally filtered by remote path."""
+        params: dict[str, Any] | None = None
+        if remote_path:
+            params = {"path": self._normalize_remote_path(remote_path)}
+
+        root = self._ocs_request(
+            "GET",
+            "/apps/files_sharing/api/v1/shares",
+            params=params,
+            operation="listing share links",
+        )
+        if root is None:
+            return []
+
+        data = root.find(".//data")
+        if data is None:
+            return []
+
+        links: list[dict[str, Any]] = []
+        for elem in data.findall(".//element"):
+            if elem.findtext("share_type", default="") != PUBLIC_LINK_SHARE_TYPE:
+                continue
+            links.append(
+                {
+                    "id": elem.findtext("id", default=""),
+                    "path": self._normalize_remote_path(elem.findtext("path", default="/")),
+                    "url": elem.findtext("url", default=""),
+                    "permissions": self._parse_permissions(elem.findtext("permissions", default="1")),
+                    "password_protected": elem.findtext("share_with", default="") != "",
+                    "expire_date": elem.findtext("expiration", default=""),
+                }
+            )
+
+        return links
+
+    def revoke_share_link(self, share_id: str) -> bool:
+        """Revoke an existing public share link by ID."""
+        root = self._ocs_request(
+            "DELETE",
+            f"/apps/files_sharing/api/v1/shares/{share_id}",
+            operation=f"revoking share link '{share_id}'",
+            expected_statuses={200},
+        )
+        if root is None:
+            return False
+
+        print(f"Revoked share link: {share_id}")
+        return True
 
 
-def print_json(data):
+def print_json(data: Any) -> None:
     """Print data as formatted JSON."""
     print(json.dumps(data, indent=2))
 
 
-def print_list(results):
-    """Print list results in a readable format."""
+def print_list(results: list[dict[str, Any]]) -> None:
+    """Print list results in a readable table."""
     if not results:
         print("(empty)")
         return
 
-    # Calculate column widths
-    max_name = max(len(r['name']) for r in results) if results else 10
+    max_name = max(len(item["name"]) for item in results)
     max_type = 6
     max_size = 10
-
-    # Header
     print(f"{'Name':<{max_name}} {'Type':<{max_type}} {'Size':>{max_size}} {'Modified'}")
-    print('-' * (max_name + max_type + max_size + 30))
+    print("-" * (max_name + max_type + max_size + 30))
 
-    # Files and folders
-    folders = sorted([r for r in results if r['type'] == 'folder'], key=lambda x: x['name'])
-    files = sorted([r for r in results if r['type'] == 'file'], key=lambda x: x['name'])
+    folders = sorted((item for item in results if item["type"] == "folder"), key=lambda item: item["name"])
+    files = sorted((item for item in results if item["type"] == "file"), key=lambda item: item["name"])
 
-    for item in folders + files:
-        size_str = str(item['size']) if item['type'] == 'file' else '-'
-        modified_short = item['modified'][:19] if len(item['modified']) > 19 else item['modified']
-        print(f"{item['name']:<{max_name}} {item['type']:<{max_type}} {size_str:>{max_size}} {modified_short}")
+    for item in [*folders, *files]:
+        size = str(item["size"]) if item["type"] == "file" else "-"
+        modified = item["modified"][:19] if len(item["modified"]) > 19 else item["modified"]
+        print(f"{item['name']:<{max_name}} {item['type']:<{max_type}} {size:>{max_size}} {modified}")
 
 
-def print_info(info):
-    """Print info results."""
+def print_info(info: dict[str, Any] | None) -> None:
+    """Print a single-item info payload."""
     if not info:
         print("No info available")
         return
@@ -523,132 +693,241 @@ def print_info(info):
     print(f"File ID:   {info.get('file_id', 'N/A')}")
 
 
-def print_shared(shares):
-    """Print shared with me results in a readable format."""
+def print_shared(shares: list[dict[str, Any]]) -> None:
+    """Print items shared with the current user."""
     if not shares:
         print("No shared folders found.")
         return
-    
-    # Calculate column widths
-    max_name = max(len(s.get('name', '')) for s in shares) if shares else 10
-    max_owner = max(len(s.get('owner_display', s.get('owner', 'Unknown'))) for s in shares) if shares else 10
-    max_perms = max(len(s.get('permissions', '')) for s in shares) if shares else 10
-    
-    # Ensure minimum widths
-    max_name = max(max_name, 10)
-    max_owner = max(max_owner, 10)
-    max_perms = max(max_perms, 10)
-    
-    # Header
-    print(f"\n\U0001F4C1 Shared with me:")
+
+    max_name = max(max(len(share.get("name", "")) for share in shares), 10)
+    max_owner = max(
+        max(len(share.get("owner_display", share.get("owner", "Unknown"))) for share in shares),
+        10,
+    )
+    max_perms = max(max(len(share.get("permissions", "")) for share in shares), 10)
+
+    print("\n📁 Shared with me:")
     print(f"{'Name':<{max_name}}  {'Owner':<{max_owner}}  {'Permissions':<{max_perms}}  {'Path'}")
-    print('-' * (max_name + max_owner + max_perms + 50))
-    
-    # Sort by name
-    for share in sorted(shares, key=lambda x: x.get('name', '')):
-        owner = share.get('owner_display', share.get('owner', 'Unknown'))
-        perms = share.get('permissions', 'unknown')
-        path = share.get('path', '/')
-        name = share.get('name', 'Unknown')
-        
-        print(f"{name:<{max_name}}  {owner:<{max_owner}}  {perms:<{max_perms}}  {path}")
-    
-    print(f"\nTo access a shared folder, use its path from the list above.")
+    print("-" * (max_name + max_owner + max_perms + 50))
+
+    for share in sorted(shares, key=lambda item: item.get("name", "")):
+        owner = share.get("owner_display", share.get("owner", "Unknown"))
+        permissions = share.get("permissions", "unknown")
+        print(
+            f"{share.get('name', 'Unknown'):<{max_name}}  "
+            f"{owner:<{max_owner}}  "
+            f"{permissions:<{max_perms}}  "
+            f"{share.get('path', '/')}"
+        )
 
 
-def main():
-    """Main entry point."""
-    if len(sys.argv) < 2:
-        print("Nextcloud WebDAV Client")
-        print()
-        print("Usage: nextcloud.py <command> [arguments]")
-        print()
-        print("Commands:")
-        print("  list <remote_path>              List files in directory")
-        print("  upload <local> <remote>         Upload file")
-        print("  download <remote> <local>       Download file")
-        print("  mkdir <remote_path>             Create directory")
-        print("  delete <remote_path>            Delete file or directory")
-        print("  move <source> <dest>            Move/rename")
-        print("  copy <source> <dest>            Copy file or directory")
-        print("  info <remote_path>              Get file/directory info")
-        print("  shared                          List folders shared with me")
-        print()
-        print("Set environment variables: NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_APP_PASSWORD")
-        sys.exit(1)
+def print_share_links(links: list[dict[str, Any]]) -> None:
+    """Print public share links."""
+    if not links:
+        print("No public share links found.")
+        return
 
-    command = sys.argv[1].lower()
-    client = NextcloudClient()
+    max_id = max(max(len(link.get("id", "")) for link in links), 2)
+    max_path = max(max(len(link.get("path", "")) for link in links), 4)
+    print(f"{'ID':<{max_id}}  {'Path':<{max_path}}  {'Permissions':<18}  {'URL'}")
+    print("-" * (max_id + max_path + 60))
 
-    if command == 'list':
-        path = sys.argv[2] if len(sys.argv) > 2 else '/'
-        results = client.list(path)
-        if results is not None:
-            print_list(results)
-            sys.exit(0)
-        sys.exit(4)
+    for link in links:
+        print(
+            f"{link.get('id', ''):<{max_id}}  "
+            f"{link.get('path', ''):<{max_path}}  "
+            f"{link.get('permissions', 'unknown'):<18}  "
+            f"{link.get('url', '')}"
+        )
 
-    elif command == 'upload':
-        if len(sys.argv) < 4:
+
+def _parse_share_create_args(args: list[str]) -> tuple[str | None, dict[str, Any]]:
+    """Parse `share-create` arguments from a simple argv list."""
+    if not args:
+        return None, {}
+
+    remote_path = args[0]
+    options: dict[str, Any] = {
+        "password": None,
+        "expire_date": None,
+        "public_upload": False,
+    }
+
+    index = 1
+    while index < len(args):
+        token = args[index]
+        if token == "--password" and index + 1 < len(args):
+            options["password"] = args[index + 1]
+            index += 2
+            continue
+        if token == "--expire-date" and index + 1 < len(args):
+            options["expire_date"] = args[index + 1]
+            index += 2
+            continue
+        if token == "--public-upload":
+            options["public_upload"] = True
+            index += 1
+            continue
+        print(f"Unknown share-create option: {token}")
+        return None, {}
+
+    return remote_path, options
+
+
+def print_usage() -> None:
+    """Print usage information for the standalone Nextcloud module CLI."""
+    print("Nextcloud WebDAV Client")
+    print()
+    print("Usage: nextcloud.py <command> [arguments]")
+    print()
+    print("Commands:")
+    print("  list [remote_path] [--recursive]      List files in directory")
+    print("  search <query> [remote_path]          Search files/folders by name")
+    print("  upload <local> <remote>               Upload file")
+    print("  download <remote> <local>             Download file")
+    print("  mkdir <remote_path>                   Create directory")
+    print("  delete <remote_path>                  Delete file or directory")
+    print("  move <source> <dest>                  Move/rename")
+    print("  copy <source> <dest>                  Copy file or directory")
+    print("  info <remote_path>                    Get file/directory info")
+    print("  shared                                List items shared with me")
+    print("  share-create <path> [options]         Create public share link")
+    print("  share-list [remote_path]              List public share links")
+    print("  share-revoke <share_id>               Revoke public share link")
+    print()
+    print("Options for share-create:")
+    print("  --password <value>                    Protect link with password")
+    print("  --expire-date YYYY-MM-DD              Set link expiry date")
+    print("  --public-upload                       Allow public upload on folder shares")
+    print()
+    print(
+        "Set environment variables: NEXTCLOUD_URL, NEXTCLOUD_USERNAME, "
+        "NEXTCLOUD_APP_PASSWORD"
+    )
+
+
+def run_cli(argv: list[str] | None = None) -> int:
+    """Run the standalone Nextcloud CLI and return an exit code."""
+    args = argv if argv is not None else sys.argv[1:]
+    if not args:
+        print_usage()
+        return 1
+
+    command = args[0].lower()
+
+    try:
+        client = NextcloudClient()
+    except EnvironmentError as exc:
+        print(str(exc))
+        return 1
+
+    command_args = args[1:]
+
+    if command == "list":
+        recursive = "--recursive" in command_args
+        clean_args = [arg for arg in command_args if arg != "--recursive"]
+        remote_path = clean_args[0] if clean_args else "/"
+        results = client.list(remote_path, recursive=recursive)
+        if results is None:
+            return 3
+        print_list(results)
+        return 0
+
+    if command == "search":
+        if not command_args:
+            print("Usage: nextcloud.py search <query> [remote_path]")
+            return 1
+        query = command_args[0]
+        remote_path = command_args[1] if len(command_args) > 1 else "/"
+        results = client.search(query, remote_path)
+        if results is None:
+            return 3
+        print_list(results)
+        return 0
+
+    if command == "upload":
+        if len(command_args) < 2:
             print("Usage: nextcloud.py upload <local_path> <remote_path>")
-            sys.exit(1)
-        success = client.upload(sys.argv[2], sys.argv[3])
-        sys.exit(0 if success else 3)
+            return 1
+        return 0 if client.upload(command_args[0], command_args[1]) else 3
 
-    elif command == 'download':
-        if len(sys.argv) < 4:
+    if command == "download":
+        if len(command_args) < 2:
             print("Usage: nextcloud.py download <remote_path> <local_path>")
-            sys.exit(1)
-        success = client.download(sys.argv[2], sys.argv[3])
-        sys.exit(0 if success else 3)
+            return 1
+        return 0 if client.download(command_args[0], command_args[1]) else 3
 
-    elif command == 'mkdir':
-        if len(sys.argv) < 3:
+    if command == "mkdir":
+        if not command_args:
             print("Usage: nextcloud.py mkdir <remote_path>")
-            sys.exit(1)
-        success = client.mkdir(sys.argv[2])
-        sys.exit(0 if success else 3)
+            return 1
+        return 0 if client.mkdir(command_args[0]) else 3
 
-    elif command == 'delete':
-        if len(sys.argv) < 3:
+    if command == "delete":
+        if not command_args:
             print("Usage: nextcloud.py delete <remote_path>")
-            sys.exit(1)
-        success = client.delete(sys.argv[2])
-        sys.exit(0 if success else 3)
+            return 1
+        return 0 if client.delete(command_args[0]) else 3
 
-    elif command == 'move':
-        if len(sys.argv) < 4:
+    if command == "move":
+        if len(command_args) < 2:
             print("Usage: nextcloud.py move <source_path> <dest_path>")
-            sys.exit(1)
-        success = client.move(sys.argv[2], sys.argv[3])
-        sys.exit(0 if success else 3)
+            return 1
+        return 0 if client.move(command_args[0], command_args[1]) else 3
 
-    elif command == 'copy':
-        if len(sys.argv) < 4:
+    if command == "copy":
+        if len(command_args) < 2:
             print("Usage: nextcloud.py copy <source_path> <dest_path>")
-            sys.exit(1)
-        success = client.copy(sys.argv[2], sys.argv[3])
-        sys.exit(0 if success else 3)
+            return 1
+        return 0 if client.copy(command_args[0], command_args[1]) else 3
 
-    elif command == 'info':
-        if len(sys.argv) < 3:
+    if command == "info":
+        if not command_args:
             print("Usage: nextcloud.py info <remote_path>")
-            sys.exit(1)
-        info = client.info(sys.argv[2])
-        if info:
-            print_info(info)
-            sys.exit(0)
-        sys.exit(4)
+            return 1
+        info = client.info(command_args[0])
+        if info is None:
+            return 4
+        print_info(info)
+        return 0
 
-    elif command == 'shared':
-        shares = client.get_shared_with_me()
-        print_shared(shares)
-        sys.exit(0 if shares is not None else 4)
+    if command == "shared":
+        print_shared(client.get_shared_with_me())
+        return 0
 
-    else:
-        print(f"Unknown command: {command}")
-        sys.exit(1)
+    if command == "share-create":
+        remote_path, options = _parse_share_create_args(command_args)
+        if remote_path is None:
+            print(
+                "Usage: nextcloud.py share-create <remote_path> "
+                "[--password VALUE] [--expire-date YYYY-MM-DD] [--public-upload]"
+            )
+            return 1
+        result = client.create_share_link(remote_path, **options)
+        if result is None:
+            return 3
+        print_json(result)
+        return 0
+
+    if command == "share-list":
+        remote_path = command_args[0] if command_args else None
+        print_share_links(client.list_share_links(remote_path))
+        return 0
+
+    if command == "share-revoke":
+        if not command_args:
+            print("Usage: nextcloud.py share-revoke <share_id>")
+            return 1
+        return 0 if client.revoke_share_link(command_args[0]) else 3
+
+    print(f"Unknown command: {command}")
+    return 1
 
 
-if __name__ == '__main__':
+def main() -> None:
+    """Main entry point."""
+    sys.exit(run_cli())
+
+
+if __name__ == "__main__":
     main()

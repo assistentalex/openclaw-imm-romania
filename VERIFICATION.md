@@ -86,14 +86,19 @@ imm-romania sync status                # Show sync status
 ### Files Commands (Nextcloud)
 
 ```bash
-imm-romania files list [PATH]         # List files (default: /)
-imm-romania files upload LOCAL REMOTE # Upload file
-imm-romania files download REMOTE LOCAL # Download file
-imm-romania files mkdir PATH          # Create directory
-imm-romania files delete PATH         # Delete file/folder
-imm-romania files move OLD NEW        # Move/rename
-imm-romania files copy SRC DEST       # Copy file
-imm-romania files info PATH           # Get file info
+imm-romania files list [PATH] [--recursive]  # List files (default: /)
+imm-romania files search QUERY [PATH]        # Search files/folders by name
+imm-romania files upload LOCAL REMOTE        # Upload file
+imm-romania files download REMOTE LOCAL      # Download file
+imm-romania files mkdir PATH                 # Create directory
+imm-romania files delete PATH                # Delete file/folder
+imm-romania files move OLD NEW               # Move/rename
+imm-romania files copy SRC DEST              # Copy file
+imm-romania files info PATH                  # Get file info
+imm-romania files shared                     # Items shared with current user
+imm-romania files share-create PATH [--password VALUE] [--expire-date YYYY-MM-DD] [--public-upload]
+imm-romania files share-list [PATH]          # List public share links
+imm-romania files share-revoke SHARE_ID      # Revoke share link
 ```
 
 ---
@@ -136,7 +141,10 @@ if command == 'list':
 
 | Test | Command | Result |
 |------|---------|--------|
-| Connection | `files list /` | ✅ OK (after fix) |
+| Connection | `files list /` | ✅ OK |
+| Recursive list | `files list / --recursive` | ⏳ Not tested |
+| Search | `files search contract /Clients/` | ⏳ Not tested |
+| Share list | `files share-list` | ⏳ Not tested |
 | Upload | `files upload` | ⏳ Not tested |
 | Download | `files download` | ⏳ Not tested |
 
@@ -163,6 +171,9 @@ imm-romania tasks list
 
 # Nextcloud
 imm-romania files list /
+imm-romania files list / --recursive
+imm-romania files search contract /Clients/
+imm-romania files share-list
 imm-romania files info /some-file.txt
 ```
 

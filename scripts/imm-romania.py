@@ -38,64 +38,17 @@ def main():
         msp_main()
 
     elif module in ('files', 'nextcloud', 'nc'):
-        # Route to Nextcloud module
-        from modules.nextcloud.nextcloud import NextcloudClient
+        from modules.nextcloud.nextcloud import run_cli as nextcloud_run_cli
+
         if len(args) < 1:
             print("Error: No command specified for files.")
-            print("Available commands: list, upload, download, mkdir, delete, move, copy, info")
+            print(
+                "Available commands: list, search, upload, download, mkdir, "
+                "delete, move, copy, info, shared, share-create, share-list, share-revoke"
+            )
             sys.exit(1)
 
-        client = NextcloudClient()
-        command = args[0]
-        command_args = args[1:]
-
-        # Map commands to methods
-        if command == 'list':
-            path = command_args[0] if command_args else '/'
-            results = client.list(path)
-            if results:
-                from modules.nextcloud.nextcloud import print_list
-                print_list(results)
-            else:
-                print("(empty)")
-        elif command == 'upload':
-            if len(command_args) < 2:
-                print("Error: upload requires <local_file> <remote_path>")
-                sys.exit(1)
-            client.upload(command_args[0], command_args[1])
-        elif command == 'download':
-            if len(command_args) < 2:
-                print("Error: download requires <remote_file> <local_dir>")
-                sys.exit(1)
-            client.download(command_args[0], command_args[1])
-        elif command == 'mkdir':
-            if len(command_args) < 1:
-                print("Error: mkdir requires <remote_path>")
-                sys.exit(1)
-            client.mkdir(command_args[0])
-        elif command == 'delete':
-            if len(command_args) < 1:
-                print("Error: delete requires <remote_path>")
-                sys.exit(1)
-            client.delete(command_args[0])
-        elif command == 'move':
-            if len(command_args) < 2:
-                print("Error: move requires <old_path> <new_path>")
-                sys.exit(1)
-            client.move(command_args[0], command_args[1])
-        elif command == 'copy':
-            if len(command_args) < 2:
-                print("Error: copy requires <source_path> <dest_path>")
-                sys.exit(1)
-            client.copy(command_args[0], command_args[1])
-        elif command == 'info':
-            if len(command_args) < 1:
-                print("Error: info requires <remote_path>")
-                sys.exit(1)
-            client.info(command_args[0])
-        else:
-            print(f"Error: Unknown files command: {command}")
-            sys.exit(1)
+        sys.exit(nextcloud_run_cli(args))
 
     elif module in ('help', '-h', '--help'):
         print_usage()
@@ -156,13 +109,19 @@ Analytics Commands:
     imm-romania analytics report             Full analytics report
 
 File Commands:
-    imm-romania files list [PATH]         List files in directory
-    imm-romania files upload LOCAL REMOTE Upload file to Nextcloud
-    imm-romania files download REMOTE LOCAL Download file from Nextcloud
-    imm-romania files mkdir PATH          Create directory
-    imm-romania files delete PATH         Delete file or directory
-    imm-romania files move OLD NEW       Move/rename file
-    imm-romania files copy SRC DEST       Copy file
+    imm-romania files list [PATH] [--recursive] List files in directory
+    imm-romania files search QUERY [PATH]       Search files/folders by name
+    imm-romania files upload LOCAL REMOTE       Upload file to Nextcloud
+    imm-romania files download REMOTE LOCAL     Download file from Nextcloud
+    imm-romania files mkdir PATH                Create directory
+    imm-romania files delete PATH               Delete file or directory
+    imm-romania files move OLD NEW              Move/rename file
+    imm-romania files copy SRC DEST             Copy file
+    imm-romania files info PATH                 Get file info
+    imm-romania files shared                    List items shared with current user
+    imm-romania files share-create PATH [--password VALUE] [--expire-date YYYY-MM-DD] [--public-upload]
+    imm-romania files share-list [PATH]         List public share links
+    imm-romania files share-revoke SHARE_ID     Revoke public share link
 
 Configuration:
     Set environment variables:
@@ -188,6 +147,12 @@ Examples:
 
     # Upload file to Nextcloud
     imm-romania files upload /local/report.pdf /Documents/
+
+    # Search files in Nextcloud
+    imm-romania files search contract /Clients/
+
+    # Create a share link
+    imm-romania files share-create /Contracts/offer.pdf --expire-date 2026-04-30
 
     # MSP GitHub checker (optional)
     imm-romania msp github-check repos --config data/msp-github-repos.example.json

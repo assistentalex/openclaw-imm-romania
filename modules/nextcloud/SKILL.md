@@ -1,11 +1,11 @@
 ---
 name: nextcloud
-description: File management for Nextcloud via WebDAV. Use for uploading, downloading, listing, moving, copying files and folders on Nextcloud. Triggers on phrases like "upload to nextcloud", "download from nextcloud", "list files on nextcloud", "nextcloud file operations".
+description: File management for Nextcloud via WebDAV and OCS APIs. Use for uploading, downloading, listing, searching, sharing, moving, copying files and folders on Nextcloud. Triggers on phrases like "upload to nextcloud", "download from nextcloud", "list files on nextcloud", "search nextcloud", "create nextcloud share link", "nextcloud file operations".
 ---
 
 # Nextcloud Module
 
-File management on Nextcloud server using WebDAV protocol.
+File management on Nextcloud server using WebDAV protocol and OCS sharing APIs.
 
 ## Requirements
 
@@ -38,9 +38,19 @@ List files and folders in a directory.
 
 ```bash
 python3 -m modules.nextcloud list /path/to/directory/
+python3 -m modules.nextcloud list /path/to/directory/ --recursive
 ```
 
 Returns: File name, type (file/folder), size, and last modified date.
+
+### search
+Search files and folders by name, recursively.
+
+```bash
+python3 -m modules.nextcloud search contract /Clients/
+```
+
+Returns: Matching files/folders with path, type, size, and last modified date.
 
 ### upload
 Upload a local file to Nextcloud.
@@ -91,16 +101,40 @@ Get detailed information about a file or directory.
 python3 -m modules.nextcloud info /path/to/item
 ```
 
+### share-create
+Create a public share link for a file or folder.
+
+```bash
+python3 -m modules.nextcloud share-create /Contracts/offer.pdf
+python3 -m modules.nextcloud share-create /Dropzones/Inbox --public-upload --expire-date 2026-04-30
+```
+
+### share-list
+List public share links, optionally filtered by path.
+
+```bash
+python3 -m modules.nextcloud share-list
+python3 -m modules.nextcloud share-list /Contracts/offer.pdf
+```
+
+### share-revoke
+Revoke a public share link by share ID.
+
+```bash
+python3 -m modules.nextcloud share-revoke 42
+```
+
 ## Error Handling
 
 - Exit code 0: Success
-- Exit code 1: Missing environment variables
-- Exit code 2: Connection/authentication error
-- Exit code 3: File operation error
-- Exit code 4: File not found
+- Exit code 1: Missing configuration or invalid command usage
+- Exit code 3: Connection/authentication/operation error
+- Exit code 4: File or directory not found (for info-like lookups)
 
 ## Notes
 
 - Nextcloud WebDAV uses user ID (not username) in paths - the script resolves this automatically
+- Search currently matches file/folder names and paths, not document content
+- Share-link commands use the Nextcloud OCS sharing API
 - For large files, ensure sufficient timeout settings
 - Self-signed certificates may require additional configuration
