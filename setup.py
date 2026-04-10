@@ -16,7 +16,7 @@ setup(
     description="Email, Calendar, and Tasks for Exchange on-premises (2016/2019)",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/assistentalex/openclaw-imm-romania",
+    url="https://github.com/asistent-alex/openclaw-imm-romania",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",

@@ -171,12 +171,12 @@ Vezi [references/setup.md](references/setup.md) pentru configurare detaliată.
 
 ## Coding Standards
 
-This project follows the [Hardshell Coding Standards](https://github.com/assistentalex/openclaw-hardshell).
+This project follows the [Hardshell Coding Standards](https://github.com/asistent-alex/openclaw-hardshell).
 
 When writing or modifying Python code, see:
-- **[Python Standards](https://github.com/assistentalex/openclaw-hardshell/blob/main/references/languages/python.md)** - PEP 8, type hints, docstrings, security
-- **[Testing Standards](https://github.com/assistentalex/openclaw-hardshell/blob/main/references/testing.md)** - TDD, test pyramid, coverage
-- **[Git Workflow](https://github.com/assistentalex/openclaw-hardshell/blob/main/references/git-workflow.md)** - Conventional commits, PR process
+- **[Python Standards](https://github.com/asistent-alex/openclaw-hardshell/blob/main/references/languages/python.md)** - PEP 8, type hints, docstrings, security
+- **[Testing Standards](https://github.com/asistent-alex/openclaw-hardshell/blob/main/references/testing.md)** - TDD, test pyramid, coverage
+- **[Git Workflow](https://github.com/asistent-alex/openclaw-hardshell/blob/main/references/git-workflow.md)** - Conventional commits, PR process
 
 Key rules:
 

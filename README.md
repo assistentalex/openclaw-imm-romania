@@ -4,7 +4,7 @@
 
 **Exchange, Nextcloud, GitHub — one assistant. Built by [Firma de AI](https://firmade.ai), supported by [Firma de IT](https://firmade.it)**
 
-[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](https://github.com/assistentalex/openclaw-imm-romania)
+[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](https://github.com/asistent-alex/openclaw-imm-romania)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![OpenClaw Skill](https://img.shields.io/badge/OpenClaw-Skill-green.svg)](https://clawhub.ai)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-brightgreen.svg)](https://www.python.org/)
@@ -109,7 +109,7 @@ export NEXTCLOUD_APP_PASSWORD="parola-app"  # Settings > Security > App Password
 
 ```bash
 cd ~/.openclaw/skills/
-git clone https://github.com/assistentalex/openclaw-imm-romania.git
+git clone https://github.com/asistent-alex/openclaw-imm-romania.git
 pip3 install exchangelib requests requests_ntlm
 ```
 
@@ -121,8 +121,8 @@ Skill-uri din aceeași familie, construite sub umbrela [Firma de AI](https://fir
 
 | Skill | Ce face | Link |
 |-------|----------|------|
-| **Hardshell** | Coding standards pentru OpenClaw skills — PEP 8, type hints, testing, git workflow. Referință obligatorie pentru codul din acest proiect. | [openclaw-hardshell](https://github.com/assistentalex/openclaw-hardshell) |
-| **prompt-to-pr** | Workflow complet de la prompt la PR gata de merge. 6 moduri (feature, fix, review, refactor, test, docs), token tracking, context budget, repo registry. | [openclaw-prompt-to-pr](https://github.com/assistentalex/openclaw-prompt-to-pr) |
+| **Hardshell** | Coding standards pentru OpenClaw skills — PEP 8, type hints, testing, git workflow. Referință obligatorie pentru codul din acest proiect. | [openclaw-hardshell](https://github.com/asistent-alex/openclaw-hardshell) |
+| **prompt-to-pr** | Workflow complet de la prompt la PR gata de merge. 6 moduri (feature, fix, review, refactor, test, docs), token tracking, context budget, repo registry. | [openclaw-prompt-to-pr](https://github.com/asistent-alex/openclaw-prompt-to-pr) |
 
 ---
 
@@ -141,7 +141,7 @@ Skill-uri din aceeași familie, construite sub umbrela [Firma de AI](https://fir
 
 ## 📄 Licență
 
-MIT — vezi [LICENSE](LICENSE). Codul urmează [Hardshell Coding Standards](https://github.com/assistentalex/openclaw-hardshell).
+MIT — vezi [LICENSE](LICENSE). Codul urmează [Hardshell Coding Standards](https://github.com/asistent-alex/openclaw-hardshell).
 
 ---
 
@@ -149,6 +149,6 @@ MIT — vezi [LICENSE](LICENSE). Codul urmează [Hardshell Coding Standards](htt
 
 **[Built by Firma de AI](https://firmade.ai) · [Supported by Firma de IT](https://firmade.it) · Made with ☕ in România**
 
-[Hardshell](https://github.com/assistentalex/openclaw-hardshell) · [prompt-to-pr](https://github.com/assistentalex/openclaw-prompt-to-pr) · [Report Bug](https://github.com/assistentalex/openclaw-imm-romania/issues) · [Request Feature](https://github.com/assistentalex/openclaw-imm-romania/issues)
+[Hardshell](https://github.com/asistent-alex/openclaw-hardshell) · [prompt-to-pr](https://github.com/asistent-alex/openclaw-prompt-to-pr) · [Report Bug](https://github.com/asistent-alex/openclaw-imm-romania/issues) · [Request Feature](https://github.com/asistent-alex/openclaw-imm-romania/issues)
 
 </div>

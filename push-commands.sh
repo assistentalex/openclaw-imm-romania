@@ -3,12 +3,12 @@
 # Rulează aceste comenzi pe mașina ta locală
 
 # 1. Clonează repository-ul
-git clone https://github.com/assistentalex/imm-romania.git
-cd imm-romania
+git clone https://github.com/asistent-alex/openclaw-imm-romania.git
+cd openclaw-imm-romania
 
 # 2. Copiază fișierele din skill-ul local
 # Înlocuiește cu calea ta locală
-SKILL_DIR="/home/adminul/.npm-global/lib/node_modules/openclaw/skills/imm-romania"
+SKILL_DIR="/home/adminul/.openclaw/skills/imm-romania"
 cp -r "$SKILL_DIR"/* .
 
 # 3. Adaugă .gitignore dacă nu există
@@ -36,4 +36,4 @@ git commit -m "Initial commit: IMM-Romania Exchange skill"
 git branch -M main
 git push -u origin main
 
-echo "Done! Repository: https://github.com/assistentalex/imm-romania"
+echo "Done! Repository: https://github.com/asistent-alex/openclaw-imm-romania"

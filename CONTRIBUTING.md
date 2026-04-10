@@ -4,7 +4,7 @@ Thank you for your interest in contributing!
 
 ## Development Standards
 
-This project follows the [Hardshell Coding Standards](https://github.com/assistentalex/openclaw-hardshell).
+This project follows the [Hardshell Coding Standards](https://github.com/asistent-alex/openclaw-hardshell).
 
 ### Quick Reference
 
