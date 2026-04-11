@@ -83,11 +83,12 @@ python3 -m modules.nextcloud extract-actions /Clients/contract.txt
 Returns: action items, due-date hints, owner hints, and source excerpts.
 
 ### create-tasks-from-file
-Create Exchange tasks from extracted file actions.
+Preview or create Exchange tasks from extracted file actions.
 
 ```bash
-python3 -m modules.nextcloud create-tasks-from-file /Clients/contract.txt --dry-run
-python3 -m modules.nextcloud create-tasks-from-file /Clients/contract.txt --mailbox user@example.com
+python3 -m modules.nextcloud create-tasks-from-file /Clients/contract.txt
+python3 -m modules.nextcloud create-tasks-from-file /Clients/contract.txt --select 1,2 --execute
+python3 -m modules.nextcloud create-tasks-from-file /Clients/contract.txt --mailbox user@example.com --execute
 ```
 
 ### upload
@@ -174,6 +175,8 @@ python3 -m modules.nextcloud share-revoke 42
 - Nextcloud WebDAV uses user ID (not username) in paths - the script resolves this automatically
 - Search currently matches file/folder names and paths, not document content
 - `extract-text`, `summarize`, `ask-file`, `extract-actions`, and `create-tasks-from-file` operate on one file at a time
+- `create-tasks-from-file` is preview-first by default; use `--execute` to actually create Exchange tasks
+- `--select 1,2,...` lets you approve only a subset of extracted task proposals
 - PDF extraction uses `pdfplumber` (recommended, MIT license, best table/layout handling) with `pypdf` as fallback; install `pdfplumber` for best results
 - Task creation uses Exchange delegate access when `--mailbox` is supplied
 - Share-link commands use the Nextcloud OCS sharing API

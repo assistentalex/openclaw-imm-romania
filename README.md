@@ -63,7 +63,7 @@ Gestionează fișiere pe Nextcloud prin WebDAV + OCS API și extrage context uti
 | Rezumă un document | `imm-romania files summarize /Clienti/contract.docx` |
 | Pune întrebări pe un fișier | `imm-romania files ask-file /Clienti/contract.docx "Când expiră?"` |
 | Extrage acțiuni | `imm-romania files extract-actions /Clienti/contract.txt` |
-| Creează task-uri din fișier | `imm-romania files create-tasks-from-file /Clienti/contract.txt --dry-run` |
+| Preview / creează task-uri din fișier | `imm-romania files create-tasks-from-file /Clienti/contract.txt` · `imm-romania files create-tasks-from-file /Clienti/contract.txt --select 1,2 --execute` |
 | Creează folder | `imm-romania files mkdir /Documente/Nou` |
 | Partajări | `imm-romania files share-list` |
 
@@ -81,7 +81,7 @@ Păstrează istoria conversațiilor între sesiuni prin LCM plugin. Nu configure
   - `ask-file`
 - Nextcloud are acum workflow intelligence:
   - `extract-actions`
-  - `create-tasks-from-file`
+  - `create-tasks-from-file` cu preview-first, selecție și execuție explicită
 
 ## 🛠️ Configurare
 

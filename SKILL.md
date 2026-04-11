@@ -109,7 +109,8 @@ imm-romania files ask-file /Clients/contract.docx "When is the renewal due?"
 
 # Workflow extraction
 imm-romania files extract-actions /Clients/contract.txt
-imm-romania files create-tasks-from-file /Clients/contract.txt --dry-run
+imm-romania files create-tasks-from-file /Clients/contract.txt
+imm-romania files create-tasks-from-file /Clients/contract.txt --select 1,2 --execute
 ```
 
 ## Workflow-uri Combinate

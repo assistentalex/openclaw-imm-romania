@@ -858,17 +858,11 @@ class NextcloudClient:
             "truncated": truncated,
         }
 
-    def summarize(self, remote_path: str, max_chars: int = 12000) -> dict[str, Any] | None:
-        """Produce a grounded summary for a single file."""
-        extracted = self.extract_text(remote_path, max_chars=max_chars)
-        if extracted is None:
-            return None
-
-        text = extracted["text"]
+    def _build_grounded_summary(self, text: str) -> tuple[str, list[str]]:
+        """Build a lightweight grounded summary and highlight list from extracted text."""
         sentences = self._split_sentences(text)
         if not sentences:
-            print("Error summarize: no sentences available after extraction")
-            return None
+            return "", []
 
         token_counts = Counter(self._tokenize(text))
         ranked: list[tuple[float, int, str]] = []
@@ -884,6 +878,18 @@ class NextcloudClient:
         ordered_sentences = [item[2] for item in sorted(top_sentences, key=lambda item: item[1])]
         summary = " ".join(ordered_sentences) or " ".join(sentences[:3])
         highlights = [token for token, _count in token_counts.most_common(5)]
+        return summary, highlights
+
+    def summarize(self, remote_path: str, max_chars: int = 12000) -> dict[str, Any] | None:
+        """Produce a grounded summary for a single file."""
+        extracted = self.extract_text(remote_path, max_chars=max_chars)
+        if extracted is None:
+            return None
+
+        summary, highlights = self._build_grounded_summary(extracted["text"])
+        if not summary:
+            print("Error summarize: no sentences available after extraction")
+            return None
 
         return {
             "path": extracted["path"],
@@ -967,6 +973,52 @@ class NextcloudClient:
         match = re.search(r"\b([A-ZĂÂÎȘȚ][a-zăâîșț]+)\s+(?:should|will|must|owns)\b", sentence)
         return match.group(1) if match else None
 
+    def _infer_priority_hint(self, sentence: str) -> str:
+        """Infer a lightweight task priority from urgency language."""
+        lowered = sentence.lower()
+        if any(token in lowered for token in ("urgent", "immediately", "asap", "today")):
+            return "high"
+        if self._extract_due_hint(sentence) or "this week" in lowered or "follow up" in lowered or "follow-up" in lowered:
+            return "medium"
+        return "normal"
+
+    def _estimate_action_confidence(
+        self,
+        sentence: str,
+        due_hint: str | None,
+        owner_hint: str | None,
+    ) -> str:
+        """Estimate confidence for an extracted action using lightweight heuristics."""
+        lowered = sentence.lower()
+        score = 0.45
+        if any(keyword in lowered for keyword in ACTION_KEYWORDS):
+            score += 0.2
+        if due_hint:
+            score += 0.2
+        if owner_hint:
+            score += 0.1
+        if re.match(r"^(please\s+)?(send|review|create|prepare|reply|schedule|confirm|approve)\b", lowered):
+            score += 0.1
+
+        if score >= 0.8:
+            return "high"
+        if score >= 0.55:
+            return "medium"
+        return "low"
+
+    def _classify_document_type(self, remote_path: str, text: str) -> str:
+        """Classify a document into a coarse workflow-relevant type."""
+        haystack = f"{Path(remote_path).name.lower()}\n{text.lower()}"
+        if any(token in haystack for token in ("meeting", "minutes", "meeting notes", "proces verbal", "process-verbal")):
+            return "meeting-notes"
+        if any(token in haystack for token in ("contract", "agreement", "renewal", "clause")):
+            return "contract"
+        if any(token in haystack for token in ("offer", "proposal", "quote", "pricing")):
+            return "offer"
+        if any(token in haystack for token in ("brief", "instruction", "memo")):
+            return "brief"
+        return "unknown"
+
     def _make_action_title(self, sentence: str) -> str:
         """Turn a sentence into a short task title."""
         title = sentence.strip().rstrip(".?!")
@@ -978,78 +1030,166 @@ class NextcloudClient:
             title = title[0].upper() + title[1:]
         return title
 
+    def _build_action_payload(self, index: int, sentence: str) -> dict[str, Any]:
+        """Convert a source sentence into a structured action proposal."""
+        due_hint = self._extract_due_hint(sentence)
+        owner_hint = self._extract_owner_hint(sentence)
+        priority_hint = self._infer_priority_hint(sentence)
+        confidence = self._estimate_action_confidence(sentence, due_hint, owner_hint)
+
+        return {
+            "index": index,
+            "title": self._make_action_title(sentence),
+            "reason": "Explicit action phrase found in source sentence.",
+            "details": sentence,
+            "due_hint": due_hint,
+            "owner_hint": owner_hint,
+            "source_excerpt": sentence,
+            "evidence": [sentence],
+            "due_date": {
+                "value": due_hint,
+                "source": "inferred" if due_hint else "missing",
+            },
+            "owner": {
+                "value": owner_hint,
+                "source": "inferred" if owner_hint else "missing",
+            },
+            "priority": {
+                "value": priority_hint,
+                "source": "inferred",
+            },
+            "confidence": confidence,
+        }
+
     def extract_actions(self, remote_path: str, max_chars: int = 12000) -> dict[str, Any] | None:
         """Extract grounded action suggestions from one file."""
         extracted = self.extract_text(remote_path, max_chars=max_chars)
         if extracted is None:
             return None
 
+        summary, highlights = self._build_grounded_summary(extracted["text"])
         actions: list[dict[str, Any]] = []
         for sentence in self._split_sentences(extracted["text"]):
             lowered = sentence.lower()
             if not any(keyword in lowered for keyword in ACTION_KEYWORDS):
                 continue
 
-            title = self._make_action_title(sentence)
-            if not title:
+            payload = self._build_action_payload(len(actions) + 1, sentence)
+            if not payload["title"]:
                 continue
-
-            actions.append(
-                {
-                    "title": title,
-                    "details": sentence,
-                    "due_hint": self._extract_due_hint(sentence),
-                    "owner_hint": self._extract_owner_hint(sentence),
-                    "source_excerpt": sentence,
-                }
-            )
+            actions.append(payload)
 
         return {
             "path": extracted["path"],
+            "document_type": self._classify_document_type(extracted["path"], extracted["text"]),
+            "summary": summary,
+            "highlights": highlights,
             "count": len(actions),
             "actions": actions,
+            "preview_required": True,
             "truncated": extracted["truncated"],
         }
+
+    def _select_actions(
+        self,
+        actions: list[dict[str, Any]],
+        selected_indexes: list[int] | None,
+    ) -> tuple[list[dict[str, Any]], list[int]]:
+        """Select approved action proposals by 1-based index."""
+        if not selected_indexes:
+            return actions, []
+
+        selected = {index for index in selected_indexes if index > 0}
+        chosen = [action for action in actions if action.get("index") in selected]
+        invalid = sorted(index for index in selected if index not in {action.get("index") for action in actions})
+        return chosen, invalid
 
     def create_tasks_from_file(
         self,
         remote_path: str,
         mailbox: str | None = None,
         priority: str = "normal",
-        dry_run: bool = False,
+        dry_run: bool | None = None,
+        execute: bool = False,
+        selected_indexes: list[int] | None = None,
     ) -> dict[str, Any] | None:
-        """Create Exchange tasks from actions extracted from one file."""
+        """Preview or create Exchange tasks from actions extracted from one file."""
+        if dry_run is not None:
+            execute = not dry_run
+
         extracted = self.extract_actions(remote_path)
         if extracted is None:
             return None
+
+        selected_actions, invalid_indexes = self._select_actions(extracted["actions"], selected_indexes)
+        default_mailbox = mailbox or "default-mailbox"
+        task_proposals: list[dict[str, Any]] = []
+        for action in selected_actions:
+            effective_priority = priority if priority != "normal" else action["priority"]["value"]
+            task_proposals.append(
+                {
+                    "index": action["index"],
+                    "subject": action["title"],
+                    "reason": action["reason"],
+                    "source_excerpt": action["source_excerpt"],
+                    "evidence": action["evidence"],
+                    "due_date": action["due_date"],
+                    "owner": action["owner"],
+                    "priority": {
+                        "value": effective_priority,
+                        "source": "override" if priority != "normal" else action["priority"]["source"],
+                    },
+                    "confidence": action["confidence"],
+                    "selected": True,
+                }
+            )
+
+        if not execute:
+            return {
+                "path": extracted["path"],
+                "document_type": extracted["document_type"],
+                "summary": extracted["summary"],
+                "highlights": extracted["highlights"],
+                "preview_required": True,
+                "mode": "preview",
+                "mailbox": default_mailbox,
+                "dry_run": True,
+                "execute": False,
+                "proposal_count": len(task_proposals),
+                "selected_indexes": [proposal["index"] for proposal in task_proposals],
+                "invalid_indexes": invalid_indexes,
+                "tasks": task_proposals,
+            }
 
         account = get_exchange_account(mailbox)
         created_tasks: list[dict[str, Any]] = []
         priority_map = {"low": "Low", "normal": "Normal", "high": "High"}
 
-        for action in extracted["actions"]:
+        for proposal in task_proposals:
             body_lines = [
                 f"Source file: {extracted['path']}",
-                f"Source excerpt: {action['source_excerpt']}",
+                f"Reason: {proposal['reason']}",
+                f"Source excerpt: {proposal['source_excerpt']}",
+                f"Confidence: {proposal['confidence']}",
             ]
-            if action.get("owner_hint"):
-                body_lines.append(f"Owner hint: {action['owner_hint']}")
-            if action.get("due_hint"):
-                body_lines.append(f"Due hint: {action['due_hint']}")
+            if proposal["owner"]["value"]:
+                body_lines.append(f"Owner hint ({proposal['owner']['source']}): {proposal['owner']['value']}")
+            if proposal["due_date"]["value"]:
+                body_lines.append(f"Due date ({proposal['due_date']['source']}): {proposal['due_date']['value']}")
 
-            task = build_exchange_task(account, action["title"], "\n".join(body_lines))
-            task.importance = priority_map.get(priority.lower(), "Normal")
-            if action.get("due_hint"):
-                task.due_date = build_ews_date(action["due_hint"])
-
-            if not dry_run:
-                task.save()
+            task = build_exchange_task(account, proposal["subject"], "\n".join(body_lines))
+            task.importance = priority_map.get(proposal["priority"]["value"], "Normal")
+            if proposal["due_date"]["value"]:
+                task.due_date = build_ews_date(proposal["due_date"]["value"])
+            task.save()
 
             created_tasks.append(
                 {
-                    "subject": action["title"],
-                    "due_hint": action.get("due_hint"),
-                    "owner_hint": action.get("owner_hint"),
+                    "index": proposal["index"],
+                    "subject": proposal["subject"],
+                    "due_date": proposal["due_date"],
+                    "owner": proposal["owner"],
+                    "priority": proposal["priority"],
                     "mailbox": str(getattr(account, "primary_smtp_address", mailbox or "")),
                     "id": getattr(task, "id", None),
                 }
@@ -1057,9 +1197,16 @@ class NextcloudClient:
 
         return {
             "path": extracted["path"],
-            "created_count": len(created_tasks),
+            "document_type": extracted["document_type"],
+            "summary": extracted["summary"],
+            "highlights": extracted["highlights"],
+            "mode": "execute",
             "mailbox": str(getattr(account, "primary_smtp_address", mailbox or "")),
-            "dry_run": dry_run,
+            "dry_run": False,
+            "execute": True,
+            "created_count": len(created_tasks),
+            "selected_indexes": [proposal["index"] for proposal in task_proposals],
+            "invalid_indexes": invalid_indexes,
             "tasks": created_tasks,
         }
 
@@ -1201,7 +1348,7 @@ def print_usage() -> None:
     print("  summarize <remote_path>               Summarize one file")
     print("  ask-file <remote_path> <question>     Answer a question from one file")
     print("  extract-actions <remote_path>         Extract workflow actions from one file")
-    print("  create-tasks-from-file <path> [options]  Create Exchange tasks from one file")
+    print("  create-tasks-from-file <path> [options]  Preview or create Exchange tasks from one file")
     print("  mkdir <remote_path>                   Create directory")
     print("  delete <remote_path>                  Delete file or directory")
     print("  move <source> <dest>                  Move/rename")
@@ -1219,8 +1366,10 @@ def print_usage() -> None:
     print()
     print("Options for create-tasks-from-file:")
     print("  --mailbox <email>                     Target delegate mailbox for created tasks")
-    print("  --priority <low|normal|high>          Task priority (default: normal)")
-    print("  --dry-run                             Show tasks without creating them")
+    print("  --priority <low|normal|high>          Override task priority (default: inferred/normal)")
+    print("  --select <1,2,...>                    Only create selected proposal indexes")
+    print("  --execute                             Actually create tasks after preview")
+    print("  --dry-run                             Alias for preview-only mode")
     print()
     print(
         "Set environment variables: NEXTCLOUD_URL, NEXTCLOUD_USERNAME, "
@@ -1326,7 +1475,8 @@ def run_cli(argv: list[str] | None = None) -> int:
         remote_path = command_args[0]
         mailbox = None
         priority = "normal"
-        dry_run = False
+        execute = False
+        selected_indexes: list[int] | None = None
         index = 1
         while index < len(command_args):
             token = command_args[index]
@@ -1338,8 +1488,21 @@ def run_cli(argv: list[str] | None = None) -> int:
                 priority = command_args[index + 1]
                 index += 2
                 continue
+            if token == "--select" and index + 1 < len(command_args):
+                raw_indexes = [part.strip() for part in command_args[index + 1].split(",") if part.strip()]
+                try:
+                    selected_indexes = [int(part) for part in raw_indexes]
+                except ValueError:
+                    print("Invalid --select value. Use a comma-separated list like: 1,2,3")
+                    return 1
+                index += 2
+                continue
+            if token == "--execute":
+                execute = True
+                index += 1
+                continue
             if token == "--dry-run":
-                dry_run = True
+                execute = False
                 index += 1
                 continue
             print(f"Unknown create-tasks-from-file option: {token}")
@@ -1348,7 +1511,8 @@ def run_cli(argv: list[str] | None = None) -> int:
             remote_path,
             mailbox=mailbox,
             priority=priority,
-            dry_run=dry_run,
+            execute=execute,
+            selected_indexes=selected_indexes,
         )
         if result is None:
             return 3

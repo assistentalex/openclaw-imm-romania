@@ -283,11 +283,65 @@ class TestNextcloudClient(NextcloudTestCase):
             result = client.extract_actions("/Clients/contract.txt")
 
         self.assertEqual(result["path"], "/Clients/contract.txt")
+        self.assertEqual(result["document_type"], "contract")
+        self.assertTrue(result["summary"])
         self.assertGreaterEqual(result["count"], 2)
         self.assertTrue(any(item["due_hint"] == "2026-05-15" for item in result["actions"]))
         self.assertTrue(any(item["owner_hint"] == "Ana" for item in result["actions"]))
+        self.assertTrue(all(item["confidence"] in {"low", "medium", "high"} for item in result["actions"]))
+        self.assertTrue(all("due_date" in item and "owner" in item and "priority" in item for item in result["actions"]))
 
-    def test_create_tasks_from_file_uses_exchange_task_creation(self):
+    def test_create_tasks_from_file_defaults_to_preview_mode(self):
+        client = self.create_client()
+        extracted = {
+            "path": "/Clients/contract.txt",
+            "document_type": "contract",
+            "summary": "Renewal terms and follow-up obligations.",
+            "highlights": ["renewal", "follow-up"],
+            "count": 2,
+            "actions": [
+                {
+                    "index": 1,
+                    "title": "Send the updated quote",
+                    "reason": "Explicit action phrase found in source sentence.",
+                    "details": "Please send the updated quote by 15 May 2026.",
+                    "due_hint": "2026-05-15",
+                    "owner_hint": "Ana",
+                    "source_excerpt": "Please send the updated quote by 15 May 2026.",
+                    "evidence": ["Please send the updated quote by 15 May 2026."],
+                    "due_date": {"value": "2026-05-15", "source": "inferred"},
+                    "owner": {"value": "Ana", "source": "inferred"},
+                    "priority": {"value": "medium", "source": "inferred"},
+                    "confidence": "high",
+                },
+                {
+                    "index": 2,
+                    "title": "Create a follow-up for the renewal call",
+                    "reason": "Explicit action phrase found in source sentence.",
+                    "details": "Create a follow-up for the renewal call.",
+                    "due_hint": None,
+                    "owner_hint": None,
+                    "source_excerpt": "Create a follow-up for the renewal call.",
+                    "evidence": ["Create a follow-up for the renewal call."],
+                    "due_date": {"value": None, "source": "missing"},
+                    "owner": {"value": None, "source": "missing"},
+                    "priority": {"value": "normal", "source": "inferred"},
+                    "confidence": "medium",
+                },
+            ],
+        }
+
+        with patch.object(client, "extract_actions", return_value=extracted):
+            result = client.create_tasks_from_file("/Clients/contract.txt")
+
+        self.assertEqual(result["mode"], "preview")
+        self.assertTrue(result["dry_run"])
+        self.assertFalse(result["execute"])
+        self.assertEqual(result["proposal_count"], 2)
+        self.assertEqual(result["selected_indexes"], [1, 2])
+        self.assertEqual(result["tasks"][0]["subject"], "Send the updated quote")
+
+    def test_create_tasks_from_file_execute_respects_selected_indexes(self):
         client = self.create_client()
         created = []
 
@@ -307,21 +361,38 @@ class TestNextcloudClient(NextcloudTestCase):
         fake_account = type("Account", (), {"tasks": object(), "primary_smtp_address": "owner@example.com"})()
         extracted = {
             "path": "/Clients/contract.txt",
+            "document_type": "contract",
+            "summary": "Renewal terms and follow-up obligations.",
+            "highlights": ["renewal", "follow-up"],
             "count": 2,
             "actions": [
                 {
+                    "index": 1,
                     "title": "Send the updated quote",
+                    "reason": "Explicit action phrase found in source sentence.",
                     "details": "Please send the updated quote by 15 May 2026.",
                     "due_hint": "2026-05-15",
                     "owner_hint": "Ana",
                     "source_excerpt": "Please send the updated quote by 15 May 2026.",
+                    "evidence": ["Please send the updated quote by 15 May 2026."],
+                    "due_date": {"value": "2026-05-15", "source": "inferred"},
+                    "owner": {"value": "Ana", "source": "inferred"},
+                    "priority": {"value": "medium", "source": "inferred"},
+                    "confidence": "high",
                 },
                 {
+                    "index": 2,
                     "title": "Create a follow-up for the renewal call",
+                    "reason": "Explicit action phrase found in source sentence.",
                     "details": "Create a follow-up for the renewal call.",
                     "due_hint": None,
                     "owner_hint": None,
                     "source_excerpt": "Create a follow-up for the renewal call.",
+                    "evidence": ["Create a follow-up for the renewal call."],
+                    "due_date": {"value": None, "source": "missing"},
+                    "owner": {"value": None, "source": "missing"},
+                    "priority": {"value": "normal", "source": "inferred"},
+                    "confidence": "medium",
                 },
             ],
         }
@@ -330,10 +401,16 @@ class TestNextcloudClient(NextcloudTestCase):
             with patch("modules.nextcloud.nextcloud.get_exchange_account", return_value=fake_account):
                 with patch("modules.nextcloud.nextcloud.build_exchange_task", side_effect=lambda account, subject, body: FakeTask(account=account, folder=account.tasks, subject=subject, body=body)):
                     with patch("modules.nextcloud.nextcloud.build_ews_date", return_value="ews-date"):
-                        result = client.create_tasks_from_file("/Clients/contract.txt")
+                        result = client.create_tasks_from_file(
+                            "/Clients/contract.txt",
+                            execute=True,
+                            selected_indexes=[1],
+                        )
 
-        self.assertEqual(result["created_count"], 2)
-        self.assertEqual(len(created), 2)
+        self.assertEqual(result["mode"], "execute")
+        self.assertEqual(result["created_count"], 1)
+        self.assertEqual(result["selected_indexes"], [1])
+        self.assertEqual(len(created), 1)
         self.assertEqual(created[0].subject, "Send the updated quote")
         self.assertEqual(created[0].due_date, "ews-date")
 
@@ -382,6 +459,35 @@ class TestNextcloudCli(NextcloudTestCase):
 
         self.assertEqual(exit_code, 1)
         self.assertIn("Usage: nextcloud.py create-tasks-from-file <remote_path>", stdout.getvalue())
+
+    def test_run_cli_parses_execute_and_select_for_create_tasks_from_file(self):
+        fake_result = {"mode": "execute", "created_count": 1, "tasks": [{"subject": "Send the updated quote"}]}
+
+        with patch.dict(os.environ, self.ENV, clear=False):
+            with patch.object(
+                NextcloudClient,
+                "_resolve_user_id",
+                lambda self: setattr(self, "user_id", "alex-id"),
+            ):
+                with patch.object(NextcloudClient, "create_tasks_from_file", return_value=fake_result) as mocked:
+                    with patch("sys.stdout", new_callable=StringIO) as stdout:
+                        exit_code = run_cli([
+                            "create-tasks-from-file",
+                            "/Clients/contract.txt",
+                            "--select",
+                            "1,2",
+                            "--execute",
+                        ])
+
+        self.assertEqual(exit_code, 0)
+        mocked.assert_called_once_with(
+            "/Clients/contract.txt",
+            mailbox=None,
+            priority="normal",
+            execute=True,
+            selected_indexes=[1, 2],
+        )
+        self.assertIn("created_count", stdout.getvalue())
 
 
 if __name__ == "__main__":
