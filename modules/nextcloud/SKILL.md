@@ -157,7 +157,7 @@ python3 -m modules.nextcloud share-revoke 42
 - Nextcloud WebDAV uses user ID (not username) in paths - the script resolves this automatically
 - Search currently matches file/folder names and paths, not document content
 - `extract-text`, `summarize`, and `ask-file` operate on one file at a time
-- PDF extraction is best-effort and works only when a compatible PDF parser is available in the environment
+- PDF extraction uses `pdfplumber` (recommended, MIT license, best table/layout handling) with `pypdf` as fallback; install `pdfplumber` for best results
 - Share-link commands use the Nextcloud OCS sharing API
 - For large files, ensure sufficient timeout settings
 - Self-signed certificates may require additional configuration

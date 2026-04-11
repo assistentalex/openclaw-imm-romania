@@ -715,19 +715,38 @@ class NextcloudClient:
         return " ".join(parts)
 
     def _extract_pdf_text(self, content: bytes) -> str:
-        """Extract text from a PDF when an optional parser is available."""
+        """Extract text from a PDF, preferring pdfplumber for better table/layout handling.
+
+        Falls back to pypdf when pdfplumber is not installed.
+        Returns empty string if no parser is available.
+        """
+        # Primary: pdfplumber — best table + layout extraction, MIT license
+        try:
+            import pdfplumber
+
+            with pdfplumber.open(io.BytesIO(content)) as pdf:
+                parts: list[str] = []
+                for page in pdf.pages:
+                    text = page.extract_text() or ""
+                    if text.strip():
+                        parts.append(text.strip())
+                return "\n".join(parts)
+        except ImportError:
+            pass
+        except Exception:
+            pass
+
+        # Fallback: pypdf — pure-Python, zero C deps, decent text extraction
         try:
             from pypdf import PdfReader
-        except ImportError:
-            return ""
 
-        try:
             reader = PdfReader(io.BytesIO(content))
             pages = [(page.extract_text() or "").strip() for page in reader.pages]
+            return "\n".join(page for page in pages if page)
+        except ImportError:
+            return ""
         except Exception:
             return ""
-
-        return "\n".join(page for page in pages if page)
 
     def _normalize_analysis_text(self, text: str) -> str:
         """Normalize extracted text for summarization / Q&A flows."""

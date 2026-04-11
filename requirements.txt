@@ -7,5 +7,8 @@ exchangelib>=5.0.0
 # NTLM authentication
 requests_ntlm>=1.1.0
 
+# Document understanding (optional but recommended)
+pdfplumber>=0.10.0
+
 # Testing (optional)
 pytest>=7.0.0

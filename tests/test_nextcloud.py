@@ -7,7 +7,7 @@ import sys
 import unittest
 import zipfile
 from io import StringIO
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, PROJECT_ROOT)
@@ -248,6 +248,27 @@ class TestNextcloudClient(NextcloudTestCase):
 
         self.assertIn("15 May 2026", result["answer"])
         self.assertTrue(result["supporting_excerpts"])
+
+
+    def test_extract_text_prefers_pdfplumber_over_pypdf(self):
+        """Verify _extract_pdf_text tries pdfplumber before pypdf."""
+        import inspect
+        client = self.create_client()
+        source = inspect.getsource(client._extract_pdf_text)
+        pdfplumber_pos = source.find("pdfplumber")
+        pypdf_pos = source.find("pypdf")
+        self.assertLess(pdfplumber_pos, pypdf_pos, "pdfplumber should be tried before pypdf")
+        self.assertIn("pdfplumber", source)
+        self.assertIn("pypdf", source)
+
+    def test_extract_text_pdf_returns_none_without_parsers(self):
+        """When no PDF parser extracts text, extract_text returns None."""
+        client = self.create_client()
+        with patch.object(client, "_extract_pdf_text", return_value=""):
+            with patch.object(client, "_request", return_value=FakeResponse(content=b"%PDF-1.4 fake")):
+                result = client.extract_text("/Docs/report.pdf")
+        self.assertIsNone(result)
+
 
 
 class TestNextcloudCli(NextcloudTestCase):
