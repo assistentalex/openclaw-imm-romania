@@ -1,8 +1,0 @@
-{
-  "enabled": true,
-  "recipient": "ops@example.com",
-  "repos": [
-    "openclaw/openclaw",
-    "Martian-Engineering/lossless-claw"
-  ]
-}

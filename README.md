@@ -2,7 +2,7 @@
 
 # OpenClaw-IMM-Romania
 
-**Exchange, Nextcloud, GitHub — one assistant. Built by [Firma de AI](https://firmade.ai), supported by [Firma de IT](https://firmade.it)**
+**Exchange and Nextcloud — one assistant. Built by [Firma de AI](https://firmade.ai), supported by [Firma de IT](https://firmade.it)**
 
 [![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](https://github.com/asistent-alex/openclaw-imm-romania)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -25,9 +25,9 @@ Conectează Exchange și Nextcloud la OpenClaw. Citești și trimiți emailuri, 
 
 ```bash
 clawhub install imm-romania
-imm-romania exchange connect    # configurează Exchange
-imm-romania nextcloud connect   # configurează Nextcloud
-imm-romania exchange mail list  # gata, funcționează
+imm-romania mail connect       # verifică Exchange
+imm-romania files list /       # verifică Nextcloud
+imm-romania mail read --limit 5
 ```
 
 ## 🧩 Module
@@ -64,16 +64,6 @@ Gestionează fișiere pe Nextcloud prin WebDAV + OCS API.
 ### 🧠 Memory — Context Persistent
 
 Păstrează istoria conversațiilor între sesiuni prin LCM plugin. Nu configurezi nimic — funcționează automat.
-
-### 🐙 MSP GitHub Checker — Optional
-
-Monitorizează release-uri publicate pentru repo-uri configurate și generează digest-uri utile pentru workflow-uri MSP.
-
-```bash
-imm-romania msp github-check repos
-imm-romania msp github-check check --repo openclaw/openclaw --repo Martian-Engineering/lossless-claw
-imm-romania msp github-check digest --check
-```
 
 ## 🛠️ Configurare
 
@@ -132,8 +122,6 @@ Skill-uri din aceeași familie, construite sub umbrela [Firma de AI](https://fir
 - [x] Exchange Calendar (list, create, today, week)
 - [x] Exchange Tasks (CRUD + delegat)
 - [x] Nextcloud Files (upload, download, organize)
-- [x] MSP Client Management
-- [x] Optional GitHub Releases Checker (MSP-scoped)
 - [ ] Exchange Contacts
 - [ ] Email Templates
 - [ ] Calendar Scheduling (find free slots)

@@ -32,11 +32,6 @@ def main():
         sys.argv = [sys.argv[0], normalized_module] + args
         exchange_main()
 
-    elif module in ('msp',):
-        from modules.msp.cli import main as msp_main
-        sys.argv = [sys.argv[0]] + args
-        msp_main()
-
     elif module in ('files', 'nextcloud', 'nc'):
         from modules.nextcloud.nextcloud import run_cli as nextcloud_run_cli
 
@@ -74,7 +69,6 @@ Modules:
     analytics   Email analytics and statistics (Exchange)
     sync        Task sync and reminders (Exchange)
     files       File operations (Nextcloud)
-    msp         MSP operations (clients, contracts, reminders, github-check)
 
 Email Commands:
     imm-romania mail connect              Test Exchange connection
@@ -153,10 +147,6 @@ Examples:
 
     # Create a share link
     imm-romania files share-create /Contracts/offer.pdf --expire-date 2026-04-30
-
-    # MSP GitHub checker (optional)
-    imm-romania msp github-check repos --config data/msp-github-repos.example.json
-    imm-romania msp github-check digest --check --config data/msp-github-repos.example.json
 
 For more information, see references/setup.md
 """)

@@ -12,7 +12,6 @@ Asistent complet pentru IMM-uri din România care integrează:
 - **Exchange**: Email, Calendar, Tasks (on-premises 2016/2019)
 - **Nextcloud**: Gestionare fișiere și colaborare
 - **Memory**: Context persistent prin LCM plugin
-- **MSP GitHub Checker**: Monitorizare opțională pentru release-uri GitHub
 
 ## Module Disponibile
 
@@ -95,18 +94,6 @@ imm-romania analytics folders
 # Raport complet
 imm-romania analytics report --days 30
 ```
-
-### MSP GitHub Checker (Optional)
-
-```bash
-# Repo-uri configurate / override
-imm-romania msp github-check repos
-imm-romania msp github-check check --repo openclaw/openclaw --repo Martian-Engineering/lossless-claw
-imm-romania msp github-check digest --check
-imm-romania msp github-check status
-```
-
-Checker-ul monitorizează doar release-uri publicate și produce digest JSON/text pentru automatizări și email.
 
 ### Fișiere (Nextcloud)
 
@@ -206,8 +193,7 @@ modules/
 
 ## Notes
 
-- Tasks sunt create în inbox-ul asistentului, în numele utilizatorului
-- EWS nu suportă task assignment (delegare către alți utilizatori)
+- Tasks sunt create în folderul Tasks al mailbox-ului implicit sau în mailbox-ul țintă când folosești delegate access
 - Pentru task-uri collaborative, folosiți calendar events cu invitați
 - Self-signed certificates necesită `verify_ssl: false`
 - LCM plugin trebuie instalat separat: `openclaw plugins install @martian-engineering/lossless-claw`
