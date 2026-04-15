@@ -1,25 +1,39 @@
 ---
 name: imm-romania
 version: 0.4.0
-description: Complete business assistant for Romanian SMEs (IMM-uri). Integrates Exchange (email, calendar, tasks, analytics), Nextcloud (file management plus document understanding and workflow extraction), and persistent memory via LCM plugin. Use when the user needs email operations, calendar management, task tracking, file operations, file summarization/Q&A, extracting actions from files, creating tasks from documents, email analytics, or combined workflows like "send report and archive copy", "create task from email", "schedule meeting with file attachment", "search conversation history", "show email statistics".
+description: Exchange and Nextcloud workflow assistant for teams, built by Firma de AI and supported by Firma de IT. Integrates Exchange (email, calendar, tasks, analytics), Nextcloud (file management, sharing, text extraction, summarization, file Q&A, action extraction, task creation from files), and persistent memory via LCM plugin. Use when the user needs email operations, calendar management, task tracking, file operations, document summarization/Q&A, extracting actions from files, creating tasks from documents, email analytics, or combined workflows like "send report and archive copy", "create task from email", "schedule meeting with file attachment", "search conversation history", or "show email statistics".
 validation: scripts/validate.sh
 ---
 
-# IMM-Romania
+# Firma de AI — Exchange & Nextcloud Assistant
 
-Asistent complet pentru IMM-uri din România care integrează:
+**Built by [Firma de AI](https://firmade.ai), supported by [Firma de IT](https://firmade.it).**
 
-- **Exchange**: Email, Calendar, Tasks, Analytics (on-premises 2016/2019)
-- **Nextcloud**: Gestionare fișiere, document understanding și workflow extraction
-- **Memory**: Context persistent prin LCM plugin
+This skill connects Exchange and Nextcloud into one practical workflow layer for:
+
+- **Exchange**: email, calendar, tasks, analytics
+- **Nextcloud**: file operations, sharing, document understanding, workflow extraction
+- **Memory**: persistent context via LCM plugin
 
 ## Module Disponibile
 
 | Modul | Descriere | Comandă |
 |-------|-----------|---------|
 | **Exchange** | Email, Calendar, Tasks, Analytics | `imm-romania <mail\|cal\|tasks\|analytics\|sync>` |
-| **Nextcloud** | Fișiere, sumarizare, Q&A, extragere acțiuni | `imm-romania files <list\|search\|extract-text\|summarize\|ask-file\|extract-actions\|create-tasks-from-file\|...>` |
+| **Nextcloud** | Fișiere, sharing, sumarizare, Q&A, extragere acțiuni | `imm-romania files <list\|search\|extract-text\|summarize\|ask-file\|extract-actions\|create-tasks-from-file\|...>` |
 | **Memory** | Context persistent | Automat via LCM plugin |
+
+## Ce rezolvă concret
+
+Folosește skillul când vrei să lucrezi cu:
+
+- emailuri, reply-uri, drafturi și atașamente în Exchange
+- calendar, meeting-uri și follow-up tasks
+- task-uri Exchange, inclusiv delegate access
+- fișiere Nextcloud: listare, căutare, upload, download, mutare, sharing
+- document understanding: extract-text, summarize, ask-file
+- workflow extraction: extrage acțiuni din fișiere și creează task-uri Exchange
+- context persistent între sesiuni prin LCM
 
 ## Utilizare Rapidă
 
@@ -160,6 +174,17 @@ Exemple:
 ## Configurare Completă
 
 Vezi [references/setup.md](references/setup.md) pentru configurare detaliată.
+
+## Positioning public / branding
+
+For public listings, documentation, and SEO copy, prefer this positioning:
+
+- **Public title:** `Firma de AI — Exchange & Nextcloud Assistant`
+- **Subtitle:** `Email, files, tasks, and document workflows for teams`
+- **Brand line:** `Built by Firma de AI, supported by Firma de IT.`
+- **Links:** `https://firmade.ai` și `https://firmade.it`
+
+This keeps the internal skill name `imm-romania` while making the public positioning more accurate and searchable.
 
 ## Coding Standards
 

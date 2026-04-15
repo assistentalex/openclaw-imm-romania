@@ -1,8 +1,10 @@
 <div align="center">
 
-# OpenClaw-IMM-Romania
+# Firma de AI — Exchange & Nextcloud Assistant
 
-**Exchange and Nextcloud — one assistant. Built by [Firma de AI](https://firmade.ai), supported by [Firma de IT](https://firmade.it)**
+**Email, files, tasks, and document workflows for teams**
+
+**Built for [Firma de AI](https://firmade.ai), supported by [Firma de IT](https://firmade.it)**
 
 [![Version](https://img.shields.io/badge/version-0.4.0-blue.svg)](https://github.com/asistent-alex/openclaw-imm-romania)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -15,106 +17,152 @@
 
 ---
 
-## Ce rezolvă acest skill OpenClaw?
+A business workflow assistant for Microsoft Exchange and Nextcloud, with document understanding, task creation from files, and persistent context through OpenClaw.
 
-Ai un mic business în România? Folosești Exchange și Nextcloud? 
+> Public positioning: **Firma de AI — Exchange & Nextcloud Assistant**  
+> Internal skill / CLI name: **`imm-romania`**
 
-Conectează Exchange și Nextcloud la OpenClaw. Citești și trimiți emailuri, programezi întâlniri, gestionezi task-uri și operezi fișiere pe Nextcloud — totul din terminal sau chat, fără interfață grafică.
+## What it does
 
-## ⚡ Instalare rapidă în 3 pași
+This skill connects Exchange and Nextcloud into one practical workflow layer for:
+
+- **Email** — read, send, draft, reply, forward, attachments
+- **Calendar** — today, week, list, create, update, respond
+- **Tasks** — list, create, complete, trash, delegate workflows
+- **Analytics** — inbox stats, response time, top senders, heatmap, reports
+- **Files** — list, search, upload, download, move, copy, info, sharing
+- **Document understanding** — extract text, summarize, ask questions about one file
+- **Workflow extraction** — extract actions from documents and create Exchange tasks
+- **Persistent memory** — optional LCM integration for conversation continuity
+
+## Why this is useful
+
+Use it when a team already works in **Microsoft Exchange** and **Nextcloud** and wants one assistant layer for:
+
+- inbox and follow-up workflows
+- meeting and task coordination
+- file operations and sharing
+- turning documents into action items
+- searching prior conversation context while working
+
+Built by [Firma de AI](https://firmade.ai), supported by [Firma de IT](https://firmade.it).
+
+## Quick start
+
+### Current CLI name
+
+After installation, the command remains:
 
 ```bash
-clawhub install imm-romania
-imm-romania mail connect       # verifică Exchange
-imm-romania files list /       # verifică Nextcloud
+imm-romania
+```
+
+### Typical first checks
+
+```bash
+imm-romania mail connect
+imm-romania files list /
 imm-romania mail read --limit 5
+imm-romania cal today
+imm-romania tasks list
 ```
 
-## 🧩 Module
+## Main capabilities
 
-### 📧 Exchange — Email, Calendar & Tasks
+### Exchange — Email, Calendar, Tasks, Analytics
 
-Conecțiune completă la Exchange on-premises (2016/2019) prin EWS.
+Full Exchange on-premises (2016/2019) workflows over EWS.
 
-| Ce poți face | Comandă |
+| What you can do | Command |
 |---|---|
-| Citește emailuri | `mail read` · `mail read --unread` · `mail get --id X` |
-| Trimite email | `mail send --to x@y.com --subject "Salut"` |
-| Calendar azi | `cal today` sau `calendar today` |
-| Calendar săptămână | `cal week` sau `calendar week` |
-| Creează task | `tasks create --subject "Facturi" --due 2026-04-15` |
-| Listează task-uri | `tasks list` · `tasks list --mailbox coleg@firma.ro` |
-| Marchează emailuri ca citite | `mail mark-all-read` |
-| Mută un task în Deleted Items | `tasks trash --id TASK_ID` |
-| Statistici inbox | `analytics stats` |
+| Read email | `imm-romania mail read` · `imm-romania mail read --unread` · `imm-romania mail get --id X` |
+| Send email | `imm-romania mail send --to x@y.com --subject "Hello" --body "..."` |
+| Reply / forward | `imm-romania mail reply --id EMAIL_ID --body "..."` · `imm-romania mail forward --id EMAIL_ID --to other@example.com` |
+| Download attachment | `imm-romania mail download-attachment --id EMAIL_ID --name file.pdf` |
+| Mark unread mail as read | `imm-romania mail mark-all-read` |
+| Today / week calendar | `imm-romania cal today` · `imm-romania cal week` |
+| Create meeting | `imm-romania cal create --subject "Meeting" --start "2026-04-20 14:00" --duration 60` |
+| Create task | `imm-romania tasks create --subject "Follow-up" --due "+7d" --priority high` |
+| List delegated tasks | `imm-romania tasks list --mailbox coleg@firma.ro` |
+| Complete / trash task | `imm-romania tasks complete --id TASK_ID` · `imm-romania tasks trash --id TASK_ID` |
+| Inbox analytics | `imm-romania analytics stats --days 30` |
 
-> 💡 **Acces delegat** — Folosește `--mailbox` pentru a lucra cu mailbox-ul unui coleg (cu permisiuni Editor)
+> Delegate workflows are supported where Exchange permissions allow them.
 
-### 📁 Nextcloud — Fișiere, Document Understanding & Workflow
+### Nextcloud — Files, Sharing, Document Understanding
 
-Gestionează fișiere pe Nextcloud prin WebDAV + OCS API și extrage context util din documente.
+Nextcloud workflows over WebDAV and OCS APIs.
 
-| Ce poți face | Comandă |
+| What you can do | Command |
 |---|---|
-| Listează fișiere | `imm-romania files list /Documente/` |
-| Caută fișiere | `imm-romania files search contract /Clienti/` |
-| Upload fișier | `imm-romania files upload local.pdf /Documente/` |
-| Download fișier | `imm-romania files download /Documente/raport.pdf /tmp/raport.pdf` |
-| Extrage text | `imm-romania files extract-text /Clienti/contract.docx` |
-| Rezumă un document | `imm-romania files summarize /Clienti/contract.docx` |
-| Pune întrebări pe un fișier | `imm-romania files ask-file /Clienti/contract.docx "Când expiră?"` |
-| Extrage acțiuni | `imm-romania files extract-actions /Clienti/contract.txt` |
-| Preview / creează task-uri din fișier | `imm-romania files create-tasks-from-file /Clienti/contract.txt` · `imm-romania files create-tasks-from-file /Clienti/contract.txt --select 1,2 --execute` |
-| Creează folder | `imm-romania files mkdir /Documente/Nou` |
-| Partajări | `imm-romania files share-list` |
+| List files | `imm-romania files list /Documents/` |
+| Search files | `imm-romania files search contract /Clients/` |
+| Upload / download | `imm-romania files upload /local/report.pdf /Documents/` · `imm-romania files download /Documents/report.pdf /tmp/` |
+| Create / move / copy | `imm-romania files mkdir /Documents/New` · `imm-romania files move /old /new` · `imm-romania files copy /src /dst` |
+| File info | `imm-romania files info /Documents/report.pdf` |
+| Shared items / public links | `imm-romania files shared` · `imm-romania files share-list` · `imm-romania files share-create /Contracts/offer.pdf` |
+| Extract text | `imm-romania files extract-text /Clients/contract.docx` |
+| Summarize a file | `imm-romania files summarize /Clients/contract.docx` |
+| Ask a file | `imm-romania files ask-file /Clients/contract.docx "When is the renewal due?"` |
+| Extract actions | `imm-romania files extract-actions /Clients/contract.txt` |
+| Create tasks from file | `imm-romania files create-tasks-from-file /Clients/contract.txt --select 1,2 --execute` |
 
-### 🧠 Memory — Context Persistent
+### Combined workflows
 
-Păstrează istoria conversațiilor între sesiuni prin LCM plugin. Nu configurezi nimic — funcționează automat.
-
-## ✨ Noutăți în 0.4.0
-
-- IMM-Romania rămâne concentrat pe **Exchange + Nextcloud**
-- logica MSP a fost extrasă într-un skill separat
-- Nextcloud are acum document understanding:
-  - `extract-text`
-  - `summarize`
-  - `ask-file`
-- Nextcloud are acum workflow intelligence:
-  - `extract-actions`
-  - `create-tasks-from-file` cu preview-first, selecție și execuție explicită
-
-## 🛠️ Configurare
-
-<details>
-<summary><b>Exchange</b></summary>
+#### Send a Nextcloud file by email
 
 ```bash
-export EXCHANGE_SERVER="https://mail.firma.ro/EWS/Exchange.asmx"
-export EXCHANGE_USERNAME="cont@firma.ro"
-export EXCHANGE_PASSWORD="parola"
-export EXCHANGE_EMAIL="cont@firma.ro"
-# Pentru self-signed certs:
-export EXCHANGE_VERIFY_SSL="false"
+imm-romania files download /Documents/offer.pdf /tmp/
+imm-romania mail send --to "client@example.com" --subject "Offer" --body "Please see attached." --attach /tmp/offer.pdf
 ```
 
-Sau rulează `imm-romania mail connect` pentru verificarea rapidă a conexiunii Exchange.
-
-</details>
-
-<details>
-<summary><b>Nextcloud</b></summary>
+#### Save an email attachment into Nextcloud
 
 ```bash
-export NEXTCLOUD_URL="https://cloud.firma.ro"
-export NEXTCLOUD_USERNAME="utilizator"
-export NEXTCLOUD_APP_PASSWORD="parola-app"  # Settings > Security > App Password
+imm-romania mail download-attachment --id EMAIL_ID --name "contract.pdf" --output /tmp/
+imm-romania files upload /tmp/contract.pdf /Contracts/
 ```
 
-</details>
+#### Turn a document into follow-up tasks
 
-<details>
-<summary><b>Instalare manuală (fără ClawHub)</b></summary>
+```bash
+imm-romania files extract-actions /Clients/contract.txt
+imm-romania files create-tasks-from-file /Clients/contract.txt --select 1,2 --execute
+```
+
+## Configuration
+
+### Exchange
+
+```bash
+export EXCHANGE_SERVER="https://mail.your-domain.com/EWS/Exchange.asmx"
+export EXCHANGE_USERNAME="service-account"
+export EXCHANGE_PASSWORD="your-password"
+export EXCHANGE_EMAIL="service-account@your-domain.com"
+export EXCHANGE_VERIFY_SSL="false"   # only for self-signed certificates
+```
+
+### Nextcloud
+
+```bash
+export NEXTCLOUD_URL="https://cloud.your-domain.com"
+export NEXTCLOUD_USERNAME="your-username"
+export NEXTCLOUD_APP_PASSWORD="your-app-password"
+```
+
+### Memory / LCM (optional)
+
+Install the plugin separately if you want persistent conversation context:
+
+```bash
+openclaw plugins install @martian-engineering/lossless-claw
+```
+
+For full setup details, see [references/setup.md](references/setup.md).
+
+## Installation options
+
+### From Git
 
 ```bash
 cd ~/.openclaw/skills/
@@ -123,41 +171,52 @@ cd openclaw-imm-romania
 pip3 install -r requirements.txt
 ```
 
-</details>
+### From ClawHub
 
-## 🧰 Ecosistem
+Use the published listing/slug once the public package is live on ClawHub. The public title is intended to be:
 
-Skill-uri din aceeași familie, construite sub umbrela [Firma de AI](https://firmade.ai) și [Firma de IT](https://firmade.it):
+**Firma de AI — Exchange & Nextcloud Assistant**
 
-| Skill | Ce face | Link |
-|-------|----------|------|
-| **Hardshell** | Coding standards pentru OpenClaw skills — PEP 8, type hints, testing, git workflow. Referință obligatorie pentru codul din acest proiect. | [openclaw-hardshell](https://github.com/asistent-alex/openclaw-hardshell) |
-| **prompt-to-pr** | Workflow complet de la prompt la PR gata de merge. 6 moduri (feature, fix, review, refactor, test, docs), token tracking, context budget, repo registry. | [openclaw-prompt-to-pr](https://github.com/asistent-alex/openclaw-prompt-to-pr) |
+The CLI command remains:
 
----
+```bash
+imm-romania
+```
 
-## 🗺️ Roadmap
+## Brand positioning
 
-- [x] Exchange Email (read, send, draft, search)
-- [x] Exchange Calendar (list, create, today, week)
-- [x] Exchange Tasks (CRUD + delegat)
-- [x] Nextcloud Files (upload, download, organize)
-- [x] Nextcloud Document Understanding (extract, summarize, Q&A)
-- [x] Nextcloud Workflow Extraction (actions → Exchange tasks)
-- [ ] Exchange Contacts
-- [ ] Email Templates
-- [ ] Calendar Scheduling (find free slots)
-- [ ] Multi-language support (RO/EN)
+For public listings, release notes, and marketing copy, prefer:
 
-## 📄 Licență
+- **Title:** Firma de AI — Exchange & Nextcloud Assistant
+- **Subtitle:** Email, files, tasks, and document workflows for teams
+- **Brand line:** Built by Firma de AI, supported by Firma de IT.
+- **Links:** https://firmade.ai · https://firmade.it
 
-MIT — vezi [LICENSE](LICENSE). Codul urmează [Hardshell Coding Standards](https://github.com/asistent-alex/openclaw-hardshell).
+## Roadmap
+
+- [x] Exchange email workflows
+- [x] Exchange calendar workflows
+- [x] Exchange task workflows
+- [x] Exchange analytics
+- [x] Nextcloud file operations
+- [x] Nextcloud document understanding
+- [x] Document-to-task workflows
+- [ ] Exchange contacts
+- [ ] Email templates
+- [ ] Calendar scheduling / find free slots
+- [ ] Broader multilingual support
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+This project follows the [Hardshell Coding Standards](https://github.com/asistent-alex/openclaw-hardshell).
 
 ---
 
 <div align="center">
 
-**[Built by Firma de AI](https://firmade.ai) · [Supported by Firma de IT](https://firmade.it) · Made with ☕ in România**
+**[Firma de AI](https://firmade.ai) · [Firma de IT](https://firmade.it) · Exchange + Nextcloud workflows with ☕**
 
 [Hardshell](https://github.com/asistent-alex/openclaw-hardshell) · [prompt-to-pr](https://github.com/asistent-alex/openclaw-prompt-to-pr) · [Report Bug](https://github.com/asistent-alex/openclaw-imm-romania/issues) · [Request Feature](https://github.com/asistent-alex/openclaw-imm-romania/issues)
 
