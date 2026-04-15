@@ -45,7 +45,7 @@ Use it when a team already works in **Microsoft Exchange** and **Nextcloud** and
 - turning documents into action items
 - searching prior conversation context while working
 
-Built for teams using [Firma de AI](https://firmade.ai) and supported by [Firma de IT](https://firmade.it).
+Built by [Firma de AI](https://firmade.ai), supported by [Firma de IT](https://firmade.it).
 
 ## Quick start
 
@@ -189,7 +189,7 @@ For public listings, release notes, and marketing copy, prefer:
 
 - **Title:** Firma de AI — Exchange & Nextcloud Assistant
 - **Subtitle:** Email, files, tasks, and document workflows for teams
-- **Brand line:** Built for teams using Firma de AI and supported by Firma de IT.
+- **Brand line:** Built by Firma de AI, supported by Firma de IT.
 - **Links:** https://firmade.ai · https://firmade.it
 
 ## Roadmap

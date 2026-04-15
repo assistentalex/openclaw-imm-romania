@@ -7,7 +7,7 @@ validation: scripts/validate.sh
 
 # Firma de AI — Exchange & Nextcloud Assistant
 
-**Built for teams using [Firma de AI](https://firmade.ai) and supported by [Firma de IT](https://firmade.it).**
+**Built by [Firma de AI](https://firmade.ai), supported by [Firma de IT](https://firmade.it).**
 
 This skill connects Exchange and Nextcloud into one practical workflow layer for:
 
@@ -181,7 +181,7 @@ For public listings, documentation, and SEO copy, prefer this positioning:
 
 - **Public title:** `Firma de AI — Exchange & Nextcloud Assistant`
 - **Subtitle:** `Email, files, tasks, and document workflows for teams`
-- **Brand line:** `Built for teams using Firma de AI and supported by Firma de IT.`
+- **Brand line:** `Built by Firma de AI, supported by Firma de IT.`
 - **Links:** `https://firmade.ai` și `https://firmade.it`
 
 This keeps the internal skill name `imm-romania` while making the public positioning more accurate and searchable.
