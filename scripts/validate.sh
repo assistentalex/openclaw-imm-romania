@@ -1,14 +1,14 @@
 #!/bin/bash
-# IMM-Romania Validation Script
+# NexLink Validation Script
 # Run this after any changes to verify functionality
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CLI="$SCRIPT_DIR/imm-romania.py"
+CLI="$SCRIPT_DIR/nexlink.py"
 
 echo "=========================================="
-echo "IMM-Romania Validation Script"
+echo "NexLink Validation Script"
 echo "=========================================="
 echo ""
 

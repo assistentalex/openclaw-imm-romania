@@ -1,5 +1,5 @@
 #!/bin/bash
-# Comenzi pentru a face push la repository-ul IMM-Romania
+# Comenzi pentru a face push la repository-ul NexLink
 # Rulează aceste comenzi pe mașina ta locală
 
 # 1. Clonează repository-ul
@@ -8,7 +8,7 @@ cd openclaw-nexlink
 
 # 2. Copiază fișierele din skill-ul local
 # Înlocuiește cu calea ta locală
-SKILL_DIR="/home/adminul/.openclaw/skills/imm-romania"
+SKILL_DIR="/home/adminul/.openclaw/skills/nexlink"
 cp -r "$SKILL_DIR"/* .
 
 # 3. Adaugă .gitignore dacă nu există
@@ -32,7 +32,7 @@ EOF
 
 # 4. Commit și push
 git add .
-git commit -m "Initial commit: IMM-Romania Exchange skill"
+git commit -m "Initial commit: NexLink Exchange skill"
 git branch -M main
 git push -u origin main
 

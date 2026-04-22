@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Product boundary cleanup**
-  - IMM-Romania now focuses on Exchange + Nextcloud only
+  - NexLink now focuses on Exchange + Nextcloud only
   - MSP runtime, scripts, tests, and examples were removed from this repo
   - MSP logic now lives in a separate dedicated skill
 - **Documentation refresh**
@@ -50,7 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Module Organization**: Clean separation of concerns
   - `modules/exchange/` - Email, Calendar, Tasks, Sync
   - `modules/nextcloud/` - File management
-  - `scripts/imm-romania.py` - Unified CLI entry point
+  - `scripts/nexlink.py` - Unified CLI entry point
 - **Documentation**: Setup guide, skill docs, coding standards
 
 ### Fixed
@@ -66,7 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Email operations: connect, read, get, send, draft, reply, forward, mark, attachments
 - Calendar operations: connect, list, today, week, get, create, update, delete, respond, availability
 - Tasks operations: connect, list, get, create, update, complete, delete
-- Unified CLI with `imm-romania mail|calendar|tasks` commands
+- Unified CLI with `nexlink mail|calendar|tasks` commands
 - Configuration via environment variables or config file
 - Self-signed certificate support via `verify_ssl: false`
 - MIT License
@@ -82,7 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Exchange Module**: Email, Calendar, Tasks operations (moved from root)
 - **Nextcloud Module**: File management via WebDAV (new)
 - **Memory Integration**: Documentation for LCM plugin integration
-- **Unified CLI**: New orchestrator `imm-romania.py` for all modules
+- **Unified CLI**: New orchestrator `nexlink.py` for all modules
 
 ### Added - Exchange Module
 
@@ -148,9 +148,9 @@ If upgrading from 1.x:
    python3 scripts/mail.py connect
    
    # After
-   python3 scripts/imm-romania.py mail connect
+   python3 scripts/nexlink.py mail connect
    # Or simply
-   imm-romania mail connect
+   nexlink mail connect
    ```
 
 3. New environment variables for Nextcloud:
@@ -169,7 +169,7 @@ If upgrading from 1.x:
 - Email operations: connect, read, get, send, draft, reply, forward, mark, attachments
 - Calendar operations: connect, list, today, week, get, create, update, delete, respond, availability
 - Tasks operations: connect, list, get, create, update, complete, delete
-- Unified CLI with `imm-romania mail|calendar|tasks` commands
+- Unified CLI with `nexlink mail|calendar|tasks` commands
 - Configuration via environment variables or config file
 - Self-signed certificate support via `verify_ssl: false`
 - MIT License

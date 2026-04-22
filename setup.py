@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-IMM-Romania - Exchange and Nextcloud assistant for Romanian SMEs.
+NexLink - Exchange and Nextcloud assistant for Romanian SMEs.
 """
 
 from setuptools import setup, find_packages
@@ -9,14 +9,14 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="imm-romania",
+    name="nexlink",
     version="0.4.0",
     author="OpenClaw Community",
     author_email="community@openclaw.ai",
     description="Exchange and Nextcloud assistant for Romanian SMEs",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/asistent-alex/openclaw-imm-romania",
+    url="https://github.com/asistent-alex/openclaw-nexlink",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -40,6 +40,6 @@ setup(
         ],
     },
     scripts=[
-        "scripts/imm-romania.py",
+        "scripts/nexlink.py",
     ],
 )

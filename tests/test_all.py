@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Contract tests for the Exchange module in IMM-Romania.
+Contract tests for the Exchange module in NexLink.
 These tests validate the current public structure and utility behavior,
 not legacy import paths or obsolete API assumptions.
 """
@@ -236,7 +236,7 @@ class TestCLI(unittest.TestCase):
             cwd=PROJECT_ROOT,
         )
         self.assertEqual(result.returncode, 0)
-        self.assertIn("imm-romania", result.stdout)
+        self.assertIn("nexlink", result.stdout)
         self.assertIn("mail", result.stdout)
         self.assertIn("calendar", result.stdout)
         self.assertIn("tasks", result.stdout)

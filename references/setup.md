@@ -1,6 +1,6 @@
-# IMM-Romania Setup Guide
+# NexLink Setup Guide
 
-Ghid practic de instalare, configurare și verificare pentru skill-ul IMM-Romania.
+Ghid practic de instalare, configurare și verificare pentru skill-ul NexLink.
 
 ## Cuprins
 
@@ -25,7 +25,7 @@ Ghid practic de instalare, configurare și verificare pentru skill-ul IMM-Romani
 ### Varianta recomandată: prin ClawHub
 
 ```bash
-clawhub install imm-romania
+clawhub install nexlink
 ```
 
 ### Varianta manuală: din Git
@@ -65,9 +65,9 @@ exchange:
 ### Verificare Exchange
 
 ```bash
-imm-romania mail connect
-imm-romania cal today
-imm-romania tasks list
+nexlink mail connect
+nexlink cal today
+nexlink tasks list
 ```
 
 ## Configurare Nextcloud
@@ -90,10 +90,10 @@ export NEXTCLOUD_APP_PASSWORD="your-app-password"
 ### Verificare Nextcloud
 
 ```bash
-imm-romania files list /
-imm-romania files search contract /Clients/
-imm-romania files summarize /Clients/contract.docx
-imm-romania files extract-actions /Clients/contract.txt
+nexlink files list /
+nexlink files search contract /Clients/
+nexlink files summarize /Clients/contract.docx
+nexlink files extract-actions /Clients/contract.txt
 ```
 
 ## Configurare Memory (LCM)
@@ -142,22 +142,22 @@ Rulează din repo sau după instalarea CLI-ului:
 
 ```bash
 # Exchange
-imm-romania mail connect
-imm-romania mail read --limit 5
-imm-romania cal today
-imm-romania tasks list
-imm-romania analytics stats --days 7
+nexlink mail connect
+nexlink mail read --limit 5
+nexlink cal today
+nexlink tasks list
+nexlink analytics stats --days 7
 
 # Nextcloud
-imm-romania files list /
-imm-romania files search contract /Clients/
-imm-romania files extract-text /Clients/contract.docx
-imm-romania files summarize /Clients/contract.docx
-imm-romania files ask-file /Clients/contract.docx "When is the renewal due?"
-imm-romania files extract-actions /Clients/contract.txt
-imm-romania files create-tasks-from-file /Clients/contract.txt
-imm-romania files share-list
-imm-romania files shared
+nexlink files list /
+nexlink files search contract /Clients/
+nexlink files extract-text /Clients/contract.docx
+nexlink files summarize /Clients/contract.docx
+nexlink files ask-file /Clients/contract.docx "When is the renewal due?"
+nexlink files extract-actions /Clients/contract.txt
+nexlink files create-tasks-from-file /Clients/contract.txt
+nexlink files share-list
+nexlink files shared
 ```
 
 ### Observație importantă despre task-uri
@@ -165,7 +165,7 @@ imm-romania files shared
 Pentru task-uri, comanda sigură de eliminare este:
 
 ```bash
-imm-romania tasks trash --id TASK_ID
+nexlink tasks trash --id TASK_ID
 ```
 
 Nu documenta `tasks delete` pentru Exchange tasks în acest repo.
@@ -215,13 +215,13 @@ Dacă rulezi direct din repo și ai probleme de path, folosește entrypoint-ul u
 
 ```bash
 cd ~/.openclaw/skills/openclaw-nexlink
-python3 scripts/imm-romania.py mail connect
+python3 scripts/nexlink.py mail connect
 ```
 
 sau, dacă scriptul este instalat în PATH:
 
 ```bash
-imm-romania mail connect
+nexlink mail connect
 ```
 
 ## Configurație completă exemplu

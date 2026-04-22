@@ -1,5 +1,5 @@
 ---
-name: imm-romania
+name: nexlink
 version: 0.5.0
 description: NexLink — Exchange & Nextcloud Connector. Built by Firma de AI and supported by Firma de IT. Integrates Exchange (email, calendar, tasks, analytics), Nextcloud (file management, sharing, text extraction, summarization, file Q&A, action extraction, task creation from files), and persistent memory via LCM plugin. Use when the user needs email operations, calendar management, task tracking, file operations, document summarization/Q&A, extracting actions from files, creating tasks from documents, email analytics, or combined workflows like "send report and archive copy", "create task from email", "schedule meeting with file attachment", "search conversation history", or "show email statistics".
 validation: scripts/validate.sh
@@ -19,8 +19,8 @@ This skill connects Exchange and Nextcloud into one practical workflow layer for
 
 | Modul | Descriere | Comandă |
 |-------|-----------|---------|
-| **Exchange** | Email, Calendar, Tasks, Analytics | `imm-romania <mail\|cal\|tasks\|analytics\|sync>` |
-| **Nextcloud** | Fișiere, sharing, sumarizare, Q&A, extragere acțiuni | `imm-romania files <list\|search\|extract-text\|summarize\|ask-file\|extract-actions\|create-tasks-from-file\|...>` |
+| **Exchange** | Email, Calendar, Tasks, Analytics | `nexlink <mail\|cal\|tasks\|analytics\|sync>` |
+| **Nextcloud** | Fișiere, sharing, sumarizare, Q&A, extragere acțiuni | `nexlink files <list\|search\|extract-text\|summarize\|ask-file\|extract-actions\|create-tasks-from-file\|...>` |
 | **Memory** | Context persistent | Automat via LCM plugin |
 
 ## Ce rezolvă concret
@@ -41,90 +41,90 @@ Folosește skillul când vrei să lucrezi cu:
 
 ```bash
 # Conexiune
-imm-romania mail connect
+nexlink mail connect
 
 # Listează email-uri
-imm-romania mail read --limit 10
-imm-romania mail read --unread
+nexlink mail read --limit 10
+nexlink mail read --unread
 
 # Trimite email
-imm-romania mail send --to "client@example.com" --subject "Ofertă" --body "..."
+nexlink mail send --to "client@example.com" --subject "Ofertă" --body "..."
 
 # Răspunde
-imm-romania mail reply --id EMAIL_ID --body "Răspuns"
+nexlink mail reply --id EMAIL_ID --body "Răspuns"
 ```
 
 ### Calendar
 
 ```bash
 # Evenimente
-imm-romania cal today
-imm-romania cal week
-imm-romania cal list --days 7
+nexlink cal today
+nexlink cal week
+nexlink cal list --days 7
 
 # Creează eveniment
-imm-romania cal create --subject "Meeting" --start "2024-01-15 14:00" --duration 60
+nexlink cal create --subject "Meeting" --start "2024-01-15 14:00" --duration 60
 
 # Cu invitați
-imm-romania cal create --subject "Team Meeting" --start "2024-01-15 14:00" --to "user1@example.com,user2@example.com"
+nexlink cal create --subject "Team Meeting" --start "2024-01-15 14:00" --to "user1@example.com,user2@example.com"
 ```
 
 ### Tasks
 
 ```bash
 # Listează
-imm-romania tasks list
-imm-romania tasks list --overdue
+nexlink tasks list
+nexlink tasks list --overdue
 
 # Creează
-imm-romania tasks create --subject "Review proposal" --due "+7d" --priority high
+nexlink tasks create --subject "Review proposal" --due "+7d" --priority high
 
 # Completează
-imm-romania tasks complete --id TASK_ID
+nexlink tasks complete --id TASK_ID
 ```
 
 ### Analytics (Email Statistics)
 
 ```bash
 # Statistici generale
-imm-romania analytics stats --days 30
+nexlink analytics stats --days 30
 
 # Timp mediu de răspuns
-imm-romania analytics response-time --days 7
+nexlink analytics response-time --days 7
 
 # Top expeditori
-imm-romania analytics top-senders --limit 20
+nexlink analytics top-senders --limit 20
 
 # Activity heatmap
-imm-romania analytics heatmap --days 30
+nexlink analytics heatmap --days 30
 
 # Statistici per folder
-imm-romania analytics folders
+nexlink analytics folders
 
 # Raport complet
-imm-romania analytics report --days 30
+nexlink analytics report --days 30
 ```
 
 ### Fișiere (Nextcloud)
 
 ```bash
 # Listează și caută
-imm-romania files list /Documents/
-imm-romania files search contract /Clients/
+nexlink files list /Documents/
+nexlink files search contract /Clients/
 
 # Upload / Download
-imm-romania files upload /local/report.pdf /Documents/
-imm-romania files download /Documents/report.pdf /local/
+nexlink files upload /local/report.pdf /Documents/
+nexlink files download /Documents/report.pdf /local/
 
 # Document understanding
-imm-romania files extract-text /Clients/contract.docx
-imm-romania files summarize /Clients/contract.docx
-imm-romania files ask-file /Clients/contract.docx "When is the renewal due?"
+nexlink files extract-text /Clients/contract.docx
+nexlink files summarize /Clients/contract.docx
+nexlink files ask-file /Clients/contract.docx "When is the renewal due?"
 
 # Workflow extraction
-imm-romania files extract-actions /Clients/contract.txt
-imm-romania files create-tasks-from-file /Clients/contract.txt
-imm-romania files create-tasks-from-file /Clients/contract.txt --select 1,2 --execute
+nexlink files extract-actions /Clients/contract.txt
+nexlink files create-tasks-from-file /Clients/contract.txt
+nexlink files create-tasks-from-file /Clients/contract.txt --select 1,2 --execute
 ```
 
 ## Workflow-uri Combinate
@@ -135,16 +135,16 @@ Trimite email cu atașament din Nextcloud:
 
 ```bash
 # Download din Nextcloud și trimite
-imm-romania files download /Documents/offer.pdf /tmp/
-imm-romania mail send --to "client@example.com" --subject "Ofertă" --body "..." --attach /tmp/offer.pdf
+nexlink files download /Documents/offer.pdf /tmp/
+nexlink mail send --to "client@example.com" --subject "Ofertă" --body "..." --attach /tmp/offer.pdf
 ```
 
 Salvează atașament din email în Nextcloud:
 
 ```bash
 # Download atașament și upload în Nextcloud
-imm-romania mail download-attachment --id EMAIL_ID --name "contract.pdf" --output /tmp/
-imm-romania files upload /tmp/contract.pdf /Contracts/
+nexlink mail download-attachment --id EMAIL_ID --name "contract.pdf" --output /tmp/
+nexlink files upload /tmp/contract.pdf /Contracts/
 ```
 
 ### Calendar + Tasks
@@ -153,7 +153,7 @@ Creează task din meeting request:
 
 ```bash
 # După meeting, creează task pentru follow-up
-imm-romania tasks create --subject "Follow-up meeting X" --due "+3d"
+nexlink tasks create --subject "Follow-up meeting X" --due "+3d"
 ```
 
 ### Memory (LCM Plugin)
@@ -184,7 +184,7 @@ For public listings, documentation, and SEO copy, prefer this positioning:
 - **Brand line:** `Built by Firma de AI, supported by Firma de IT.`
 - **Links:** `https://firmade.ai` și `https://firmade.it`
 
-This keeps the internal skill name `imm-romania` while making the public positioning more accurate and searchable.
+This keeps the internal skill name `nexlink` while making the public positioning more accurate and searchable.
 
 ## Coding Standards
 
