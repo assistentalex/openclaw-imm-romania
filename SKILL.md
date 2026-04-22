@@ -17,6 +17,7 @@ metadata:
         - python3
         - pip3
     primaryEnv: EXCHANGE_SERVER
+    skillKey: "nexlink"
     emoji: "🔗"
     homepage: https://github.com/asistent-alex/openclaw-nexlink
     always: false
