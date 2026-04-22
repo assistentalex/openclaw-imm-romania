@@ -1,4 +1,4 @@
-# Contributing to OpenClaw IMM-Romania
+# Contributing to OpenClaw NexLink
 
 Thank you for your interest in contributing!
 

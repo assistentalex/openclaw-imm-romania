@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-IMM-Romania - Unified CLI for Exchange on-premises operations.
+NexLink - Unified CLI for Exchange on-premises operations.
 
 Commands:
   mail      - Email operations (read, send, reply, etc.)
@@ -10,12 +10,12 @@ Commands:
   sync      - Task sync and reminders (bidirectional sync with Exchange)
 
 Usage:
-  imm-romania mail connect
-  imm-romania mail read --limit 10
-  imm-romania calendar today
-  imm-romania tasks list --overdue
-  imm-romania sync sync
-  imm-romania sync reminders --hours 24
+  nexlink mail connect
+  nexlink mail read --limit 10
+  nexlink calendar today
+  nexlink tasks list --overdue
+  nexlink sync sync
+  nexlink sync reminders --hours 24
 """
 
 import argparse
@@ -27,9 +27,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 
 def main():
-    """Main entry point for IMM-Romania CLI."""
+    """Main entry point for NexLink CLI."""
     parser = argparse.ArgumentParser(
-        prog="imm-romania",
+        prog="nexlink",
         description="Email, Calendar, and Tasks for Exchange on-premises (2016/2019).",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""

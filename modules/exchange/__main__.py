@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-IMM-Romania Exchange Module - Main entry point.
+NexLink Exchange Module - Main entry point.
 """
 
 import sys

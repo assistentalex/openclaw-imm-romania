@@ -1,4 +1,4 @@
-# IMM-Romania Dependencies
+# NexLink Dependencies
 # Install with: pip3 install -r requirements.txt
 
 # Exchange Web Services

@@ -1,4 +1,4 @@
-# IMM-Romania Configuration Template
+# NexLink Configuration Template
 # Copy this file to config.yaml and fill in your values
 
 # Exchange Server Configuration (required for Email, Calendar, Tasks)
@@ -58,7 +58,7 @@ logging:
   format: JSON
 
   # Log to file (optional)
-  # file: /var/log/imm-romania.log
+  # file: /var/log/nexlink.log
 
 # Task Sync Configuration (optional)
 task_sync:

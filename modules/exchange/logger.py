@@ -1,5 +1,5 @@
 """
-Logging system for IMM-Romania skill.
+Logging system for NexLink skill.
 Provides configurable logging with file rotation and multiple levels.
 """
 
@@ -74,18 +74,18 @@ class ColoredFormatter(logging.Formatter):
 
 class Logger:
     """
-    Configurable logger for IMM-Romania skill.
+    Configurable logger for NexLink skill.
 
     Environment variables:
     - IMM_LOG_LEVEL: Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-    - IMM_LOG_FILE: Log file path (default: ~/.imm-romania/logs/imm.log)
+    - IMM_LOG_FILE: Log file path (default: ~/.nexlink/logs/imm.log)
     - IMM_LOG_FORMAT: Output format (json, text, colored)
     - IMM_LOG_MAX_SIZE: Max log file size in MB (default: 10)
     - IMM_LOG_BACKUP_COUNT: Number of backup files (default: 5)
     - IMM_LOG_CONSOLE: Enable console logging (true/false, default: true)
     """
 
-    def __init__(self, name: str = "imm-romania"):
+    def __init__(self, name: str = "nexlink"):
         self.name = name
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.DEBUG)  # Capture all, handlers filter
@@ -119,7 +119,7 @@ class Logger:
             return log_file
 
         # Default location
-        log_dir = os.path.expanduser("~/.imm-romania/logs")
+        log_dir = os.path.expanduser("~/.nexlink/logs")
         os.makedirs(log_dir, exist_ok=True)
         return os.path.join(log_dir, "imm.log")
 
@@ -228,7 +228,7 @@ class Logger:
 _logger: Optional[Logger] = None
 
 
-def get_logger(name: str = "imm-romania") -> Logger:
+def get_logger(name: str = "nexlink") -> Logger:
     """Get or create logger instance."""
     global _logger
     if _logger is None:
@@ -263,6 +263,6 @@ def configure_logging(
 
     # Reset global logger to apply new config
     global _logger
-    _logger = Logger("imm-romania")
+    _logger = Logger("nexlink")
 
     return _logger
