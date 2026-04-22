@@ -32,8 +32,8 @@ clawhub install imm-romania
 
 ```bash
 cd ~/.openclaw/skills/
-git clone https://github.com/asistent-alex/openclaw-imm-romania.git
-cd openclaw-imm-romania
+git clone https://github.com/asistent-alex/openclaw-nexlink.git
+cd openclaw-nexlink
 pip install -r requirements.txt
 ```
 
@@ -214,7 +214,7 @@ Verifică:
 Dacă rulezi direct din repo și ai probleme de path, folosește entrypoint-ul unificat:
 
 ```bash
-cd ~/.openclaw/skills/openclaw-imm-romania
+cd ~/.openclaw/skills/openclaw-nexlink
 python3 scripts/imm-romania.py mail connect
 ```
 

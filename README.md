@@ -1,12 +1,12 @@
 <div align="center">
 
-# Firma de AI — Exchange & Nextcloud Assistant
+# NexLink — Exchange & Nextcloud Connector
 
 **Email, files, tasks, and document workflows for teams**
 
 **Built for [Firma de AI](https://firmade.ai), supported by [Firma de IT](https://firmade.it)**
 
-[![Version](https://img.shields.io/badge/version-0.4.0-blue.svg)](https://github.com/asistent-alex/openclaw-imm-romania)
+[![Version](https://img.shields.io/badge/version-0.5.0-blue.svg)](https://github.com/asistent-alex/openclaw-nexlink)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![OpenClaw Skill](https://img.shields.io/badge/OpenClaw-Skill-green.svg)](https://clawhub.ai)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-brightgreen.svg)](https://www.python.org/)
@@ -17,7 +17,7 @@
 
 ---
 
-A business workflow assistant for Microsoft Exchange and Nextcloud, with document understanding, task creation from files, and persistent context through OpenClaw.
+NexLink connects Microsoft Exchange and Nextcloud into one practical workflow layer — email, calendar, tasks, file management, document understanding, and persistent context through OpenClaw.
 
 > Public positioning: **Firma de AI — Exchange & Nextcloud Assistant**  
 > Internal skill / CLI name: **`imm-romania`**
@@ -166,8 +166,8 @@ For full setup details, see [references/setup.md](references/setup.md).
 
 ```bash
 cd ~/.openclaw/skills/
-git clone https://github.com/asistent-alex/openclaw-imm-romania.git
-cd openclaw-imm-romania
+git clone https://github.com/asistent-alex/openclaw-nexlink.git
+cd openclaw-nexlink
 pip3 install -r requirements.txt
 ```
 
@@ -218,6 +218,6 @@ This project follows the [Hardshell Coding Standards](https://github.com/asisten
 
 **[Firma de AI](https://firmade.ai) · [Firma de IT](https://firmade.it) · Exchange + Nextcloud workflows with ☕**
 
-[Hardshell](https://github.com/asistent-alex/openclaw-hardshell) · [prompt-to-pr](https://github.com/asistent-alex/openclaw-prompt-to-pr) · [Report Bug](https://github.com/asistent-alex/openclaw-imm-romania/issues) · [Request Feature](https://github.com/asistent-alex/openclaw-imm-romania/issues)
+[Hardshell](https://github.com/asistent-alex/openclaw-hardshell) · [prompt-to-pr](https://github.com/asistent-alex/openclaw-prompt-to-pr) · [Report Bug](https://github.com/asistent-alex/openclaw-nexlink/issues) · [Request Feature](https://github.com/asistent-alex/openclaw-nexlink/issues)
 
 </div>

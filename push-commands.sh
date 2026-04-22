@@ -3,8 +3,8 @@
 # Rulează aceste comenzi pe mașina ta locală
 
 # 1. Clonează repository-ul
-git clone https://github.com/asistent-alex/openclaw-imm-romania.git
-cd openclaw-imm-romania
+git clone https://github.com/asistent-alex/openclaw-nexlink.git
+cd openclaw-nexlink
 
 # 2. Copiază fișierele din skill-ul local
 # Înlocuiește cu calea ta locală
@@ -36,4 +36,4 @@ git commit -m "Initial commit: IMM-Romania Exchange skill"
 git branch -M main
 git push -u origin main
 
-echo "Done! Repository: https://github.com/asistent-alex/openclaw-imm-romania"
+echo "Done! Repository: https://github.com/asistent-alex/openclaw-nexlink"
