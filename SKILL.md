@@ -1,6 +1,6 @@
 ---
 name: nexlink
-version: 0.5.0
+version: 0.5.1
 description: NexLink — Exchange & Nextcloud Connector. Built by Firma de AI and supported by Firma de IT. Integrates Exchange (email, calendar, tasks, analytics), Nextcloud (file management, sharing, text extraction, summarization, file Q&A, action extraction, task creation from files), and persistent memory via LCM plugin. Use when the user needs email operations, calendar management, task tracking, file operations, document summarization/Q&A, extracting actions from files, creating tasks from documents, email analytics, or combined workflows like "send report and archive copy", "create task from email", "schedule meeting with file attachment", "search conversation history", or "show email statistics".
 validation: scripts/validate.sh
 ---
