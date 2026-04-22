@@ -1,0 +1,44 @@
+# ClawHub ignore patterns
+# https://github.com/openclaw/clawhub/blob/main/docs/skill-format.md
+
+# Git
+.git/
+.gitignore
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local state
+.clawhub/
+.clawdhub/
+
+# Test artifacts
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Large files
+*.zip
+*.tar.gz
+*.rar

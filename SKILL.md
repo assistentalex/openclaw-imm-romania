@@ -1,8 +1,25 @@
 ---
 name: nexlink
 version: 0.9.0
-description: NexLink — Exchange & Nextcloud Connector. Built by Firma de AI and supported by Firma de IT. Integrates Exchange (email, calendar, tasks, analytics), Nextcloud (file management, sharing, text extraction, summarization, file Q&A, action extraction, task creation from files), and persistent memory via LCM plugin. Use when the user needs email operations, calendar management, task tracking, file operations, document summarization/Q&A, extracting actions from files, creating tasks from documents, email analytics, or combined workflows like "send report and archive copy", "create task from email", "schedule meeting with file attachment", "search conversation history", or "show email statistics".
-validation: scripts/validate.sh
+description: Exchange & Nextcloud connector for email, calendar, tasks, files, and document workflows.
+metadata:
+  openclaw:
+    requires:
+      env:
+        - EXCHANGE_SERVER
+        - EXCHANGE_USERNAME
+        - EXCHANGE_PASSWORD
+        - EXCHANGE_EMAIL
+        - NEXTCLOUD_URL
+        - NEXTCLOUD_USERNAME
+        - NEXTCLOUD_APP_PASSWORD
+      bins:
+        - python3
+        - pip3
+    primaryEnv: EXCHANGE_SERVER
+    emoji: "🔗"
+    homepage: https://github.com/asistent-alex/openclaw-nexlink
+    always: false
 ---
 
 # NexLink — Exchange & Nextcloud Connector
