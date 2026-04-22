@@ -33,7 +33,6 @@ This skill connects Exchange and Nextcloud into one practical workflow layer for
 - **Files** — list, search, upload, download, move, copy, info, sharing
 - **Document understanding** — extract text, summarize, ask questions about one file
 - **Workflow extraction** — extract actions from documents and create Exchange tasks
-- **Persistent memory** — optional LCM integration for conversation continuity
 
 ## Why this is useful
 
@@ -43,7 +42,6 @@ Use it when a team already works in **Microsoft Exchange** and **Nextcloud** and
 - meeting and task coordination
 - file operations and sharing
 - turning documents into action items
-- searching prior conversation context while working
 
 Built by [Firma de AI](https://firmade.ai), supported by [Firma de IT](https://firmade.it).
 
@@ -148,14 +146,6 @@ export EXCHANGE_VERIFY_SSL="false"   # only for self-signed certificates
 export NEXTCLOUD_URL="https://cloud.your-domain.com"
 export NEXTCLOUD_USERNAME="your-username"
 export NEXTCLOUD_APP_PASSWORD="your-app-password"
-```
-
-### Memory / LCM (optional)
-
-Install the plugin separately if you want persistent conversation context:
-
-```bash
-openclaw plugins install @martian-engineering/lossless-claw
 ```
 
 For full setup details, see [references/setup.md](references/setup.md).

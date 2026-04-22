@@ -30,25 +30,6 @@ nextcloud:
   username: ${NEXTCLOUD_USERNAME}
   app_password: ${NEXTCLOUD_APP_PASSWORD}
 
-# Memory Configuration (LCM plugin)
-# LCM is configured in openclaw.json, not here
-# This section is for reference only
-memory:
-  # LCM plugin provides:
-  # - Persistent conversation history
-  # - DAG-based summarization
-  # - Search through past conversations
-  #
-  # Install with: openclaw plugins install @martian-engineering/lossless-claw
-  # Configure in ~/.openclaw/openclaw.json:
-  # {
-  #   "plugins": {
-  #     "slots": {
-  #       "contextEngine": "lossless-claw"
-  #     }
-  #   }
-  # }
-
 # Logging Configuration (optional)
 logging:
   # Log level: DEBUG, INFO, WARNING, ERROR

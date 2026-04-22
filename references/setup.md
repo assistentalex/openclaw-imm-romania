@@ -8,9 +8,8 @@ Ghid practic de instalare, configurare și verificare pentru skill-ul NexLink.
 2. [Instalare](#instalare)
 3. [Configurare Exchange](#configurare-exchange)
 4. [Configurare Nextcloud](#configurare-nextcloud)
-5. [Configurare Memory (LCM)](#configurare-memory-lcm)
-6. [Verificare rapidă](#verificare-rapidă)
-7. [Troubleshooting](#troubleshooting)
+5. [Verificare rapidă](#verificare-rapidă)
+6. [Troubleshooting](#troubleshooting)
 
 ## Cerințe de sistem
 
@@ -96,46 +95,6 @@ nexlink files summarize /Clients/contract.docx
 nexlink files extract-actions /Clients/contract.txt
 ```
 
-## Configurare Memory (LCM)
-
-Integrarea LCM este opțională, dar recomandată pentru context persistent între sesiuni.
-
-### Instalare plugin
-
-```bash
-openclaw plugins install @martian-engineering/lossless-claw
-```
-
-### Configurare OpenClaw
-
-Adaugă în `~/.openclaw/openclaw.json`:
-
-```json
-{
-  "plugins": {
-    "slots": {
-      "contextEngine": "lossless-claw"
-    },
-    "entries": {
-      "lossless-claw": {
-        "enabled": true,
-        "config": {
-          "freshTailCount": 32,
-          "contextThreshold": 0.75
-        }
-      }
-    }
-  }
-}
-```
-
-### Verificare LCM
-
-```bash
-openclaw plugins list
-ls -la ~/.openclaw/lcm.db
-```
-
 ## Verificare rapidă
 
 Rulează din repo sau după instalarea CLI-ului:
@@ -201,13 +160,6 @@ Verifică:
 1. URL-ul complet (`https://...`)
 2. username-ul
 3. app password-ul, nu parola principală
-
-### LCM nu apare activ
-
-Verifică:
-1. plugin-ul este instalat: `openclaw plugins list`
-2. există configurația în `openclaw.json`
-3. baza de date există: `ls ~/.openclaw/lcm.db`
 
 ### Module import / path issues
 

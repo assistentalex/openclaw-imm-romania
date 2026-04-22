@@ -30,7 +30,6 @@ This skill connects Exchange and Nextcloud into one practical workflow layer for
 
 - **Exchange**: email, calendar, tasks, analytics
 - **Nextcloud**: file operations, sharing, document understanding, workflow extraction
-- **Memory**: persistent context via LCM plugin
 
 ## Module Disponibile
 
@@ -38,7 +37,6 @@ This skill connects Exchange and Nextcloud into one practical workflow layer for
 |-------|-----------|---------|
 | **Exchange** | Email, Calendar, Tasks, Analytics | `nexlink <mail\|cal\|tasks\|analytics\|sync>` |
 | **Nextcloud** | Fișiere, sharing, sumarizare, Q&A, extragere acțiuni | `nexlink files <list\|search\|extract-text\|summarize\|ask-file\|extract-actions\|create-tasks-from-file\|...>` |
-| **Memory** | Context persistent | Automat via LCM plugin |
 
 ## Ce rezolvă concret
 
@@ -50,7 +48,6 @@ Folosește skillul când vrei să lucrezi cu:
 - fișiere Nextcloud: listare, căutare, upload, download, mutare, sharing
 - document understanding: extract-text, summarize, ask-file
 - workflow extraction: extrage acțiuni din fișiere și creează task-uri Exchange
-- context persistent între sesiuni prin LCM
 
 ## Utilizare Rapidă
 
@@ -173,21 +170,6 @@ Creează task din meeting request:
 nexlink tasks create --subject "Follow-up meeting X" --due "+3d"
 ```
 
-### Memory (LCM Plugin)
-
-Context persistent este gestionat automat de Lossless Context Management plugin.
-
-Tool-uri disponibile (dacă plugin-ul e instalat):
-
-- `lcm_grep` - Caută în istoricul conversațiilor
-- `lcm_describe` - Detalii despre un summary
-- `lcm_expand_query` - Expandare și răspuns la întrebări
-
-Exemple:
-
-- "Ce am discutat despre proiectul X?" → caută în istoric
-- "Când am trimis ultimul email către Y?" → combină LCM cu Exchange
-
 ## Configurare Completă
 
 Vezi [references/setup.md](references/setup.md) pentru configurare detaliată.
@@ -243,7 +225,6 @@ modules/
 - Tasks sunt create în folderul Tasks al mailbox-ului implicit sau în mailbox-ul țintă când folosești delegate access
 - Pentru task-uri collaborative, folosiți calendar events cu invitați
 - Self-signed certificates necesită `verify_ssl: false`
-- LCM plugin trebuie instalat separat: `openclaw plugins install @martian-engineering/lossless-claw`
 
 ## License
 
