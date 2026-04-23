@@ -1,6 +1,6 @@
 <div align="center">
 
-# NexLink — Exchange & Nextcloud Connector
+# NexLink — Nextcloud & Exchange Connector
 
 **Email, files, tasks, and document workflows for teams**
 
