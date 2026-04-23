@@ -1,6 +1,6 @@
 ---
 name: nexlink
-version: 0.10.5
+version: 0.10.6
 description: Nextcloud & Exchange connector for email, calendar, tasks, files, and document workflows.
 metadata:
   openclaw:

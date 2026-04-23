@@ -1,8 +1,8 @@
 {
   "slug": "nexlink",
   "name": "NexLink — Nextcloud & Exchange Connector",
-  "version": "0.9.0",
-  "description": "Exchange & Nextcloud workflow assistant. Email, calendar, tasks, file management, document understanding, and persistent memory integration.",
+  "version": "0.10.6",
+  "description": "Nextcloud & Exchange workflow assistant. Email, calendar, tasks, file management, document understanding, and persistent memory integration.",
   "author": "Firma de AI",
   "homepage": "https://firmade.ai",
   "repository": "https://github.com/asistent-alex/openclaw-nexlink",
