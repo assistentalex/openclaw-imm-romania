@@ -23,7 +23,7 @@ def main():
     module = sys.argv[1]
     args = sys.argv[2:]
 
-    if module in ('mail', 'cal', 'calendar', 'tasks', 'analytics', 'sync'):
+    if module in ('mail', 'cal', 'calendar', 'tasks', 'analytics', 'sync', 'contacts'):
         # Route to Exchange module
         from modules.exchange.cli import main as exchange_main
         # Normalize 'cal' to 'calendar'
@@ -32,8 +32,25 @@ def main():
         sys.argv = [sys.argv[0], normalized_module] + args
         exchange_main()
 
-    elif module in ('files', 'nextcloud', 'nc'):
+    elif module in ('files', 'nextcloud', 'nc', 'notes'):
         from modules.nextcloud.nextcloud import run_cli as nextcloud_run_cli
+
+        if module == 'notes':
+            from modules.nextcloud.notes import setup_parser
+            import argparse
+            parser = argparse.ArgumentParser(prog='nexlink notes')
+            subparsers = parser.add_subparsers(dest='notes_command')
+            setup_parser(subparsers)
+            try:
+                parsed = parser.parse_args(args)
+                if hasattr(parsed, 'func'):
+                    parsed.func(parsed)
+                else:
+                    parser.print_help()
+                    sys.exit(1)
+            except SystemExit as e:
+                sys.exit(e.code if isinstance(e.code, int) else 1)
+            return
 
         if len(args) < 1:
             print("Error: No command specified for files.")
