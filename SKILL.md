@@ -1,6 +1,6 @@
 ---
 name: nexlink
-version: 0.10.4
+version: 0.10.5
 description: Exchange & Nextcloud connector for email, calendar, tasks, files, and document workflows.
 metadata:
   openclaw:
@@ -53,98 +53,98 @@ This skill connects Exchange and Nextcloud into one practical workflow layer for
 - **Exchange**: email, calendar, tasks, analytics
 - **Nextcloud**: file operations, sharing, document understanding, workflow extraction
 
-## Module Disponibile
+## Available Modules
 
-| Modul | Descriere | Comandă |
-|-------|-----------|---------|
+| Module | Description | Command |
+|--------|-------------|---------|
 | **Exchange** | Email, Calendar, Tasks, Analytics | `nexlink <mail\|cal\|tasks\|analytics\|sync>` |
-| **Nextcloud** | Fișiere, sharing, sumarizare, Q&A, extragere acțiuni | `nexlink files <list\|search\|extract-text\|summarize\|ask-file\|extract-actions\|create-tasks-from-file\|...>` |
+| **Nextcloud** | Files, sharing, summarization, Q&A, action extraction | `nexlink files <list\|search\|extract-text\|summarize\|ask-file\|extract-actions\|create-tasks-from-file\|...>` |
 
-## Ce rezolvă concret
+## What it solves
 
-Folosește skillul când vrei să lucrezi cu:
+Use this skill when you want to work with:
 
-- emailuri, reply-uri, drafturi și atașamente în Exchange
-- calendar, meeting-uri și follow-up tasks
-- task-uri Exchange, inclusiv delegate access
-- fișiere Nextcloud: listare, căutare, upload, download, mutare, sharing
+- emails, replies, drafts and attachments in Exchange
+- calendar, meetings and follow-up tasks
+- Exchange tasks, including delegate access
+- Nextcloud files: listing, search, upload, download, move, sharing
 - document understanding: extract-text, summarize, ask-file
-- workflow extraction: extrage acțiuni din fișiere și creează task-uri Exchange
+- workflow extraction: extract actions from files and create Exchange tasks
 
-## Utilizare Rapidă
+## Quick Start
 
 ### Email
 
 ```bash
-# Conexiune
+# Connection
 nexlink mail connect
 
-# Listează email-uri
+# List emails
 nexlink mail read --limit 10
 nexlink mail read --unread
 
-# Trimite email
-nexlink mail send --to "client@example.com" --subject "Ofertă" --body "..."
+# Send email
+nexlink mail send --to "client@example.com" --subject "Offer" --body "..."
 
-# Răspunde
-nexlink mail reply --id EMAIL_ID --body "Răspuns"
+# Reply
+nexlink mail reply --id EMAIL_ID --body "Reply"
 ```
 
 ### Calendar
 
 ```bash
-# Evenimente
+# Events
 nexlink cal today
 nexlink cal week
 nexlink cal list --days 7
 
-# Creează eveniment
+# Create event
 nexlink cal create --subject "Meeting" --start "2024-01-15 14:00" --duration 60
 
-# Cu invitați
+# With attendees
 nexlink cal create --subject "Team Meeting" --start "2024-01-15 14:00" --to "user1@example.com,user2@example.com"
 ```
 
 ### Tasks
 
 ```bash
-# Listează
+# List
 nexlink tasks list
 nexlink tasks list --overdue
 
-# Creează
+# Create
 nexlink tasks create --subject "Review proposal" --due "+7d" --priority high
 
-# Completează
+# Complete
 nexlink tasks complete --id TASK_ID
 ```
 
 ### Analytics (Email Statistics)
 
 ```bash
-# Statistici generale
+# General statistics
 nexlink analytics stats --days 30
 
-# Timp mediu de răspuns
+# Average response time
 nexlink analytics response-time --days 7
 
-# Top expeditori
+# Top senders
 nexlink analytics top-senders --limit 20
 
 # Activity heatmap
 nexlink analytics heatmap --days 30
 
-# Statistici per folder
+# Statistics per folder
 nexlink analytics folders
 
-# Raport complet
+# Full report
 nexlink analytics report --days 30
 ```
 
-### Fișiere (Nextcloud)
+### Files (Nextcloud)
 
 ```bash
-# Listează și caută
+# List and search
 nexlink files list /Documents/
 nexlink files search contract /Clients/
 
@@ -163,38 +163,38 @@ nexlink files create-tasks-from-file /Clients/contract.txt
 nexlink files create-tasks-from-file /Clients/contract.txt --select 1,2 --execute
 ```
 
-## Workflow-uri Combinate
+## Combined Workflows
 
-### Email + Fișiere
+### Email + Files
 
-Trimite email cu atașament din Nextcloud:
+Send email with attachment from Nextcloud:
 
 ```bash
-# Download din Nextcloud și trimite
+# Download from Nextcloud and send
 nexlink files download /Documents/offer.pdf /tmp/
-nexlink mail send --to "client@example.com" --subject "Ofertă" --body "..." --attach /tmp/offer.pdf
+nexlink mail send --to "client@example.com" --subject "Offer" --body "..." --attach /tmp/offer.pdf
 ```
 
-Salvează atașament din email în Nextcloud:
+Save attachment from email to Nextcloud:
 
 ```bash
-# Download atașament și upload în Nextcloud
+# Download attachment and upload to Nextcloud
 nexlink mail download-attachment --id EMAIL_ID --name "contract.pdf" --output /tmp/
 nexlink files upload /tmp/contract.pdf /Contracts/
 ```
 
 ### Calendar + Tasks
 
-Creează task din meeting request:
+Create task from meeting request:
 
 ```bash
-# După meeting, creează task pentru follow-up
+# After meeting, create follow-up task
 nexlink tasks create --subject "Follow-up meeting X" --due "+3d"
 ```
 
-## Configurare Completă
+## Full Configuration
 
-Vezi [references/setup.md](references/setup.md) pentru configurare detaliată.
+See [references/setup.md](references/setup.md) for detailed configuration.
 
 ## Positioning public / branding
 
@@ -203,7 +203,7 @@ For public listings, documentation, and SEO copy, prefer this positioning:
 - **Public title:** `Firma de AI — Exchange & Nextcloud Assistant`
 - **Subtitle:** `Email, files, tasks, and document workflows for teams`
 - **Brand line:** `Built by Firma de AI, supported by Firma de IT.`
-- **Links:** `https://firmade.ai` și `https://firmade.it`
+- **Links:** `https://firmade.ai` and `https://firmade.it`
 
 This keeps the internal skill name `nexlink` while making the public positioning more accurate and searchable.
 
@@ -244,9 +244,9 @@ modules/
 
 ## Notes
 
-- Tasks sunt create în folderul Tasks al mailbox-ului implicit sau în mailbox-ul țintă când folosești delegate access
-- Pentru task-uri collaborative, folosiți calendar events cu invitați
-- Self-signed certificates necesită `verify_ssl: false`
+- Tasks are created in the default mailbox's Tasks folder or in the target mailbox when using delegate access
+- For collaborative tasks, use calendar events with attendees
+- Self-signed certificates require `verify_ssl: false`
 
 ## License
 

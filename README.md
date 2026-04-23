@@ -182,20 +182,6 @@ For public listings, release notes, and marketing copy, prefer:
 - **Brand line:** Built by Firma de AI, supported by Firma de IT.
 - **Links:** https://firmade.ai · https://firmade.it
 
-## Roadmap
-
-- [x] Exchange email workflows
-- [x] Exchange calendar workflows
-- [x] Exchange task workflows
-- [x] Exchange analytics
-- [x] Nextcloud file operations
-- [x] Nextcloud document understanding
-- [x] Document-to-task workflows
-- [ ] Exchange contacts
-- [ ] Email templates
-- [ ] Calendar scheduling / find free slots
-- [ ] Broader multilingual support
-
 ## License
 
 MIT — see [LICENSE](LICENSE).
@@ -206,7 +192,8 @@ This project follows the [Hardshell Coding Standards](https://github.com/asisten
 
 <div align="center">
 
-**[Firma de AI](https://firmade.ai) · [Firma de IT](https://firmade.it) · Exchange + Nextcloud workflows with ☕**
+**Built by [Firma de AI](https://firmade.ai), supported by [Firma de IT](https://firmade.it)**  
+*Exchange, Nextcloud, GitHub — one assistant.*
 
 [Hardshell](https://github.com/asistent-alex/openclaw-hardshell) · [prompt-to-pr](https://github.com/asistent-alex/openclaw-prompt-to-pr) · [Report Bug](https://github.com/asistent-alex/openclaw-nexlink/issues) · [Request Feature](https://github.com/asistent-alex/openclaw-nexlink/issues)
 
