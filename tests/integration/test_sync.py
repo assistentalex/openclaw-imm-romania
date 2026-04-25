@@ -505,3 +505,91 @@ class TestErrorHandling:
             with pytest.raises(SystemExit) as exc_info:
                 cmd_reminders(args)
             assert exc_info.value.code == 1
+
+
+class TestOwnerEmailFallback:
+    """Test OWNER_EMAIL config variable fallback behavior."""
+
+    @patch("sync.get_connection_config")
+    @patch("sync.get_account")
+    @patch("sync.check_dependencies")
+    def test_reminder_uses_owner_email(self, mock_check, mock_get_account, mock_config, fake_account, make_fake_task, isolate_sync_state):
+        """When OWNER_EMAIL is set, reminders should use it as recipient."""
+        mock_get_account.return_value = fake_account
+        mock_config.return_value = {
+            "owner_email": "owner@example.com",
+            "email": "service@example.com",
+        }
+
+        today = datetime.now()
+        fake_account.tasks.all.return_value = [
+            make_fake_task(
+                task_id="task-owner",
+                subject="Owner Task",
+                due_date=today - timedelta(days=1),
+                status="NotStarted",
+            )
+        ]
+
+        args = make_args(to=None, hours=24, dry_run=True)
+        with patch("sync.out") as mock_out:
+            cmd_reminders(args)
+            # Dry run should show owner_email as recipient, not service account
+            call_args = mock_out.call_args[0][0]
+            assert call_args["would_send_to"] == "owner@example.com"
+
+    @patch("sync.get_connection_config")
+    @patch("sync.get_account")
+    @patch("sync.check_dependencies")
+    def test_reminder_falls_back_to_account_email(self, mock_check, mock_get_account, mock_config, fake_account, make_fake_task, isolate_sync_state):
+        """When OWNER_EMAIL is not set, reminders should fall back to account.primary_smtp_address."""
+        mock_get_account.return_value = fake_account
+        mock_config.return_value = {
+            "owner_email": None,  # Not set
+            "email": "service@example.com",
+        }
+
+        today = datetime.now()
+        fake_account.tasks.all.return_value = [
+            make_fake_task(
+                task_id="task-fallback",
+                subject="Fallback Task",
+                due_date=today - timedelta(days=1),
+                status="NotStarted",
+            )
+        ]
+
+        args = make_args(to=None, hours=24, dry_run=True)
+        with patch("sync.out") as mock_out:
+            cmd_reminders(args)
+            # Should fall back to account.primary_smtp_address
+            call_args = mock_out.call_args[0][0]
+            assert call_args["would_send_to"] == fake_account.primary_smtp_address
+
+    @patch("sync.get_connection_config")
+    @patch("sync.get_account")
+    @patch("sync.check_dependencies")
+    def test_reminder_explicit_to_overrides_owner_email(self, mock_check, mock_get_account, mock_config, fake_account, make_fake_task, isolate_sync_state):
+        """When --to is given, it should override both OWNER_EMAIL and account address."""
+        mock_get_account.return_value = fake_account
+        mock_config.return_value = {
+            "owner_email": "owner@example.com",
+            "email": "service@example.com",
+        }
+
+        today = datetime.now()
+        fake_account.tasks.all.return_value = [
+            make_fake_task(
+                task_id="task-explicit",
+                subject="Explicit To Task",
+                due_date=today - timedelta(days=1),
+                status="NotStarted",
+            )
+        ]
+
+        args = make_args(to="explicit@example.com", hours=24, dry_run=True)
+        with patch("sync.out") as mock_out:
+            cmd_reminders(args)
+            # Explicit --to should take priority
+            call_args = mock_out.call_args[0][0]
+            assert call_args["would_send_to"] == "explicit@example.com"

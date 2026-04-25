@@ -13,6 +13,7 @@ metadata:
         - EXCHANGE_USERNAME
         - EXCHANGE_PASSWORD
         - EXCHANGE_EMAIL
+        - OWNER_EMAIL  # Optional: recipient for notifications (defaults to EXCHANGE_EMAIL)
         - NEXTCLOUD_URL
         - NEXTCLOUD_USERNAME
         - NEXTCLOUD_APP_PASSWORD

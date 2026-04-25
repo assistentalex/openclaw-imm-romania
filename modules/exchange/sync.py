@@ -22,6 +22,7 @@ try:
 except ImportError:
     HAS_EXCHANGELIB = False
 
+from config import get_connection_config
 from connection import get_account, check_dependencies
 from utils import out, die, format_datetime, task_to_dict, add_json_argument
 from logger import get_logger
@@ -243,8 +244,9 @@ def cmd_reminders(args: argparse.Namespace) -> None:
 
     body_html = "".join(body_parts)
 
-    # Determine recipient
-    to_addr = args.to or account.primary_smtp_address
+    # Determine recipient: explicit --to > OWNER_EMAIL config > Exchange account address
+    conn_config = get_connection_config()
+    to_addr = args.to or conn_config.get("owner_email") or account.primary_smtp_address
 
     if args.dry_run:
         _logger.info(

@@ -46,6 +46,7 @@ ENV_VARS = {
     "email": "EXCHANGE_EMAIL",
     "autodiscover": "EXCHANGE_AUTODISCOVER",
     "access_type": "EXCHANGE_ACCESS_TYPE",
+    "owner_email": "OWNER_EMAIL",
 }
 
 # Defaults
@@ -239,6 +240,7 @@ class Config:
             "email": self._config.get("email"),
             "autodiscover": self._config.get("autodiscover", True),
             "access_type": self._config.get("access_type", "delegate"),
+            "owner_email": self._config.get("owner_email") or self._config.get("email"),
         }
 
     def save_to_file(self, path: Optional[str] = None) -> None:
