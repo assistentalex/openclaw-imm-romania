@@ -6,6 +6,7 @@ Common functions used across all modules.
 import json
 import sys
 import os
+import argparse
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 
@@ -21,6 +22,16 @@ except ImportError:
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from logger import get_logger
+
+def add_json_argument(parser: argparse.ArgumentParser) -> None:
+    """Add --json flag for machine-readable JSON output."""
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        default=False,
+        help="Output results in JSON format",
+    )
+
 
 _logger = get_logger()
 

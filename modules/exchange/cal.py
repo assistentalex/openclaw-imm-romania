@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from connection import get_account
-from utils import out, die
+from utils import out, die, add_json_argument
 
 from logger import get_logger
 
@@ -440,6 +440,7 @@ def cmd_week(args):
     return cmd_list(list_args)
 
 def main():
+    add_json_argument(parser)
     parser = argparse.ArgumentParser(
         prog="cal.py",
         description="Exchange calendar operations",
@@ -449,6 +450,7 @@ def main():
     # connect
     p_connect = sub.add_parser("connect", help="Test calendar connection")
     p_connect.set_defaults(func=cmd_connect)
+    add_json_argument(p_connect)
 
     # list
     p_list = sub.add_parser("list", help="List events in date range")
@@ -457,21 +459,25 @@ def main():
     p_list.add_argument("--days", "-d", type=int, default=7, help="Days to show (default 7)")
     p_list.add_argument("--limit", "-n", type=int, default=50, help="Max events")
     p_list.set_defaults(func=cmd_list)
+    add_json_argument(p_list)
 
     # today
     p_today = sub.add_parser("today", help="List today's events")
     p_today.add_argument("--limit", "-n", type=int, default=20, help="Max events")
     p_today.set_defaults(func=cmd_today)
+    add_json_argument(p_today)
 
     # week
     p_week = sub.add_parser("week", help="List this week's events")
     p_week.add_argument("--limit", "-n", type=int, default=50, help="Max events")
     p_week.set_defaults(func=cmd_week)
+    add_json_argument(p_week)
 
     # get
     p_get = sub.add_parser("get", help="Get event details")
     p_get.add_argument("--id", "-i", required=True, help="Event ID")
     p_get.set_defaults(func=cmd_get)
+    add_json_argument(p_get)
 
     # create
     p_create = sub.add_parser("create", help="Create event")
@@ -485,6 +491,7 @@ def main():
     p_create.add_argument("--all-day", action="store_true", help="All-day event")
     p_create.add_argument("--reminder", type=int, help="Reminder minutes before")
     p_create.set_defaults(func=cmd_create)
+    add_json_argument(p_create)
 
     # update
     p_update = sub.add_parser("update", help="Update event")
@@ -495,11 +502,13 @@ def main():
     p_update.add_argument("--end", help="New end date/time")
     p_update.add_argument("--body", "-b", help="New body")
     p_update.set_defaults(func=cmd_update)
+    add_json_argument(p_update)
 
     # delete
     p_delete = sub.add_parser("delete", help="Delete event")
     p_delete.add_argument("--id", "-i", required=True, help="Event ID")
     p_delete.set_defaults(func=cmd_delete)
+    add_json_argument(p_delete)
 
     # respond
     p_respond = sub.add_parser("respond", help="Respond to meeting")
@@ -507,6 +516,7 @@ def main():
     p_respond.add_argument("--response", "-r", required=True, choices=["accept", "decline", "tentative"], help="Response")
     p_respond.add_argument("--body", "-b", help="Response message")
     p_respond.set_defaults(func=cmd_respond)
+    add_json_argument(p_respond)
 
     # availability
     p_avail = sub.add_parser("availability", help="Check availability")
@@ -514,6 +524,7 @@ def main():
     p_avail.add_argument("--start", "-s", required=True, help="Start date")
     p_avail.add_argument("--end", help="End date")
     p_avail.set_defaults(func=cmd_availability)
+    add_json_argument(p_avail)
 
     args = parser.parse_args()
 
@@ -543,6 +554,7 @@ def add_parser(subparsers):
     # connect
     p_connect = subparsers.add_parser("connect", help="Test calendar connection")
     p_connect.set_defaults(func=cmd_connect)
+    add_json_argument(p_connect)
 
     # list
     p_list = subparsers.add_parser("list", help="List events in date range")
@@ -551,21 +563,25 @@ def add_parser(subparsers):
     p_list.add_argument("--days", "-d", type=int, default=7, help="Days to show (default 7)")
     p_list.add_argument("--limit", "-n", type=int, default=50, help="Max events")
     p_list.set_defaults(func=cmd_list)
+    add_json_argument(p_list)
 
     # today
     p_today = subparsers.add_parser("today", help="List today's events")
     p_today.add_argument("--limit", "-n", type=int, default=20, help="Max events")
     p_today.set_defaults(func=cmd_today)
+    add_json_argument(p_today)
 
     # week
     p_week = subparsers.add_parser("week", help="List this week's events")
     p_week.add_argument("--limit", "-n", type=int, default=50, help="Max events")
     p_week.set_defaults(func=cmd_week)
+    add_json_argument(p_week)
 
     # get
     p_get = subparsers.add_parser("get", help="Get event details")
     p_get.add_argument("--id", "-i", required=True, help="Event ID")
     p_get.set_defaults(func=cmd_get)
+    add_json_argument(p_get)
 
     # create
     p_create = subparsers.add_parser("create", help="Create event")
@@ -579,6 +595,7 @@ def add_parser(subparsers):
     p_create.add_argument("--all-day", action="store_true", help="All-day event")
     p_create.add_argument("--reminder", type=int, help="Reminder minutes before")
     p_create.set_defaults(func=cmd_create)
+    add_json_argument(p_create)
 
     # update
     p_update = subparsers.add_parser("update", help="Update event")
@@ -589,11 +606,13 @@ def add_parser(subparsers):
     p_update.add_argument("--end", help="New end date/time")
     p_update.add_argument("--body", "-b", help="New body")
     p_update.set_defaults(func=cmd_update)
+    add_json_argument(p_update)
 
     # delete
     p_delete = subparsers.add_parser("delete", help="Delete event")
     p_delete.add_argument("--id", "-i", required=True, help="Event ID")
     p_delete.set_defaults(func=cmd_delete)
+    add_json_argument(p_delete)
 
     # respond
     p_respond = subparsers.add_parser("respond", help="Respond to meeting")
@@ -601,6 +620,7 @@ def add_parser(subparsers):
     p_respond.add_argument("--response", "-r", required=True, choices=["accept", "decline", "tentative"], help="Response")
     p_respond.add_argument("--body", "-b", help="Response message")
     p_respond.set_defaults(func=cmd_respond)
+    add_json_argument(p_respond)
 
     # availability
     p_avail = subparsers.add_parser("availability", help="Check availability")
@@ -608,6 +628,7 @@ def add_parser(subparsers):
     p_avail.add_argument("--start", "-s", required=True, help="Start date")
     p_avail.add_argument("--end", help="End date")
     p_avail.set_defaults(func=cmd_availability)
+    add_json_argument(p_avail)
 
 
 if __name__ == "__main__":

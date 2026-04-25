@@ -22,7 +22,7 @@ except ImportError:
     HAS_EXCHANGELIB = False
 
 from connection import get_account
-from utils import out, die, parse_datetime, format_datetime, task_to_dict
+from utils import out, die, parse_datetime, format_datetime, task_to_dict, add_json_argument
 
 # Task status mapping
 STATUS_MAP = {
@@ -493,6 +493,7 @@ def add_parser(subparsers: argparse.ArgumentParser) -> None:
     # connect
     p_connect = subparsers.add_parser("connect", help="Test connection to Exchange")
     p_connect.set_defaults(func=cmd_connect)
+    add_json_argument(p_connect)
 
     # list
     p_list = subparsers.add_parser("list", help="List tasks")
@@ -525,6 +526,7 @@ def add_parser(subparsers: argparse.ArgumentParser) -> None:
         help="Target mailbox (email address). Use to access tasks via delegate permissions."
     )
     p_list.set_defaults(func=cmd_list)
+    add_json_argument(p_list)
 
     # get
     p_get = subparsers.add_parser("get", help="Get task details")
@@ -534,6 +536,7 @@ def add_parser(subparsers: argparse.ArgumentParser) -> None:
         help="Target mailbox (email address). Use to access tasks via delegate permissions."
     )
     p_get.set_defaults(func=cmd_get)
+    add_json_argument(p_get)
 
     # create
     p_create = subparsers.add_parser("create", help="Create a new task")
@@ -553,6 +556,7 @@ def add_parser(subparsers: argparse.ArgumentParser) -> None:
         help="Assign task to another user (email address). Requires delegate permissions.",
     )
     p_create.set_defaults(func=cmd_create)
+    add_json_argument(p_create)
 
     # assign
     p_assign = subparsers.add_parser(
@@ -578,6 +582,7 @@ def add_parser(subparsers: argparse.ArgumentParser) -> None:
         help="Task priority",
     )
     p_assign.set_defaults(func=cmd_assign)
+    add_json_argument(p_assign)
 
     # update
     p_update = subparsers.add_parser("update", help="Update a task")
@@ -600,6 +605,7 @@ def add_parser(subparsers: argparse.ArgumentParser) -> None:
         help="Target mailbox (email address). Use to access tasks via delegate permissions."
     )
     p_update.set_defaults(func=cmd_update)
+    add_json_argument(p_update)
 
     # complete
     p_complete = subparsers.add_parser("complete", help="Mark task as completed")
@@ -609,6 +615,7 @@ def add_parser(subparsers: argparse.ArgumentParser) -> None:
         help="Target mailbox (email address). Use to access tasks via delegate permissions."
     )
     p_complete.set_defaults(func=cmd_complete)
+    add_json_argument(p_complete)
 
     # trash
     p_trash = subparsers.add_parser("trash", help="Move task to Deleted Items folder")
@@ -618,10 +625,12 @@ def add_parser(subparsers: argparse.ArgumentParser) -> None:
         help="Target mailbox (email address). Use to access tasks via delegate permissions."
     )
     p_trash.set_defaults(func=cmd_trash)
+    add_json_argument(p_trash)
 
 
 def main() -> None:
     """Main entry point for standalone execution."""
+    add_json_argument(parser)
     parser = argparse.ArgumentParser(
         prog="tasks.py",
         description="Task operations for Exchange Mailbox",

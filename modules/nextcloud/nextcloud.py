@@ -116,6 +116,8 @@ MONTHS = {
 }
 
 
+_JSON_OUTPUT = False
+
 def get_exchange_account(mailbox: str | None = None) -> Any:
     """Get an Exchange account for task creation."""
     from modules.exchange.connection import get_account, get_account_for
@@ -1217,7 +1219,11 @@ def print_json(data: Any) -> None:
 
 
 def print_list(results: list[dict[str, Any]]) -> None:
-    """Print list results in a readable table."""
+    """Print list results in a readable table or JSON."""
+    if _JSON_OUTPUT:
+        print_json({"ok": True, "count": len(results), "items": results})
+        return
+
     if not results:
         print("(empty)")
         return
@@ -1239,6 +1245,10 @@ def print_list(results: list[dict[str, Any]]) -> None:
 
 def print_info(info: dict[str, Any] | None) -> None:
     """Print a single-item info payload."""
+    if _JSON_OUTPUT:
+        print_json({"ok": True, "info": info} if info else {"ok": False, "error": "No info available"})
+        return
+
     if not info:
         print("No info available")
         return
@@ -1254,6 +1264,10 @@ def print_info(info: dict[str, Any] | None) -> None:
 
 def print_shared(shares: list[dict[str, Any]]) -> None:
     """Print items shared with the current user."""
+    if _JSON_OUTPUT:
+        print_json({"ok": True, "count": len(shares), "shares": shares})
+        return
+
     if not shares:
         print("No shared folders found.")
         return
@@ -1282,6 +1296,10 @@ def print_shared(shares: list[dict[str, Any]]) -> None:
 
 def print_share_links(links: list[dict[str, Any]]) -> None:
     """Print public share links."""
+    if _JSON_OUTPUT:
+        print_json({"ok": True, "count": len(links), "links": links})
+        return
+
     if not links:
         print("No public share links found.")
         return
@@ -1379,7 +1397,14 @@ def print_usage() -> None:
 
 def run_cli(argv: list[str] | None = None) -> int:
     """Run the standalone Nextcloud CLI and return an exit code."""
+    global _JSON_OUTPUT
     args = argv if argv is not None else sys.argv[1:]
+
+    # Strip --json from args
+    if "--json" in args:
+        _JSON_OUTPUT = True
+        args = [a for a in args if a != "--json"]
+
     if not args:
         print_usage()
         return 1

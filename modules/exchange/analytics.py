@@ -27,7 +27,7 @@ from exchangelib.queryset import Q
 from exchangelib.items import Message
 
 from connection import get_account
-from utils import out, die, format_datetime
+from utils import out, die, format_datetime, add_json_argument
 from logger import get_logger
 
 _logger = get_logger()
@@ -458,6 +458,8 @@ def add_parser(subparsers):
 
 def main():
     """Main entry point for analytics CLI."""
+    add_json_argument(parser)
+    add_json_argument(parser)
     parser = argparse.ArgumentParser(
         description="Email analytics and reporting",
         formatter_class=argparse.RawDescriptionHelpFormatter,

@@ -13,7 +13,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from connection import get_account
-from utils import out, die, parse_recipients
+from utils import out, die, parse_recipients, add_json_argument
 from logger import get_logger
 
 _logger = get_logger()
@@ -479,6 +479,7 @@ def cmd_list_attachments(args):
 
 
 def main():
+    add_json_argument(parser)
     parser = argparse.ArgumentParser(
         prog="mail.py",
         description="Exchange email operations",
@@ -577,6 +578,7 @@ def add_parser(subparsers):
     # connect
     p_connect = subparsers.add_parser("connect", help="Test mail connection")
     p_connect.set_defaults(func=cmd_connect)
+    add_json_argument(p_connect)
 
     # read
     p_read = subparsers.add_parser("read", help="List emails")
@@ -586,11 +588,13 @@ def add_parser(subparsers):
     p_read.add_argument("--from", dest="frm", metavar="ADDR", help="Filter by sender")
     p_read.add_argument("--subject", "-s", metavar="TEXT", help="Filter by subject")
     p_read.set_defaults(func=cmd_read)
+    add_json_argument(p_read)
 
     # get
     p_get = subparsers.add_parser("get", help="Get email details")
     p_get.add_argument("--id", "-i", required=True, help="Email ID")
     p_get.set_defaults(func=cmd_get)
+    add_json_argument(p_get)
 
     # send
     p_send = subparsers.add_parser("send", help="Send email")
@@ -604,6 +608,7 @@ def add_parser(subparsers):
         "--attach", "-a", metavar="FILE", help="Attachments (comma-separated)"
     )
     p_send.set_defaults(func=cmd_send)
+    add_json_argument(p_send)
 
     # draft
     p_draft = subparsers.add_parser("draft", help="Create draft")
@@ -616,6 +621,7 @@ def add_parser(subparsers):
         "--attach", "-a", metavar="FILE", help="Attachments (comma-separated)"
     )
     p_draft.set_defaults(func=cmd_draft)
+    add_json_argument(p_draft)
 
     # reply
     p_reply = subparsers.add_parser("reply", help="Reply to email")
@@ -625,6 +631,7 @@ def add_parser(subparsers):
         "--all", "-a", action="store_true", dest="reply_all", help="Reply to all"
     )
     p_reply.set_defaults(func=cmd_reply)
+    add_json_argument(p_reply)
 
     # forward
     p_fwd = subparsers.add_parser("forward", help="Forward email")
@@ -632,6 +639,7 @@ def add_parser(subparsers):
     p_fwd.add_argument("--to", "-t", required=True, help="Recipient(s)")
     p_fwd.add_argument("--body", "-b", default="", help="Forward message")
     p_fwd.set_defaults(func=cmd_forward)
+    add_json_argument(p_fwd)
 
     # mark
     p_mark = subparsers.add_parser("mark", help="Mark email read/unread")
@@ -640,16 +648,19 @@ def add_parser(subparsers):
     grp.add_argument("--read", action="store_true", help="Mark as read")
     grp.add_argument("--unread", action="store_true", help="Mark as unread")
     p_mark.set_defaults(func=cmd_mark)
+    add_json_argument(p_mark)
 
     # mark-all-read
     p_markall = subparsers.add_parser("mark-all-read", help="Mark all unread emails as read")
     p_markall.add_argument("--folder", "-f", default="inbox", help="Folder (default: inbox)")
     p_markall.set_defaults(func=cmd_mark_all_read)
+    add_json_argument(p_markall)
 
     # list-attachments
     p_latt = subparsers.add_parser("list-attachments", help="List attachments")
     p_latt.add_argument("--id", "-i", required=True, help="Email ID")
     p_latt.set_defaults(func=cmd_list_attachments)
+    add_json_argument(p_latt)
 
     # download-attachment
     p_datt = subparsers.add_parser("download-attachment", help="Download attachment")
@@ -658,6 +669,7 @@ def add_parser(subparsers):
     p_datt.add_argument("--index", type=int, help="Attachment index")
     p_datt.add_argument("--output", "-o", help="Output path")
     p_datt.set_defaults(func=cmd_download_attachment)
+    add_json_argument(p_datt)
 
 
 if __name__ == "__main__":
