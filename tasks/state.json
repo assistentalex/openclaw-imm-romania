@@ -1,0 +1,21 @@
+{
+  "mode": "refactor",
+  "phase": "completed",
+  "branch": "night-shift/2026-04-25-Add---json-flag-to-all-nexl",
+  "status": "READY_FOR_PR",
+  "last_completed_task": 7,
+  "total_tasks": 7,
+  "tests_passed": 67,
+  "files_modified": [
+    "modules/exchange/utils.py",
+    "modules/exchange/mail.py",
+    "modules/exchange/cal.py",
+    "modules/exchange/tasks.py",
+    "modules/exchange/analytics.py",
+    "modules/exchange/sync.py",
+    "modules/exchange/cli.py",
+    "modules/nextcloud/nextcloud.py",
+    "tests/test_all.py"
+  ],
+  "saved_at": "2026-04-25T02:28:00Z"
+}

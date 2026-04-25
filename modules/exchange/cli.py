@@ -25,6 +25,8 @@ import sys
 # Add scripts dir to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from utils import add_json_argument
+
 
 def main():
     """Main entry point for NexLink CLI."""
@@ -47,9 +49,11 @@ Examples:
     )
 
     subparsers = parser.add_subparsers(dest="module", help="Module to use")
+    add_json_argument(parser)
 
     # Mail subparser
     mail_parser = subparsers.add_parser("mail", help="Email operations")
+    add_json_argument(mail_parser)
     mail_sub = mail_parser.add_subparsers(dest="command", help="Mail command")
 
     try:
@@ -61,6 +65,7 @@ Examples:
 
     # Calendar subparser
     cal_parser = subparsers.add_parser("calendar", help="Calendar operations")
+    add_json_argument(cal_parser)
     cal_sub = cal_parser.add_subparsers(dest="command", help="Calendar command")
 
     try:
@@ -72,6 +77,7 @@ Examples:
 
     # Tasks subparser
     tasks_parser = subparsers.add_parser("tasks", help="Task operations")
+    add_json_argument(tasks_parser)
     tasks_sub = tasks_parser.add_subparsers(dest="command", help="Tasks command")
 
     try:
@@ -83,6 +89,7 @@ Examples:
 
     # Sync subparser
     sync_parser = subparsers.add_parser("sync", help="Task sync and reminders")
+    add_json_argument(sync_parser)
     sync_sub = sync_parser.add_subparsers(dest="command", help="Sync command")
 
     try:
@@ -94,6 +101,7 @@ Examples:
 
     # Analytics subparser
     analytics_parser = subparsers.add_parser("analytics", help="Email analytics and statistics")
+    add_json_argument(analytics_parser)
     analytics_sub = analytics_parser.add_subparsers(dest="command", help="Analytics command")
 
     try:

@@ -62,6 +62,9 @@ NexLink - Unified CLI for Email, Calendar, Tasks, and Files
 Usage:
     nexlink <module> <command> [options]
 
+Global Options:
+    --json      Output results in JSON format
+
 Modules:
     mail        Email operations (Exchange)
     cal         Calendar operations (Exchange)

@@ -116,6 +116,8 @@ MONTHS = {
 }
 
 
+_JSON_OUTPUT = False
+
 def get_exchange_account(mailbox: str | None = None) -> Any:
     """Get an Exchange account for task creation."""
     from modules.exchange.connection import get_account, get_account_for
@@ -1217,7 +1219,11 @@ def print_json(data: Any) -> None:
 
 
 def print_list(results: list[dict[str, Any]]) -> None:
-    """Print list results in a readable table."""
+    """Print list results in a readable table or JSON."""
+    if _JSON_OUTPUT:
+        print_json({"ok": True, "count": len(results), "items": results})
+        return
+
     if not results:
         print("(empty)")
         return
@@ -1239,6 +1245,10 @@ def print_list(results: list[dict[str, Any]]) -> None:
 
 def print_info(info: dict[str, Any] | None) -> None:
     """Print a single-item info payload."""
+    if _JSON_OUTPUT:
+        print_json({"ok": True, "info": info} if info else {"ok": False, "error": "No info available"})
+        return
+
     if not info:
         print("No info available")
         return
@@ -1254,6 +1264,10 @@ def print_info(info: dict[str, Any] | None) -> None:
 
 def print_shared(shares: list[dict[str, Any]]) -> None:
     """Print items shared with the current user."""
+    if _JSON_OUTPUT:
+        print_json({"ok": True, "count": len(shares), "shares": shares})
+        return
+
     if not shares:
         print("No shared folders found.")
         return
@@ -1282,6 +1296,10 @@ def print_shared(shares: list[dict[str, Any]]) -> None:
 
 def print_share_links(links: list[dict[str, Any]]) -> None:
     """Print public share links."""
+    if _JSON_OUTPUT:
+        print_json({"ok": True, "count": len(links), "links": links})
+        return
+
     if not links:
         print("No public share links found.")
         return
@@ -1335,6 +1353,9 @@ def _parse_share_create_args(args: list[str]) -> tuple[str | None, dict[str, Any
 
 def print_usage() -> None:
     """Print usage information for the standalone Nextcloud module CLI."""
+    if _JSON_OUTPUT:
+        print(json.dumps({"error": "No command specified", "usage": "nextcloud <command> [options] [--json]", "code": 1}))
+        return
     print("Nextcloud WebDAV Client")
     print()
     print("Usage: nextcloud.py <command> [arguments]")
@@ -1379,7 +1400,14 @@ def print_usage() -> None:
 
 def run_cli(argv: list[str] | None = None) -> int:
     """Run the standalone Nextcloud CLI and return an exit code."""
+    global _JSON_OUTPUT
     args = argv if argv is not None else sys.argv[1:]
+
+    # Strip --json from args
+    if "--json" in args:
+        _JSON_OUTPUT = True
+        args = [a for a in args if a != "--json"]
+
     if not args:
         print_usage()
         return 1
@@ -1389,7 +1417,10 @@ def run_cli(argv: list[str] | None = None) -> int:
     try:
         client = NextcloudClient()
     except EnvironmentError as exc:
-        print(str(exc))
+        if _JSON_OUTPUT:
+            print(json.dumps({"error": str(exc), "code": 1}))
+        else:
+            print(str(exc))
         return 1
 
     command_args = args[1:]
@@ -1400,77 +1431,125 @@ def run_cli(argv: list[str] | None = None) -> int:
         remote_path = clean_args[0] if clean_args else "/"
         results = client.list(remote_path, recursive=recursive)
         if results is None:
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Failed to list directory", "code": 3}))
             return 3
         print_list(results)
         return 0
 
     if command == "search":
         if not command_args:
-            print("Usage: nextcloud.py search <query> [remote_path]")
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Usage: nextcloud.py search <query> [remote_path]", "code": 1}))
+            else:
+                print("Usage: nextcloud.py search <query> [remote_path]")
             return 1
         query = command_args[0]
         remote_path = command_args[1] if len(command_args) > 1 else "/"
         results = client.search(query, remote_path)
         if results is None:
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Search failed", "code": 3}))
             return 3
         print_list(results)
         return 0
 
     if command == "upload":
         if len(command_args) < 2:
-            print("Usage: nextcloud.py upload <local_path> <remote_path>")
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Usage: nextcloud.py upload <local_path> <remote_path>", "code": 1}))
+            else:
+                print("Usage: nextcloud.py upload <local_path> <remote_path>")
             return 1
-        return 0 if client.upload(command_args[0], command_args[1]) else 3
+        result = client.upload(command_args[0], command_args[1])
+        if _JSON_OUTPUT:
+            if result:
+                print(json.dumps({"ok": True, "local_path": command_args[0], "remote_path": command_args[1]}))
+            else:
+                print(json.dumps({"error": "Upload failed", "code": 3}))
+        return 0 if result else 3
 
     if command == "download":
         if len(command_args) < 2:
-            print("Usage: nextcloud.py download <remote_path> <local_path>")
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Usage: nextcloud.py download <remote_path> <local_path>", "code": 1}))
+            else:
+                print("Usage: nextcloud.py download <remote_path> <local_path>")
             return 1
-        return 0 if client.download(command_args[0], command_args[1]) else 3
+        result = client.download(command_args[0], command_args[1])
+        if _JSON_OUTPUT:
+            if result:
+                print(json.dumps({"ok": True, "remote_path": command_args[0], "local_path": command_args[1]}))
+            else:
+                print(json.dumps({"error": "Download failed", "code": 3}))
+        return 0 if result else 3
 
     if command == "extract-text":
         if not command_args:
-            print("Usage: nextcloud.py extract-text <remote_path>")
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Usage: nextcloud.py extract-text <remote_path>", "code": 1}))
+            else:
+                print("Usage: nextcloud.py extract-text <remote_path>")
             return 1
         result = client.extract_text(command_args[0])
         if result is None:
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Failed to extract text", "code": 3}))
             return 3
         print_json(result)
         return 0
 
     if command == "summarize":
         if not command_args:
-            print("Usage: nextcloud.py summarize <remote_path>")
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Usage: nextcloud.py summarize <remote_path>", "code": 1}))
+            else:
+                print("Usage: nextcloud.py summarize <remote_path>")
             return 1
         result = client.summarize(command_args[0])
         if result is None:
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Failed to summarize", "code": 3}))
             return 3
         print_json(result)
         return 0
 
     if command == "ask-file":
         if len(command_args) < 2:
-            print("Usage: nextcloud.py ask-file <remote_path> <question>")
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Usage: nextcloud.py ask-file <remote_path> <question>", "code": 1}))
+            else:
+                print("Usage: nextcloud.py ask-file <remote_path> <question>")
             return 1
         result = client.ask_file(command_args[0], " ".join(command_args[1:]))
         if result is None:
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Failed to answer question", "code": 3}))
             return 3
         print_json(result)
         return 0
 
     if command == "extract-actions":
         if not command_args:
-            print("Usage: nextcloud.py extract-actions <remote_path>")
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Usage: nextcloud.py extract-actions <remote_path>", "code": 1}))
+            else:
+                print("Usage: nextcloud.py extract-actions <remote_path>")
             return 1
         result = client.extract_actions(command_args[0])
         if result is None:
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Failed to extract actions", "code": 3}))
             return 3
         print_json(result)
         return 0
 
     if command == "create-tasks-from-file":
         if not command_args:
-            print("Usage: nextcloud.py create-tasks-from-file <remote_path>")
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Usage: nextcloud.py create-tasks-from-file <remote_path>", "code": 1}))
+            else:
+                print("Usage: nextcloud.py create-tasks-from-file <remote_path>")
             return 1
         remote_path = command_args[0]
         mailbox = None
@@ -1493,7 +1572,11 @@ def run_cli(argv: list[str] | None = None) -> int:
                 try:
                     selected_indexes = [int(part) for part in raw_indexes]
                 except ValueError:
-                    print("Invalid --select value. Use a comma-separated list like: 1,2,3")
+                    msg = "Invalid --select value. Use a comma-separated list like: 1,2,3"
+                    if _JSON_OUTPUT:
+                        print(json.dumps({"error": msg, "code": 1}))
+                    else:
+                        print(msg)
                     return 1
                 index += 2
                 continue
@@ -1505,7 +1588,11 @@ def run_cli(argv: list[str] | None = None) -> int:
                 execute = False
                 index += 1
                 continue
-            print(f"Unknown create-tasks-from-file option: {token}")
+            msg = f"Unknown create-tasks-from-file option: {token}"
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": msg, "code": 1}))
+            else:
+                print(msg)
             return 1
         result = client.create_tasks_from_file(
             remote_path,
@@ -1521,34 +1608,75 @@ def run_cli(argv: list[str] | None = None) -> int:
 
     if command == "mkdir":
         if not command_args:
-            print("Usage: nextcloud.py mkdir <remote_path>")
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Usage: nextcloud.py mkdir <remote_path>", "code": 1}))
+            else:
+                print("Usage: nextcloud.py mkdir <remote_path>")
             return 1
-        return 0 if client.mkdir(command_args[0]) else 3
+        result = client.mkdir(command_args[0])
+        if _JSON_OUTPUT:
+            if result:
+                print(json.dumps({"ok": True, "path": command_args[0]}))
+            else:
+                print(json.dumps({"error": "Failed to create directory", "code": 3}))
+        return 0 if result else 3
 
     if command == "delete":
         if not command_args:
-            print("Usage: nextcloud.py delete <remote_path>")
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Usage: nextcloud.py delete <remote_path>", "code": 1}))
+            else:
+                print("Usage: nextcloud.py delete <remote_path>")
             return 1
-        return 0 if client.delete(command_args[0]) else 3
+        result = client.delete(command_args[0])
+        if _JSON_OUTPUT:
+            if result:
+                print(json.dumps({"ok": True, "path": command_args[0]}))
+            else:
+                print(json.dumps({"error": "Failed to delete", "code": 3}))
+        return 0 if result else 3
 
     if command == "move":
         if len(command_args) < 2:
-            print("Usage: nextcloud.py move <source_path> <dest_path>")
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Usage: nextcloud.py move <source_path> <dest_path>", "code": 1}))
+            else:
+                print("Usage: nextcloud.py move <source_path> <dest_path>")
             return 1
-        return 0 if client.move(command_args[0], command_args[1]) else 3
+        result = client.move(command_args[0], command_args[1])
+        if _JSON_OUTPUT:
+            if result:
+                print(json.dumps({"ok": True, "source": command_args[0], "dest": command_args[1]}))
+            else:
+                print(json.dumps({"error": "Failed to move", "code": 3}))
+        return 0 if result else 3
 
     if command == "copy":
         if len(command_args) < 2:
-            print("Usage: nextcloud.py copy <source_path> <dest_path>")
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Usage: nextcloud.py copy <source_path> <dest_path>", "code": 1}))
+            else:
+                print("Usage: nextcloud.py copy <source_path> <dest_path>")
             return 1
-        return 0 if client.copy(command_args[0], command_args[1]) else 3
+        result = client.copy(command_args[0], command_args[1])
+        if _JSON_OUTPUT:
+            if result:
+                print(json.dumps({"ok": True, "source": command_args[0], "dest": command_args[1]}))
+            else:
+                print(json.dumps({"error": "Failed to copy", "code": 3}))
+        return 0 if result else 3
 
     if command == "info":
         if not command_args:
-            print("Usage: nextcloud.py info <remote_path>")
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Usage: nextcloud.py info <remote_path>", "code": 1}))
+            else:
+                print("Usage: nextcloud.py info <remote_path>")
             return 1
         info = client.info(command_args[0])
         if info is None:
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Failed to get info", "code": 4}))
             return 4
         print_info(info)
         return 0
@@ -1560,13 +1688,16 @@ def run_cli(argv: list[str] | None = None) -> int:
     if command == "share-create":
         remote_path, options = _parse_share_create_args(command_args)
         if remote_path is None:
-            print(
-                "Usage: nextcloud.py share-create <remote_path> "
-                "[--password VALUE] [--expire-date YYYY-MM-DD] [--public-upload]"
-            )
+            msg = "Usage: nextcloud.py share-create <remote_path> [--password VALUE] [--expire-date YYYY-MM-DD] [--public-upload]"
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": msg, "code": 1}))
+            else:
+                print(msg)
             return 1
         result = client.create_share_link(remote_path, **options)
         if result is None:
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Failed to create share link", "code": 3}))
             return 3
         print_json(result)
         return 0
@@ -1578,11 +1709,24 @@ def run_cli(argv: list[str] | None = None) -> int:
 
     if command == "share-revoke":
         if not command_args:
-            print("Usage: nextcloud.py share-revoke <share_id>")
+            if _JSON_OUTPUT:
+                print(json.dumps({"error": "Usage: nextcloud.py share-revoke <share_id>", "code": 1}))
+            else:
+                print("Usage: nextcloud.py share-revoke <share_id>")
             return 1
-        return 0 if client.revoke_share_link(command_args[0]) else 3
+        result = client.revoke_share_link(command_args[0])
+        if _JSON_OUTPUT:
+            if result:
+                print(json.dumps({"ok": True, "share_id": command_args[0]}))
+            else:
+                print(json.dumps({"error": "Failed to revoke share link", "code": 3}))
+        return 0 if result else 3
 
-    print(f"Unknown command: {command}")
+    msg = f"Unknown command: {command}"
+    if _JSON_OUTPUT:
+        print(json.dumps({"error": msg, "code": 1}))
+    else:
+        print(msg)
     return 1
 
 

@@ -22,8 +22,9 @@ try:
 except ImportError:
     HAS_EXCHANGELIB = False
 
+from config import get_connection_config
 from connection import get_account, check_dependencies
-from utils import out, die, format_datetime, task_to_dict
+from utils import out, die, format_datetime, task_to_dict, add_json_argument
 from logger import get_logger
 
 # Sync state file location
@@ -243,8 +244,9 @@ def cmd_reminders(args: argparse.Namespace) -> None:
 
     body_html = "".join(body_parts)
 
-    # Determine recipient
-    to_addr = args.to or account.primary_smtp_address
+    # Determine recipient: explicit --to > OWNER_EMAIL config > Exchange account address
+    conn_config = get_connection_config()
+    to_addr = args.to or conn_config.get("owner_email") or account.primary_smtp_address
 
     if args.dry_run:
         _logger.info(
@@ -435,6 +437,7 @@ def add_parser(subparsers: argparse.ArgumentParser) -> None:
         "--limit", "-n", type=int, default=50, help="Maximum tasks to return"
     )
     p_sync.set_defaults(func=cmd_sync)
+    add_json_argument(p_sync)
 
     # reminders
     p_reminders = subparsers.add_parser(
@@ -448,6 +451,7 @@ def add_parser(subparsers: argparse.ArgumentParser) -> None:
         "--dry-run", action="store_true", help="Show what would be sent"
     )
     p_reminders.set_defaults(func=cmd_reminders)
+    add_json_argument(p_reminders)
 
     # link-calendar
     p_link = subparsers.add_parser(
@@ -463,14 +467,17 @@ def add_parser(subparsers: argparse.ArgumentParser) -> None:
     )
     p_link.add_argument("--invite", action="store_true", help="Send invite to self")
     p_link.set_defaults(func=cmd_link_calendar)
+    add_json_argument(p_link)
 
     # status
     p_status = subparsers.add_parser("status", help="Show sync status and statistics")
     p_status.set_defaults(func=cmd_status)
+    add_json_argument(p_status)
 
 
 def main() -> None:
     """Main entry point for standalone execution."""
+    add_json_argument(parser)
     parser = argparse.ArgumentParser(
         prog="sync.py",
         description="Task sync and reminder operations",
