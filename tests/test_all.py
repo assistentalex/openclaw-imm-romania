@@ -240,6 +240,19 @@ class TestCLI(unittest.TestCase):
         self.assertIn("mail", result.stdout)
         self.assertIn("calendar", result.stdout)
         self.assertIn("tasks", result.stdout)
+        self.assertIn("--json", result.stdout)
+
+    def test_cli_help_json_flag_listed_in_subcommands(self):
+        """Each module subcommand help should mention --json."""
+        for subcmd in ["mail connect", "calendar today", "tasks list", "sync status"]:
+            result = subprocess.run(
+                [sys.executable, "-m", "modules.exchange.cli"] + subcmd.split() + ["--help"],
+                capture_output=True,
+                text=True,
+                cwd=PROJECT_ROOT,
+            )
+            self.assertEqual(result.returncode, 0, f"{subcmd} --help failed")
+            self.assertIn("--json", result.stdout, f"{subcmd} --help should list --json")
 
 
 class TestAnalytics(unittest.TestCase):

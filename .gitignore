@@ -56,3 +56,4 @@ data/*.json
 data/*.jsonl
 data/msp-clients.json
 data/contract-renewals.jsonl
+.coverage
