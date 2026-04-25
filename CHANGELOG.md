@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-04-25
+
+### Added
+
+- **OWNER_EMAIL config variable** — optional env var for notification recipient
+  - Priority chain: `--to` flag > `OWNER_EMAIL` > `account.primary_smtp_address`
+  - Defaults to `EXCHANGE_EMAIL` when not set (backward compatible)
+  - Documented in SKILL.md env vars list
+- **Integration tests for OWNER_EMAIL fallback** — 3 new tests in `TestOwnerEmailFallback`
+  - `test_reminder_uses_owner_email` — verifies OWNER_EMAIL is used as recipient
+  - `test_reminder_falls_back_to_account_email` — verifies fallback to Exchange account
+  - `test_reminder_explicit_to_overrides_owner_email` — verifies `--to` flag priority
+- **Integration tests for Exchange sync operations** — 15 new tests covering sync, error handling, and reminder flows
+
+### Changed
+
+- `cmd_reminders` now resolves recipient via `get_connection_config()` instead of `account.primary_smtp_address` directly
+
 ## [0.9.0] - 2026-04-22
 
 ### Changed

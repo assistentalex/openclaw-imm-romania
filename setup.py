@@ -10,7 +10,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="nexlink",
-    version="0.10.4",
+    version="0.11.0",
     author="OpenClaw Community",
     author_email="community@openclaw.ai",
     description="Exchange and Nextcloud assistant for Romanian SMEs",

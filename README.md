@@ -6,7 +6,7 @@
 
 **Built for [Firma de AI](https://firmade.ai), supported by [Firma de IT](https://firmade.it)**
 
-[![Version](https://img.shields.io/badge/version-0.10.6-blue.svg)](https://github.com/asistent-alex/openclaw-nexlink)
+[![Version](https://img.shields.io/badge/version-0.11.0-blue.svg)](https://github.com/asistent-alex/openclaw-nexlink)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![OpenClaw Skill](https://img.shields.io/badge/OpenClaw-Skill-green.svg)](https://clawhub.ai)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-brightgreen.svg)](https://www.python.org/)
@@ -87,7 +87,7 @@ Full Exchange on-premises (2016/2019) workflows over EWS.
 | List delegated tasks | `nexlink tasks list --mailbox coleg@firma.ro` |
 | Complete / trash task | `nexlink tasks complete --id TASK_ID` · `nexlink tasks trash --id TASK_ID` |
 | Sync tasks | `nexlink sync sync` · `nexlink sync status` |
-| Send reminders | `nexlink sync reminders --hours 24` |
+| Send reminders | `nexlink sync reminders --hours 24` · `nexlink sync reminders --hours 24 --to owner@example.com` |
 | Link calendar event | `nexlink sync link-calendar --task-id TASK_ID` |
 | Inbox analytics | `nexlink analytics stats --days 30` |
 | Response time | `nexlink analytics response-time --days 7` |
@@ -150,6 +150,7 @@ export EXCHANGE_SERVER="https://mail.your-domain.com/EWS/Exchange.asmx"
 export EXCHANGE_USERNAME="service-account"
 export EXCHANGE_PASSWORD="your-password"
 export EXCHANGE_EMAIL="service-account@your-domain.com"
+export OWNER_EMAIL="owner@your-domain.com"  # Optional: recipient for notifications (defaults to EXCHANGE_EMAIL)
 export EXCHANGE_VERIFY_SSL="false"   # only for self-signed certificates
 ```
 
@@ -165,7 +166,7 @@ For full setup details, see [references/setup.md](references/setup.md).
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) for the full version history. Latest: v0.10.6.
+See [CHANGELOG.md](CHANGELOG.md) for the full version history. Latest: v0.11.0.
 
 ## Installation options
 
