@@ -10,6 +10,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![OpenClaw Skill](https://img.shields.io/badge/OpenClaw-Skill-green.svg)](https://clawhub.ai)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-brightgreen.svg)](https://www.python.org/)
+[![Tests](https://img.shields.io/badge/tests-105%20passed%2C%201%20failed-yellow.svg)](https://github.com/asistent-alex/openclaw-nexlink)
+[![ClawHub](https://img.shields.io/badge/clawhub-nexlink-8A2BE2.svg)](https://clawhub.ai/asistent-alex/nexlink)
+[![Hardshell](https://img.shields.io/badge/code%20style-Hardshell-ff69b4.svg)](https://github.com/asistent-alex/openclaw-hardshell)
 [![Firma de AI](https://img.shields.io/badge/built%20by-Firma%20de%20AI-6366f1.svg)](https://firmade.ai)
 [![Firma de IT](https://img.shields.io/badge/supported%20by-Firma%20de%20IT-0ea5e9.svg)](https://firmade.it)
 

@@ -1,7 +1,7 @@
 ---
 name: nexlink
 version: 0.12.0
-description: Nextcloud & Exchange connector for email, calendar, tasks, files, and document workflows.
+description: Exchange & Nextcloud connector for cross-workflow automation — email, calendar, tasks, file management, document understanding (summarize, Q&A, action extraction), contacts, analytics, and persistent memory integration.
 metadata:
   openclaw:
     requires:
