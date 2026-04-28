@@ -61,6 +61,50 @@ def _dav_base_path(user: str) -> str:
     return f"remote.php/dav/addressbooks/users/{urllib.parse.quote(user)}"
 
 
+def _resolve_principal(base_url: str) -> Optional[str]:
+    """Discover the DAV principal name from the server.
+
+    Nextcloud may use a different identifier (e.g. a GUID) than the login
+    username, so we PROPFIND the root to get current-user-principal.
+    """
+    ns = {"d": "DAV:"}
+    body = """<?xml version="1.0" encoding="utf-8"?>
+<d:propfind xmlns:d="DAV:">
+    <d:prop>
+        <d:current-user-principal/>
+    </d:prop>
+</d:propfind>"""
+    try:
+        resp = requests.request(
+            "PROPFIND",
+            f"{base_url}/remote.php/dav/",
+            auth=_auth(),
+            headers={"Depth": "0"},
+            data=body,
+            timeout=DEFAULT_TIMEOUT,
+        )
+        if resp.status_code not in CARDDAV_SUCCESS_CODES:
+            return None
+        root = ET.fromstring(resp.content)
+        href = root.find(".//d:current-user-principal/d:href", ns)
+        if href is not None and href.text:
+            # Extract the last path segment: /remote.php/dav/principals/users/XXX/
+            # or return the full href for dav_base usage
+            return href.text.strip("/").split("/")[-1]
+        return None
+    except (RequestException, ET.ParseError):
+        return None
+
+
+def _dav_base() -> str:
+    """Get the CardDAV base path using auto-discovered principal."""
+    base_url, user, _ = _get_env_config()
+    principal = _resolve_principal(base_url)
+    if not principal:
+        principal = user
+    return _dav_base_path(principal)
+
+
 def _list_addressbooks_raw(base_url: str, dav_path: str) -> Optional[ET.Element]:
     """PROPFIND to list addressbooks (CardDAV collections)."""
     url = f"{base_url}/{dav_path}/"
@@ -92,7 +136,7 @@ def _list_addressbooks_raw(base_url: str, dav_path: str) -> Optional[ET.Element]
 def list_addressbooks() -> List[Dict[str, str]]:
     """List available CardDAV addressbooks."""
     base_url, user, _ = _get_env_config()
-    dav_base = _dav_base_path(user)
+    dav_base = _dav_base()
     ns = {
         "d": "DAV:",
         "card": "urn:ietf:params:xml:ns:carddav",
@@ -346,7 +390,7 @@ def _dict_to_vcard(data: Dict[str, str], include_uid: bool = False) -> str:
 def cmd_list(args: argparse.Namespace) -> None:
     """List contacts from a CardDAV addressbook."""
     base_url, user, _ = _get_env_config()
-    dav_base = _dav_base_path(user)
+    dav_base = _dav_base()
 
     book_href = args.addressbook
     if not book_href:
@@ -367,7 +411,7 @@ def cmd_list(args: argparse.Namespace) -> None:
 def cmd_get(args: argparse.Namespace) -> None:
     """Get a single contact by UID."""
     base_url, user, _ = _get_env_config()
-    dav_base = _dav_base_path(user)
+    dav_base = _dav_base()
 
     book_href = args.addressbook
     if not book_href:
@@ -388,7 +432,7 @@ def cmd_get(args: argparse.Namespace) -> None:
 def cmd_create(args: argparse.Namespace) -> None:
     """Create a new contact in CardDAV."""
     base_url, user, _ = _get_env_config()
-    dav_base = _dav_base_path(user)
+    dav_base = _dav_base()
 
     book_href = args.addressbook
     if not book_href:
@@ -451,7 +495,7 @@ def cmd_create(args: argparse.Namespace) -> None:
 def cmd_update(args: argparse.Namespace) -> None:
     """Update an existing contact via CardDAV."""
     base_url, user, _ = _get_env_config()
-    dav_base = _dav_base_path(user)
+    dav_base = _dav_base()
 
     book_href = args.addressbook
     if not book_href:
@@ -527,7 +571,7 @@ def cmd_update(args: argparse.Namespace) -> None:
 def cmd_delete(args: argparse.Namespace) -> None:
     """Delete a contact from CardDAV."""
     base_url, user, _ = _get_env_config()
-    dav_base = _dav_base_path(user)
+    dav_base = _dav_base()
 
     book_href = args.addressbook
     if not book_href:
@@ -571,7 +615,7 @@ def cmd_delete(args: argparse.Namespace) -> None:
 def cmd_search(args: argparse.Namespace) -> None:
     """Search contacts by query string."""
     base_url, user, _ = _get_env_config()
-    dav_base = _dav_base_path(user)
+    dav_base = _dav_base()
 
     book_href = args.addressbook
     if not book_href:
