@@ -45,7 +45,7 @@ metadata:
       repository: https://github.com/asistent-alex/openclaw-nexlink
 ---
 
-# NexLink — Nextcloud & Exchange Connector
+# NexLink — Exchange & Nextcloud Connector
 
 **Built by [Firma de AI](https://firmade.ai), supported by [Firma de IT](https://firmade.it).**
 
