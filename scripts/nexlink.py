@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-NexLink - Unified CLI for Email, Calendar, Tasks, and Files.
+NexLink - Unified CLI for Email, Calendar, Tasks, Files, and Contacts.
 
-Orchestrates Exchange (mail, calendar, tasks) and Nextcloud (files) operations.
+Orchestrates Exchange (mail, calendar, tasks) and Nextcloud (files) operations,
+plus Contacts from both sources.
 """
 
 import sys
@@ -45,6 +46,9 @@ def main():
 
         sys.exit(nextcloud_run_cli(args))
 
+    elif module == 'contacts':
+        _run_contacts(args)
+
     elif module in ('help', '-h', '--help'):
         print_usage()
 
@@ -54,10 +58,80 @@ def main():
         sys.exit(1)
 
 
+def _run_contacts(args):
+    """Handle 'nexlink contacts <command> [--source exchange|nextcloud] ...'."""
+    if len(args) < 1:
+        print("Error: No command specified for contacts.")
+        print(
+            "Available commands: list, get, create, update, delete, search, "
+            "addressbooks, addressbook-list"
+        )
+        print("\nUse --source exchange|nextcloud to choose provider (default: exchange)")
+        sys.exit(1)
+
+    command = args[0]
+    source = 'exchange'
+    remaining = []
+
+    # Parse --source from args
+    i = 1
+    while i < len(args):
+        arg = args[i]
+        if arg == '--source':
+            i += 1
+            if i < len(args):
+                source = args[i]
+            else:
+                print("Error: --source requires a value (exchange|nextcloud)")
+                sys.exit(1)
+        elif arg.startswith('--source='):
+            source = arg.split('=', 1)[1]
+        else:
+            remaining.append(arg)
+        i += 1
+
+    if source == 'exchange':
+        from modules.exchange.cli import main as exchange_main
+        sys.argv = [sys.argv[0], 'contacts', command] + remaining
+        exchange_main()
+
+    elif source == 'nextcloud':
+        _run_nc_contacts(command, remaining)
+
+    else:
+        print(f"Error: Unknown source '{source}'. Use --source exchange|nextcloud")
+        sys.exit(1)
+
+
+def _run_nc_contacts(command, remaining):
+    """Route a contacts command to the Nextcloud CardDAV handler."""
+    from modules.nextcloud.contacts import add_parser as nc_add_parser
+    from modules.nextcloud.contacts import out as nc_out
+    from modules.nextcloud.contacts import list_addressbooks as nc_list_addressbooks
+
+    # Special subcommand for listing addressbooks
+    if command in ('addressbooks', 'addressbook-list'):
+        books = nc_list_addressbooks()
+        nc_out({"ok": True, "count": len(books), "addressbooks": books})
+        sys.exit(0)
+
+    import argparse
+    parser = argparse.ArgumentParser(prog='nexlink contacts', add_help=False)
+    sub = parser.add_subparsers(dest='contact_cmd')
+    nc_add_parser(sub)
+
+    nc_args = parser.parse_args([command] + remaining)
+    if hasattr(nc_args, 'func'):
+        nc_args.func(nc_args)
+    else:
+        parser.print_help()
+        sys.exit(1)
+
+
 def print_usage():
     """Print usage information."""
     print("""
-NexLink - Unified CLI for Email, Calendar, Tasks, and Files
+NexLink - Unified CLI for Email, Calendar, Tasks, Files, and Contacts
 
 Usage:
     nexlink <module> <command> [options]
@@ -72,6 +146,7 @@ Modules:
     analytics   Email analytics and statistics (Exchange)
     sync        Task sync and reminders (Exchange)
     files       File operations (Nextcloud)
+    contacts    Contact operations (Exchange + Nextcloud)
 
 Email Commands:
     nexlink mail connect              Test Exchange connection
@@ -125,6 +200,17 @@ File Commands:
     nexlink files share-list [PATH]         List public share links
     nexlink files share-revoke SHARE_ID     Revoke public share link
 
+Contact Commands:
+    nexlink contacts list [--limit N]                                  List Exchange contacts (default)
+    nexlink contacts list --source nextcloud [--addressbook HREF]        List Nextcloud contacts
+    nexlink contacts get --id CONTACT_ID                                Get Exchange contact by ID
+    nexlink contacts get --uid UID --source nextcloud                   Get Nextcloud contact by UID
+    nexlink contacts create --name NAME [--email EMAIL] [--phone PHONE]
+    nexlink contacts update --id CONTACT_ID [--name NAME] [--email EMAIL]
+    nexlink contacts delete --id CONTACT_ID
+    nexlink contacts search --query QUERY                                Search contacts
+    nexlink contacts addressbooks --source nextcloud                     List CardDAV addressbooks
+
 Configuration:
     Set environment variables:
         EXCHANGE_SERVER    - Exchange EWS URL
@@ -146,6 +232,18 @@ Examples:
 
     # Create task
     nexlink tasks create --subject "Follow-up" --due "+7d" --priority high
+
+    # Contacts (Exchange — default)
+    nexlink contacts list
+    nexlink contacts create --name "John Doe" --email john@example.com --phone "+40-700-000-000"
+
+    # Contacts (Nextcloud)
+    nexlink contacts addressbooks --source nextcloud
+    nexlink contacts list --source nextcloud
+    nexlink contacts create --source nextcloud --name "Jane Doe" --email jane@example.com
+
+    # Search contacts
+    nexlink contacts search --query "Acme"
 
     # Upload file to Nextcloud
     nexlink files upload /local/report.pdf /Documents/

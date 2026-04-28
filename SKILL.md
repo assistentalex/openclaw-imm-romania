@@ -58,8 +58,8 @@ This skill connects Exchange and Nextcloud into one practical workflow layer for
 
 | Module | Description | Command |
 |--------|-------------|---------|
-| **Exchange** | Email, Calendar, Tasks, Analytics | `nexlink <mail\|cal\|tasks\|analytics\|sync>` |
-| **Nextcloud** | Files, sharing, summarization, Q&A, action extraction | `nexlink files <list\|search\|extract-text\|summarize\|ask-file\|extract-actions\|create-tasks-from-file\|...>` |
+| **Exchange** | Email, Calendar, Tasks, Analytics, Contacts | `nexlink <mail\|cal\|tasks\|analytics\|sync\|contacts>` |
+| **Nextcloud** | Files, sharing, summarization, Q&A, action extraction, Contacts (CardDAV) | `nexlink files <...> \| nexlink contacts --source nextcloud <...>` |
 
 ## What it solves
 
@@ -68,6 +68,7 @@ Use this skill when you want to work with:
 - emails, replies, drafts and attachments in Exchange
 - calendar, meetings and follow-up tasks
 - Exchange tasks, including delegate access
+- Contacts: Exchange contacts (EWS) and Nextcloud contacts (CardDAV)
 - Nextcloud files: listing, search, upload, download, move, sharing
 - document understanding: extract-text, summarize, ask-file
 - workflow extraction: extract actions from files and create Exchange tasks
@@ -140,6 +141,47 @@ nexlink analytics folders
 
 # Full report
 nexlink analytics report --days 30
+```
+
+### Contacts
+
+```bash
+# Exchange contacts (default source)
+nexlink contacts list
+nexlink contacts list --limit 10
+
+# Get Exchange contact by ID
+nexlink contacts get --id CONTACT_ID
+
+# Create Exchange contact
+nexlink contacts create --name "John Doe" --email "john@example.com" --phone "+40-700-000-000"
+nexlink contacts create --name "Acme Corp" --phone "+40-711-111-111" --org "Acme" --title "CEO"
+
+# Update Exchange contact
+nexlink contacts update --id CONTACT_ID --phone "+40-722-222-222"
+
+# Delete Exchange contact (moves to trash)
+nexlink contacts delete --id CONTACT_ID
+
+# Search contacts
+nexlink contacts search --query "Acme"
+
+# Nextcloud contacts (CardDAV — use --source nextcloud)
+nexlink contacts addressbooks --source nextcloud
+nexlink contacts list --source nextcloud
+nexlink contacts list --source nextcloud --addressbook "/remote.php/dav/addressbooks/users/alex/contacts/"
+
+# Get Nextcloud contact by UID
+nexlink contacts get --uid CONTACT_UID --source nextcloud
+
+# Create Nextcloud contact
+nexlink contacts create --source nextcloud --name "Jane Doe" --email "jane@example.com" --phone "+40-733-333-333"
+
+# Update Nextcloud contact
+nexlink contacts update --uid CONTACT_UID --source nextcloud --phone "+40-744-444-444"
+
+# Delete Nextcloud contact
+nexlink contacts delete --uid CONTACT_UID --source nextcloud
 ```
 
 ### Files (Nextcloud)
