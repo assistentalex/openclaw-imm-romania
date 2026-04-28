@@ -292,35 +292,43 @@ def cmd_delete(args: argparse.Namespace) -> None:
 
 
 def cmd_search(args: argparse.Namespace) -> None:
-    """Search contacts by query string."""
+    """Search contacts by query string.
+
+    Uses server-side filtering via exchangelib Q() for performance and
+    correctness on large contact lists (>200 contacts).
+    """
     if not HAS_EXCHANGELIB:
         die("exchangelib not available. Install: pip3 install exchangelib")
 
+    from exchangelib import Q
+
     account = get_account()
-    q = args.query.lower()
+    q = args.query.strip()
+
+    if not q:
+        die("Search query cannot be empty")
 
     try:
-        all_contacts = list(account.contacts.all().order_by("display_name")[:200])
+        # Server-side filter: match by name, company, or email
+        q_lower = q.lower()
+        query = (
+            Q(display_name__contains=q_lower)
+            | Q(given_name__contains=q_lower)
+            | Q(surname__contains=q_lower)
+            | Q(company_name__contains=q_lower)
+            | Q(email_addresses__contains=q_lower)
+        )
 
-        matches = []
-        for c in all_contacts:
-            display = (c.display_name or c.full_name or "").lower()
-            email_text = ""
-            if hasattr(c, "email_addresses") and c.email_addresses:
-                for ea in c.email_addresses:
-                    if ea.email:
-                        email_text += ea.email.lower() + " "
-            org = (c.company_name or "").lower()
+        limit = min(args.limit or 50, 500)
+        contacts = list(
+            account.contacts.filter(query).order_by("display_name")[:limit]
+        )
 
-            if q in display or q in email_text or q in org:
-                matches.append(_contact_to_dict(c))
-
-        result = {
+        out({
             "ok": True,
             "query": args.query,
-            "count": len(matches),
-            "contacts": matches[: args.limit],
-        }
-        out(result)
+            "count": len(contacts),
+            "contacts": [_contact_to_dict(c) for c in contacts],
+        })
     except Exception as e:
         die(f"Failed to search contacts: {e}")

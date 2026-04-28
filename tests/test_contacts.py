@@ -138,7 +138,7 @@ class ExchangeContactsTests(unittest.TestCase):
         mock_contact.phone_numbers.mobile_phone = None
 
         mock_folder = MagicMock()
-        mock_folder.all.return_value.order_by.return_value.__getitem__.return_value = [mock_contact]
+        mock_folder.filter.return_value.order_by.return_value.__getitem__.return_value = [mock_contact]
 
         mock_account = MagicMock()
         mock_account.contacts = mock_folder

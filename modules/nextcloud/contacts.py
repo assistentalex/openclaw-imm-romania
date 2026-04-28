@@ -56,6 +56,10 @@ def _auth() -> HTTPBasicAuth:
     return HTTPBasicAuth(user, token)
 
 
+# Module-level cache for DAV principal (avoids PROPFIND per request)
+_DAV_PRINCIPAL_CACHE: Optional[str] = None
+
+
 def _dav_base_path(user: str) -> str:
     """Build the CardDAV base path for the user."""
     return f"remote.php/dav/addressbooks/users/{urllib.parse.quote(user)}"
@@ -66,7 +70,13 @@ def _resolve_principal(base_url: str) -> Optional[str]:
 
     Nextcloud may use a different identifier (e.g. a GUID) than the login
     username, so we PROPFIND the root to get current-user-principal.
+    Result is cached in _DAV_PRINCIPAL_CACHE.
     """
+    global _DAV_PRINCIPAL_CACHE
+
+    if _DAV_PRINCIPAL_CACHE is not None:
+        return _DAV_PRINCIPAL_CACHE
+
     ns = {"d": "DAV:"}
     body = """<?xml version="1.0" encoding="utf-8"?>
 <d:propfind xmlns:d="DAV:">
@@ -88,9 +98,9 @@ def _resolve_principal(base_url: str) -> Optional[str]:
         root = ET.fromstring(resp.content)
         href = root.find(".//d:current-user-principal/d:href", ns)
         if href is not None and href.text:
-            # Extract the last path segment: /remote.php/dav/principals/users/XXX/
-            # or return the full href for dav_base usage
-            return href.text.strip("/").split("/")[-1]
+            principal = href.text.strip("/").split("/")[-1]
+            _DAV_PRINCIPAL_CACHE = principal
+            return principal
         return None
     except (RequestException, ET.ParseError):
         return None
