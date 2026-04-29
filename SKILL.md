@@ -1,6 +1,6 @@
 ---
 name: nexlink
-version: 0.14.0
+version: 0.14.1
 description: Exchange & Nextcloud connector + YouTube transcript extraction — email, calendar, tasks, file management, document understanding, video captions with language fallback, contacts, analytics, and persistent memory integration.
 metadata:
   openclaw:

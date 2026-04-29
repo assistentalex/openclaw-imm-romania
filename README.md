@@ -6,7 +6,7 @@
 
 **Built for [Firma de AI](https://firmade.ai), supported by [Firma de IT](https://firmade.it)**
 
-[![Version](https://img.shields.io/badge/version-0.14.0-blue.svg)](https://github.com/asistent-alex/openclaw-nexlink)
+[![Version](https://img.shields.io/badge/version-0.14.1-blue.svg)](https://github.com/asistent-alex/openclaw-nexlink)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![OpenClaw Skill](https://img.shields.io/badge/OpenClaw-Skill-green.svg)](https://clawhub.ai)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-brightgreen.svg)](https://www.python.org/)
@@ -195,7 +195,7 @@ For full setup details, see [references/setup.md](references/setup.md).
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) for the full version history. Latest: v0.14.0.
+See [CHANGELOG.md](CHANGELOG.md) for the full version history. Latest: v0.14.1.
 
 ## Installation options
 
