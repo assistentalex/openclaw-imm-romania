@@ -1,8 +1,8 @@
 <div align="center">
 
-# NexLink — Exchange & Nextcloud Connector
+# NexLink — Nextcloud, Exchange & YouTube Connector
 
-**Email, files, tasks, and document workflows for teams**
+**Email, file management, transcript extraction, and document workflows for teams**
 
 **Built for [Firma de AI](https://firmade.ai), supported by [Firma de IT](https://firmade.it)**
 
@@ -20,32 +20,34 @@
 
 ---
 
-NexLink connects Microsoft Exchange and Nextcloud into one practical workflow layer — email, calendar, tasks, file management, and document understanding.
+NexLink connects Nextcloud, Microsoft Exchange, and YouTube into one practical workflow layer — file management, email, calendar, tasks, document understanding, and transcript extraction.
 
-> Public positioning: **Firma de AI — Exchange & Nextcloud Assistant**  
+> Public positioning: **Firma de AI — Nextcloud, Exchange & YouTube Assistant**  
 > Internal skill / CLI name: **`nexlink`**
 
 ## What it does
 
-This skill connects Exchange and Nextcloud into one practical workflow layer for:
+This skill connects Nextcloud, Exchange, and YouTube into one practical workflow layer for:
 
+- **Files** — list, search, upload, download, move, copy, info, sharing
+- **Document understanding** — extract text, summarize, ask questions about one file
+- **Workflow extraction** — extract actions from documents and create Exchange tasks
+- **YouTube** — transcript extraction with language fallback, text/JSON output, save to Nextcloud
 - **Email** — read, send, draft, reply, forward, attachments
 - **Calendar** — today, week, list, create, update, respond
 - **Tasks** — list, create, complete, trash, delegate workflows
 - **Sync & Reminders** — task sync with Exchange, email reminders, calendar linking
 - **Analytics** — inbox stats, response time, top senders, heatmap, reports
-- **Files** — list, search, upload, download, move, copy, info, sharing
-- **Document understanding** — extract text, summarize, ask questions about one file
-- **Workflow extraction** — extract actions from documents and create Exchange tasks
 
 ## Why this is useful
 
-Use it when a team already works in **Microsoft Exchange** and **Nextcloud** and wants one assistant layer for:
+Use it when a team already works in **Nextcloud**, **Microsoft Exchange** and wants one assistant layer for:
 
-- inbox and follow-up workflows
-- meeting and task coordination
 - file operations and sharing
 - turning documents into action items
+- extracting YouTube transcripts for meetings and research
+- inbox and follow-up workflows
+- meeting and task coordination
 
 Built by [Firma de AI](https://firmade.ai), supported by [Firma de IT](https://firmade.it).
 
@@ -238,7 +240,7 @@ This project follows the [Hardshell Coding Standards](https://github.com/asisten
 <div align="center">
 
 **Built by [Firma de AI](https://firmade.ai), supported by [Firma de IT](https://firmade.it)**  
-*Exchange, Nextcloud, GitHub — one assistant.*
+*Nextcloud, Exchange, YouTube — one assistant.*
 
 [Hardshell](https://github.com/asistent-alex/openclaw-hardshell) · [prompt-to-pr](https://github.com/asistent-alex/openclaw-prompt-to-pr) · [Report Bug](https://github.com/asistent-alex/openclaw-nexlink/issues) · [Request Feature](https://github.com/asistent-alex/openclaw-nexlink/issues)
 

@@ -1,7 +1,7 @@
 ---
 name: nexlink
 version: 0.14.0
-description: Exchange & Nextcloud connector for cross-workflow automation — email, calendar, tasks, file management, document understanding (summarize, Q&A, action extraction), contacts, analytics, and persistent memory integration.
+description: Exchange & Nextcloud connector + YouTube transcript extraction — email, calendar, tasks, file management, document understanding, video captions with language fallback, contacts, analytics, and persistent memory integration.
 metadata:
   openclaw:
     requires:
@@ -48,34 +48,36 @@ metadata:
       repository: https://github.com/asistent-alex/openclaw-nexlink
 ---
 
-# NexLink — Exchange & Nextcloud Connector
+# NexLink — Nextcloud, Exchange & YouTube Connector
 
 **Built by [Firma de AI](https://firmade.ai), supported by [Firma de IT](https://firmade.it).**
 
-This skill connects Exchange and Nextcloud into one practical workflow layer for:
+This skill connects Nextcloud, Exchange, and YouTube into one practical workflow layer for:
 
-- **Exchange**: email, calendar, tasks, analytics
 - **Nextcloud**: file operations, sharing, document understanding, workflow extraction
+- **Exchange**: email, calendar, tasks, analytics
+- **YouTube**: transcript extraction with language fallback
 
 ## Available Modules
 
 | Module | Description | Command |
 |--------|-------------|---------|
-| **Exchange** | Email, Calendar, Tasks, Analytics, Contacts | `nexlink <mail\|cal\|tasks\|analytics\|sync\|contacts>` |
 | **Nextcloud** | Files, sharing, summarization, Q&A, action extraction, Contacts (CardDAV) | `nexlink files <...> \| nexlink contacts --source nextcloud <...>` |
+| **Exchange** | Email, Calendar, Tasks, Analytics, Contacts | `nexlink <mail\|cal\|tasks\|analytics\|sync\|contacts>` |
 | **YouTube** | Transcript extraction with language fallback | `nexlink youtube transcript\|languages <url>` |
 
 ## What it solves
 
 Use this skill when you want to work with:
 
+- Nextcloud files: listing, search, upload, download, move, sharing
+- document understanding: extract-text, summarize, ask-file
+- workflow extraction: extract actions from files and create Exchange tasks
+- YouTube transcripts: `nexlink youtube transcript <url>` (text/JSON, language fallback, save to Nextcloud)
 - emails, replies, drafts and attachments in Exchange
 - calendar, meetings and follow-up tasks
 - Exchange tasks, including delegate access
 - Contacts: Exchange contacts (EWS) and Nextcloud contacts (CardDAV)
-- Nextcloud files: listing, search, upload, download, move, sharing
-- document understanding: extract-text, summarize, ask-file
-- workflow extraction: extract actions from files and create Exchange tasks
 
 ## Quick Start
 
