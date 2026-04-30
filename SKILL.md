@@ -1,14 +1,7 @@
 ---
 name: nexlink
 version: 0.15.0
-description: |
-  🔗 **NexLink** — Enterprise Connector for Nextcloud, Microsoft Exchange & YouTube
-  
-  Built by [Firma de AI](https://firmade.ai) · [GitHub](https://github.com/asistent-alex/openclaw-nexlink) · [Docs](https://github.com/asistent-alex/openclaw-nexlink#readme)
-  
-  Email, calendar, tasks, file management, document understanding, transcript 
-  extraction, contacts, analytics — with built-in security confirmations 
-  and least-privilege defaults.
+description: "🔗 NexLink — Enterprise Connector for Nextcloud, Exchange & YouTube. Built by Firma de AI. Email, calendar, tasks, file management, document understanding, transcript extraction, contacts, analytics — with built-in security confirmations and least-privilege defaults."
 metadata:
   openclaw:
     requires:

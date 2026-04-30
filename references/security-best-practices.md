@@ -108,12 +108,14 @@ NexLink uses the LCM (Lossless Context Memory) plugin for persistent context.
 
 **How to clear:**
 ```bash
-# Clear all NexLink memory
-nexlink memory clear
+# Clear all NexLink memory (requires confirmation)
+nexlink memory clear --yes
 
-# Or manually:
-rm -rf ~/.openclaw/skills/nexlink/.lcm/
+# Or manually with confirmation:
+# rm -rf ~/.openclaw/skills/nexlink/.lcm/
 ```
+
+**⚠️ Always use `--yes` or manual confirmation for destructive operations.**
 
 **To opt out of persistent memory:**
 ```bash
