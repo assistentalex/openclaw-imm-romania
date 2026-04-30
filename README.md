@@ -1,29 +1,44 @@
 <div align="center">
 
-# NexLink — Nextcloud, Exchange & YouTube Connector
+# 🔗 NexLink — Enterprise Connector for Nextcloud, Exchange & YouTube
 
-**Email, file management, transcript extraction, and document workflows for teams**
+**Email, calendar, tasks, file management, document understanding, transcript extraction, contacts, and analytics**
 
-**Built for [Firma de AI](https://firmade.ai), supported by [Firma de IT](https://firmade.it)**
+**Built by [Firma de AI](https://firmade.ai) · Supported by [Firma de IT](https://firmade.it)**
 
-[![Version](https://img.shields.io/badge/version-0.14.1-blue.svg)](https://github.com/asistent-alex/openclaw-nexlink)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![OpenClaw Skill](https://img.shields.io/badge/OpenClaw-Skill-green.svg)](https://clawhub.ai)
+[![Version](https://img.shields.io/badge/version-0.15.0-blue.svg)](https://github.com/asistent-alex/openclaw-nexlink)
+[![License: MIT-0](https://img.shields.io/badge/License-MIT--0-yellow.svg)](https://opensource.org/licenses/MIT)
+[![OpenClaw Skill](https://img.shields.io/badge/OpenClaw-Skill-green.svg)](https://clawhub.ai/asistent-alex/nexlink)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-brightgreen.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-105%20passed%2C%201%20failed-yellow.svg)](https://github.com/asistent-alex/openclaw-nexlink)
+[![Tests](https://img.shields.io/badge/tests-48%2F48%20passed-brightgreen.svg)](https://github.com/asistent-alex/openclaw-nexlink/actions)
 [![ClawHub](https://img.shields.io/badge/clawhub-nexlink-8A2BE2.svg)](https://clawhub.ai/asistent-alex/nexlink)
 [![Hardshell](https://img.shields.io/badge/code%20style-Hardshell-ff69b4.svg)](https://github.com/asistent-alex/openclaw-hardshell)
-[![Firma de AI](https://img.shields.io/badge/built%20by-Firma%20de%20AI-6366f1.svg)](https://firmade.ai)
-[![Firma de IT](https://img.shields.io/badge/supported%20by-Firma%20de%20IT-0ea5e9.svg)](https://firmade.it)
+[![GitHub](https://img.shields.io/badge/GitHub-Repo-181717.svg?logo=github)](https://github.com/asistent-alex/openclaw-nexlink)
+[![Security](https://img.shields.io/badge/security-audited-brightgreen.svg)](https://github.com/asistent-alex/openclaw-nexlink/blob/main/SECURITY.md)
 
 </div>
 
 ---
 
-NexLink connects Nextcloud, Microsoft Exchange, and YouTube into one practical workflow layer — file management, email, calendar, tasks, document understanding, and transcript extraction.
+**NexLink** connects Nextcloud, Microsoft Exchange, and YouTube into one enterprise-grade workflow layer — with built-in security confirmations, least-privilege defaults, and persistent memory.
 
-> Public positioning: **Firma de AI — Nextcloud, Exchange & YouTube Assistant**  
-> Internal skill / CLI name: **`nexlink`**
+> **Public positioning:** *Firma de AI — Nextcloud, Exchange & YouTube Assistant*  
+> **CLI name:** `nexlink` · **Version:** `v0.15.0` · **License:** `MIT-0`
+
+### 🔗 Official Links
+
+| Resource | URL |
+|----------|-----|
+| 🏠 **Homepage** | [firmade.ai](https://firmade.ai) |
+| 📦 **GitHub Repository** | [github.com/asistent-alex/openclaw-nexlink](https://github.com/asistent-alex/openclaw-nexlink) |
+| 📋 **ClawHub Listing** | [clawhub.ai/asistent-alex/nexlink](https://clawhub.ai/asistent-alex/nexlink) |
+| 📖 **Documentation** | [github.com/asistent-alex/openclaw-nexlink#readme](https://github.com/asistent-alex/openclaw-nexlink#readme) |
+| 🔒 **Security Policy** | [github.com/asistent-alex/openclaw-nexlink/blob/main/SECURITY.md](https://github.com/asistent-alex/openclaw-nexlink/blob/main/SECURITY.md) |
+| 📝 **Changelog** | [github.com/asistent-alex/openclaw-nexlink/blob/main/CHANGELOG.md](https://github.com/asistent-alex/openclaw-nexlink/blob/main/CHANGELOG.md) |
+| 🐛 **Issues** | [github.com/asistent-alex/openclaw-nexlink/issues](https://github.com/asistent-alex/openclaw-nexlink/issues) |
+| 🔄 **Releases** | [github.com/asistent-alex/openclaw-nexlink/releases](https://github.com/asistent-alex/openclaw-nexlink/releases) |
+
+---
 
 ## What it does
 
