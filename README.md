@@ -20,7 +20,7 @@
 
 ---
 
-**NexLink** connects Nextcloud, Microsoft Exchange, and YouTube into one enterprise-grade workflow layer — with built-in security confirmations, least-privilege defaults, and persistent memory.
+**NexLink** connects Nextcloud, Microsoft Exchange, and YouTube into one enterprise-grade workflow layer — with built-in security confirmations and least-privilege defaults.
 
 > **Public positioning:** *Firma de AI — Nextcloud, Exchange & YouTube Assistant*  
 > **CLI name:** `nexlink` · **Version:** `v0.15.0` · **License:** `MIT-0`

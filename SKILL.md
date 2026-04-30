@@ -7,8 +7,8 @@ description: |
   Built by [Firma de AI](https://firmade.ai) · [GitHub](https://github.com/asistent-alex/openclaw-nexlink) · [Docs](https://github.com/asistent-alex/openclaw-nexlink#readme)
   
   Email, calendar, tasks, file management, document understanding, transcript 
-  extraction, contacts, analytics — with built-in security confirmations, 
-  least-privilege defaults, and persistent memory integration.
+  extraction, contacts, analytics — with built-in security confirmations 
+  and least-privilege defaults.
 metadata:
   openclaw:
     requires:

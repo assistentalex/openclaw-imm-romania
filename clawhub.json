@@ -2,7 +2,7 @@
   "slug": "nexlink",
   "name": "NexLink — Enterprise Connector for Nextcloud, Exchange & YouTube",
   "version": "0.15.0",
-  "description": "Enterprise-grade connector for Nextcloud, Microsoft Exchange, and YouTube. Email, calendar, tasks, file management, document understanding, transcript extraction, contacts, analytics — with built-in security confirmations, least-privilege defaults, and persistent memory integration.",
+  "description": "Enterprise-grade connector for Nextcloud, Microsoft Exchange, and YouTube. Email, calendar, tasks, file management, document understanding, transcript extraction, contacts, analytics — with built-in security confirmations and least-privilege defaults.",
   "author": "Firma de AI",
   "homepage": "https://firmade.ai",
   "repository": "https://github.com/asistent-alex/openclaw-nexlink",
@@ -41,6 +41,6 @@
   "keywords": [
     "nextcloud", "exchange", "youtube", "email", "calendar", "tasks",
     "files", "contacts", "analytics", "transcript", "document-understanding",
-    "security", "least-privilege", "persistent-memory", "workflow"
+    "security", "least-privilege", "workflow"
   ]
 }
