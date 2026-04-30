@@ -4,8 +4,8 @@ Common functions used across all modules.
 """
 
 import json
-import sys
 import os
+import sys
 import argparse
 from datetime import datetime
 from typing import List, Optional, Dict, Any
@@ -40,6 +40,38 @@ def out(data: Dict[str, Any]) -> None:
     """Output JSON to stdout and exit successfully."""
     print(json.dumps(data, indent=2, default=str))
     sys.exit(0)
+
+
+def confirm_or_die(action_desc: str) -> None:
+    """Prompt for confirmation before a destructive operation.
+
+    Bypassed when NEXLINK_AUTO_APPROVE is set (checks env var).
+    Exits with code 2 on non-confirmation.
+
+    Args:
+        action_desc: Human-readable description of what's about to happen.
+    """
+    if os.environ.get("NEXLINK_AUTO_APPROVE", "").lower() in ("1", "true", "yes"):
+        return
+
+    if not sys.stdin.isatty():
+        die({
+            "ok": False,
+            "error": (
+                f"Confirmation required: {action_desc}. "
+                "Use --yes flag or set NEXLINK_AUTO_APPROVE=1 to bypass."
+            ),
+        })
+
+    try:
+        answer = input(f"⚠️  {action_desc} [y/N]: ").strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        print("", file=sys.stderr)
+        sys.exit(2)
+
+    if answer not in ("y", "yes"):
+        print("Aborted.", file=sys.stderr)
+        sys.exit(2)
 
 
 def die(message) -> None:

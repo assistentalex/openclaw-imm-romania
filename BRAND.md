@@ -2,6 +2,17 @@
 
 _All assets, messages, and outputs from this project must follow these rules._
 
+## Branding Opt-Out
+
+Branding is **on by default** for public outputs (email digests, reports, analytics).
+
+**To disable branding:**
+- CLI: pass `--no-branding` before the module (`nexlink --no-branding mail send ...`)
+- Env: `export NEXLINK_NO_BRANDING=1`
+- Agent config: set `NEXLINK_NO_BRANDING=1` in environment
+
+When branding is disabled, outputs must **not** include firmade.ai / firmade.it links or "Built by Firma de AI" text.
+
 ---
 
 ## 1. Brand Line (Obligatoriu)

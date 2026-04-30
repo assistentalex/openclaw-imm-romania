@@ -21,8 +21,30 @@ def main():
         print_usage()
         sys.exit(1)
 
-    module = sys.argv[1]
-    args = sys.argv[2:]
+    # Parse global flags before routing to modules.
+    # --yes/-y: auto-approve destructive operations (sets NEXLINK_AUTO_APPROVE).
+    # --no-branding: suppress brand line in public outputs.
+    # --no-memory: disable LCM persistent memory for this session.
+    global_flags = {"--yes", "-y", "--no-branding", "--no-memory"}
+    module_args = []
+    i = 1
+    while i < len(sys.argv):
+        arg = sys.argv[i]
+        if arg in ("--yes", "-y"):
+            os.environ["NEXLINK_AUTO_APPROVE"] = "1"
+        elif arg == "--no-branding":
+            os.environ["NEXLINK_NO_BRANDING"] = "1"
+        elif arg == "--no-memory":
+            os.environ["NEXLINK_NO_MEMORY"] = "1"
+        else:
+            module_args.append(arg)
+        i += 1
+
+    module = module_args[0] if module_args else "help"
+    args = module_args[1:]
+
+    # Reconstruct sys.argv for sub-modules (pass through remaining flags)
+    sys.argv = [sys.argv[0], module] + args
 
     if module in ('mail', 'cal', 'calendar', 'tasks', 'analytics', 'sync'):
         # Route to Exchange module
@@ -149,7 +171,10 @@ Usage:
     nexlink <module> <command> [options]
 
 Global Options:
-    --json      Output results in JSON format
+    --json          Output results in JSON format
+    --no-branding   Suppress brand line in public outputs
+    --no-memory     Disable LCM persistent memory for this session
+    --yes, -y   Auto-approve destructive operations (send, delete, create, etc.)
 
 Modules:
     mail        Email operations (Exchange)

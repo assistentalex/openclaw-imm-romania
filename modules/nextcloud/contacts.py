@@ -31,6 +31,39 @@ DEFAULT_TIMEOUT = 30
 CARDDAV_SUCCESS_CODES = {200, 201, 204, 207}
 
 
+def _confirm_or_die(action_desc: str) -> None:
+    """Prompt for confirmation before a destructive operation.
+
+    Bypassed when NEXLINK_AUTO_APPROVE is set.
+    Exits with code 2 on non-confirmation.
+    """
+    if os.environ.get("NEXLINK_AUTO_APPROVE", "").lower() in ("1", "true", "yes"):
+        return
+
+    if not sys.stdin.isatty():
+        print(
+            json.dumps({
+                "ok": False,
+                "error": (
+                    f"Confirmation required: {action_desc}. "
+                    "Use --yes flag or set NEXLINK_AUTO_APPROVE=1 to bypass."
+                ),
+            }),
+            file=sys.stderr,
+        )
+        sys.exit(2)
+
+    try:
+        answer = input(f"⚠️  {action_desc} [y/N]: ").strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        print("", file=sys.stderr)
+        sys.exit(2)
+
+    if answer not in ("y", "yes"):
+        print("Aborted.", file=sys.stderr)
+        sys.exit(2)
+
+
 def _get_env_config() -> tuple[str, str, str]:
     """Get Nextcloud config from environment variables."""
     url = os.environ.get("NEXTCLOUD_URL", "")
@@ -441,6 +474,8 @@ def cmd_get(args: argparse.Namespace) -> None:
 
 def cmd_create(args: argparse.Namespace) -> None:
     """Create a new contact in CardDAV."""
+    _confirm_or_die(f"Create Nextcloud contact \"{getattr(args, 'name', '?')}\"")
+
     base_url, user, _ = _get_env_config()
     dav_base = _dav_base()
 
@@ -504,6 +539,8 @@ def cmd_create(args: argparse.Namespace) -> None:
 
 def cmd_update(args: argparse.Namespace) -> None:
     """Update an existing contact via CardDAV."""
+    _confirm_or_die(f"Update Nextcloud contact {args.uid}")
+
     base_url, user, _ = _get_env_config()
     dav_base = _dav_base()
 
@@ -580,6 +617,8 @@ def cmd_update(args: argparse.Namespace) -> None:
 
 def cmd_delete(args: argparse.Namespace) -> None:
     """Delete a contact from CardDAV."""
+    _confirm_or_die(f"Delete Nextcloud contact {args.uid}")
+
     base_url, user, _ = _get_env_config()
     dav_base = _dav_base()
 

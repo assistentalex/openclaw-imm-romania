@@ -24,7 +24,7 @@ except ImportError:
 
 from config import get_connection_config
 from connection import get_account, check_dependencies
-from utils import out, die, format_datetime, task_to_dict, add_json_argument
+from utils import out, die, format_datetime, task_to_dict, add_json_argument, confirm_or_die
 from logger import get_logger
 
 # Sync state file location
@@ -67,6 +67,7 @@ def cmd_sync(args: argparse.Namespace) -> None:
 
     Local changes can be pushed back to Exchange.
     """
+    confirm_or_die("Sync tasks with Exchange")
     check_dependencies()
     account = get_account()
 
@@ -307,6 +308,7 @@ def cmd_link_calendar(args: argparse.Namespace) -> None:
 
     Useful for tasks that need specific time slots or reminders.
     """
+    confirm_or_die(f"Create calendar event from task {args.id}")
     check_dependencies()
     account = get_account()
 

@@ -220,6 +220,8 @@ def cmd_create(args: argparse.Namespace) -> None:
 
 def cmd_update(args: argparse.Namespace) -> None:
     """Update an existing contact."""
+    confirm_or_die(f"Update contact {args.id}")
+
     if not HAS_EXCHANGELIB:
         die("exchangelib not available. Install: pip3 install exchangelib")
 
@@ -274,6 +276,8 @@ def cmd_update(args: argparse.Namespace) -> None:
 
 def cmd_delete(args: argparse.Namespace) -> None:
     """Move contact to trash (soft delete)."""
+    confirm_or_die(f"Delete contact {args.id}")
+
     if not HAS_EXCHANGELIB:
         die("exchangelib not available. Install: pip3 install exchangelib")
 

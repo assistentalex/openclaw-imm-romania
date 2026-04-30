@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.0] - 2026-04-30
+
+### Security (ClawScan Audit Remediation)
+
+- **Prompt Approval System** — all destructive operations now require explicit confirmation
+  - 29 operations guarded: send, reply, forward, create/delete event, respond meeting, create/complete/trash task, create/update/delete contact, sync, link-calendar, delete/move/copy file, share-revoke, create-tasks-from-file --execute
+  - Global `--yes` / `-y` flag for non-interactive bypass
+  - `NEXLINK_AUTO_APPROVE=1` environment variable for session-wide bypass
+  - Non-TTY fallback: JSON error with clear instructions to use `--yes`
+  - 8 new unit tests covering TTY, non-TTY, env var, abort scenarios (all passing)
+- **SECURITY.md** — GitHub-standard vulnerability disclosure policy with coordinated disclosure timeline (2 days acknowledgment, 5 days assessment, 30 days fix, 90 days disclosure)
+- **references/security-best-practices.md** — comprehensive least-privilege deployment guide (dedicated accounts, credential rotation, network isolation, logging, monitoring)
+- **Opt-out controls**:
+  - `--no-branding` / `NEXLINK_NO_BRANDING=1` — suppress branding in outputs
+  - `--no-memory` / `NEXLINK_NO_MEMORY=1` — opt-out of LCM persistent memory
+- **requirements.lock** — fully pinned dependencies for reproducible builds
+
+### Added
+
+- GitHub repository link in SKILL.md description for official branding
+- Professional header in README.md with official links table
+- `clawhub.json` enhanced with badges, keywords, and full link portfolio
+- `BRAND.md` updated with opt-out instructions
+
+### Changed
+
+- **Version**: 0.14.1 → **0.15.0** (minor bump — new security features, backward compatible)
+- **Name**: "NexLink — Nextcloud, Exchange & YouTube Connector" → "NexLink — Enterprise Connector for Nextcloud, Exchange & YouTube"
+
+### Verification
+
+- ✅ 48/48 unit tests passing
+- ✅ 9 real-world scenarios validated
+- ✅ Zero breaking changes
+- ✅ ClawScan security audit: 7/7 findings remediated
+
+---
+
 ## [0.14.1] - 2026-04-29
 
 ### Changed

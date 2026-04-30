@@ -13,7 +13,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from connection import get_account
-from utils import out, die, parse_recipients, add_json_argument
+from utils import out, die, parse_recipients, add_json_argument, confirm_or_die
 from logger import get_logger
 
 _logger = get_logger()
@@ -213,6 +213,8 @@ def cmd_get(args):
 
 def cmd_send(args):
     """Send an email."""
+    confirm_or_die(f"Send email to {args.to} with subject \"{args.subject}\"")
+
     from exchangelib import Message, HTMLBody, FileAttachment
 
     account = get_account()
@@ -279,6 +281,8 @@ def cmd_draft(args):
 
 def cmd_reply(args):
     """Reply to an email."""
+    confirm_or_die(f"Reply to email {args.id}")
+
     account = get_account()
 
     try:
@@ -297,6 +301,8 @@ def cmd_reply(args):
 
 def cmd_forward(args):
     """Forward an email."""
+    confirm_or_die(f"Forward email {args.id} to {args.to}")
+
     account = get_account()
 
     try:

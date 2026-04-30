@@ -55,6 +55,36 @@ DEFAULT_TIMEOUT = 60
 TRANSFER_TIMEOUT = 300
 WEBDAV_SUCCESS_CODES = {200, 201, 204, 207}
 PUBLIC_LINK_SHARE_TYPE = "3"
+
+
+def _confirm_or_die(action_desc: str) -> None:
+    """Prompt for confirmation before a destructive operation.
+
+    Bypassed when NEXLINK_AUTO_APPROVE is set.
+    Exits with code 2 on non-confirmation.
+    """
+    if os.environ.get("NEXLINK_AUTO_APPROVE", "").lower() in ("1", "true", "yes"):
+        return
+
+    if not sys.stdin.isatty():
+        print(json.dumps({
+            "ok": False,
+            "error": f"Confirmation required: {action_desc}. "
+                      "Use --yes flag or set NEXLINK_AUTO_APPROVE=1 to bypass.",
+        }), file=sys.stderr)
+        sys.exit(2)
+
+    try:
+        answer = input(f"\u26a0\ufe0f  {action_desc} [y/N]: ").strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        print("", file=sys.stderr)
+        sys.exit(2)
+
+    if answer not in ("y", "yes"):
+        print("Aborted.", file=sys.stderr)
+        sys.exit(2)
+
+
 TEXT_FILE_EXTENSIONS = {
     ".txt",
     ".md",
@@ -1408,6 +1438,11 @@ def run_cli(argv: list[str] | None = None) -> int:
         _JSON_OUTPUT = True
         args = [a for a in args if a != "--json"]
 
+    # Strip global --yes and set env var
+    if "--yes" in args or "-y" in args:
+        os.environ["NEXLINK_AUTO_APPROVE"] = "1"
+        args = [a for a in args if a not in ("--yes", "-y")]
+
     if not args:
         print_usage()
         return 1
@@ -1583,6 +1618,7 @@ def run_cli(argv: list[str] | None = None) -> int:
             if token == "--execute":
                 execute = True
                 index += 1
+                _confirm_or_die(f"Execute task creation from {remote_path}")
                 continue
             if token == "--dry-run":
                 execute = False
@@ -1628,6 +1664,7 @@ def run_cli(argv: list[str] | None = None) -> int:
             else:
                 print("Usage: nextcloud.py delete <remote_path>")
             return 1
+        _confirm_or_die(f"Delete Nextcloud file/dir {command_args[0]}")
         result = client.delete(command_args[0])
         if _JSON_OUTPUT:
             if result:
@@ -1643,6 +1680,7 @@ def run_cli(argv: list[str] | None = None) -> int:
             else:
                 print("Usage: nextcloud.py move <source_path> <dest_path>")
             return 1
+        _confirm_or_die(f"Move/rename Nextcloud file {command_args[0]} -> {command_args[1]}")
         result = client.move(command_args[0], command_args[1])
         if _JSON_OUTPUT:
             if result:
@@ -1658,6 +1696,7 @@ def run_cli(argv: list[str] | None = None) -> int:
             else:
                 print("Usage: nextcloud.py copy <source_path> <dest_path>")
             return 1
+        _confirm_or_die(f"Copy Nextcloud file {command_args[0]} -> {command_args[1]}")
         result = client.copy(command_args[0], command_args[1])
         if _JSON_OUTPUT:
             if result:
@@ -1714,6 +1753,7 @@ def run_cli(argv: list[str] | None = None) -> int:
             else:
                 print("Usage: nextcloud.py share-revoke <share_id>")
             return 1
+        _confirm_or_die(f"Revoke Nextcloud share link {command_args[0]}")
         result = client.revoke_share_link(command_args[0])
         if _JSON_OUTPUT:
             if result:

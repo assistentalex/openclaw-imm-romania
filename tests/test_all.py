@@ -48,6 +48,95 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(result.month, 1)
         self.assertEqual(result.day, 15)
 
+
+class TestConfirmOrDie(unittest.TestCase):
+    """Tests for the confirm_or_die safety helper."""
+
+    def test_auto_approve_env_var_bypasses(self):
+        """When NEXLINK_AUTO_APPROVE=1, confirm_or_die returns immediately."""
+        from utils import confirm_or_die
+
+        with patch.dict(os.environ, {"NEXLINK_AUTO_APPROVE": "1"}, clear=False):
+            # Should not raise or exit
+            confirm_or_die("Delete everything")
+
+    def test_auto_approve_yes_string(self):
+        """NEXLINK_AUTO_APPROVE=yes should also bypass."""
+        from utils import confirm_or_die
+
+        with patch.dict(os.environ, {"NEXLINK_AUTO_APPROVE": "yes"}, clear=False):
+            confirm_or_die("Delete everything")
+
+    def test_auto_approve_true_string(self):
+        """NEXLINK_AUTO_APPROVE=True should also bypass."""
+        from utils import confirm_or_die
+
+        with patch.dict(os.environ, {"NEXLINK_AUTO_APPROVE": "True"}, clear=False):
+            confirm_or_die("Delete everything")
+
+    @patch("sys.stdin")
+    def test_non_tty_exits_with_json_error(self, mock_stdin):
+        """When stdin is not a TTY and no auto-approve, exits with code 1 via die()."""
+        from utils import confirm_or_die
+
+        mock_stdin.isatty.return_value = False
+
+        with self.assertRaises(SystemExit) as cm:
+            confirm_or_die("Delete file.txt")
+
+        # die() uses exit code 1 for errors
+        self.assertEqual(cm.exception.code, 1)
+
+    @patch("sys.stdin")
+    @patch("builtins.input", return_value="y")
+    def test_tty_yes_allows(self, mock_input, mock_stdin):
+        """When stdin is TTY and user types 'y', returns without error."""
+        from utils import confirm_or_die
+
+        mock_stdin.isatty.return_value = True
+
+        # Should return normally
+        confirm_or_die("Delete file.txt")
+
+    @patch("sys.stdin")
+    @patch("builtins.input", return_value="n")
+    def test_tty_no_aborts(self, mock_input, mock_stdin):
+        """When stdin is TTY and user types 'n', exits with code 2."""
+        from utils import confirm_or_die
+
+        mock_stdin.isatty.return_value = True
+
+        with self.assertRaises(SystemExit) as cm:
+            confirm_or_die("Delete file.txt")
+
+        self.assertEqual(cm.exception.code, 2)
+
+    @patch("sys.stdin")
+    @patch("builtins.input", return_value="")
+    def test_tty_empty_defaults_no(self, mock_input, mock_stdin):
+        """When stdin is TTY and user presses Enter (empty), aborts."""
+        from utils import confirm_or_die
+
+        mock_stdin.isatty.return_value = True
+
+        with self.assertRaises(SystemExit) as cm:
+            confirm_or_die("Delete file.txt")
+
+        self.assertEqual(cm.exception.code, 2)
+
+    @patch("sys.stdin")
+    @patch("builtins.input", side_effect=EOFError)
+    def test_tty_eof_aborts(self, mock_input, mock_stdin):
+        """When stdin is TTY and EOF is received, exits with code 2."""
+        from utils import confirm_or_die
+
+        mock_stdin.isatty.return_value = True
+
+        with self.assertRaises(SystemExit) as cm:
+            confirm_or_die("Delete file.txt")
+
+        self.assertEqual(cm.exception.code, 2)
+
     def test_parse_datetime_none(self):
         from utils import parse_datetime
 

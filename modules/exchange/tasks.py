@@ -22,7 +22,7 @@ except ImportError:
     HAS_EXCHANGELIB = False
 
 from connection import get_account
-from utils import out, die, parse_datetime, format_datetime, task_to_dict, add_json_argument
+from utils import out, die, parse_datetime, format_datetime, task_to_dict, add_json_argument, confirm_or_die
 
 # Task status mapping
 STATUS_MAP = {
@@ -209,6 +209,8 @@ def cmd_create(args: argparse.Namespace) -> None:
     Use --assign-to to create a task directly in another user's mailbox.
     This requires delegate permissions on the target mailbox.
     """
+    confirm_or_die(f"Create task \"{args.subject}\"")
+
     # Determine which account to use
     if args.assign_to:
         from connection import get_account_for
@@ -425,6 +427,8 @@ def cmd_complete(args: argparse.Namespace) -> None:
     
     Use --mailbox to complete a task in another user's mailbox via delegate access.
     """
+    confirm_or_die(f"Mark task {args.id} as completed")
+
     # Determine which account to use
     if getattr(args, 'mailbox', None):
         from connection import get_account_for
@@ -460,6 +464,8 @@ def cmd_trash(args: argparse.Namespace) -> None:
     Use --mailbox to trash a task in another user's mailbox via delegate access.
     This is safer than hard delete as the task can be recovered from Deleted Items.
     """
+    confirm_or_die(f"Move task {args.id} to trash")
+
     # Determine which account to use
     if getattr(args, 'mailbox', None):
         from connection import get_account_for

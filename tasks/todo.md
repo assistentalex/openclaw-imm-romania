@@ -1,37 +1,26 @@
-# prompt-to-pr — 🚀 New Feature: Contacts (CardDAV + Exchange)
+# prompt-to-pr — 🚀 Security ClawScan Remediation
 
 ## Status
+- **Phase:** 3/6 — IMPLEMENT
+- **Branch:** `fix/security-clawscan-remediation`
+- **Feature:** Remediate 7 ClawScan security findings
 
-- **Phase:** 5/8 — IMPLEMENT_DONE (13 tests pass)
-- **Branch:** `feat/contacts`
-- **Feature:** Contacts CRUD + search for Nextcloud (CardDAV) and Exchange (EWS)
+## Tasks
 
-## Implemented
-
-| # | Task | File | Status |
+| # | Task | Risk | Status |
 |---|------|------|--------|
-| 1 | Exchange contacts module | `modules/exchange/contacts.py` | ✅ |
-| 2 | Nextcloud contacts (CardDAV) | `modules/nextcloud/contacts.py` | ✅ |
-| 3 | CLI routing | `scripts/nexlink.py` | ✅ |
-| 4 | SKILL.md docs | `SKILL.md` | ✅ |
-| 5 | Tests (13 pass) | `tests/test_contacts.py` | ✅ |
+| 1 | Confirmation helper + --yes flag | HIGH ⚠️ | ⬜ |
+| 2 | Pin dependencies + align version | LOW | ⬜ |
+| 3 | SECURITY.md (new) | MEDIUM | ⬜ |
+| 4 | setup.md least-privilege guide | MEDIUM | ⬜ |
+| 5 | Remove stale memory claim | LOW | ⬜ |
+| 6 | Branding optional (--no-branding) | LOW | ⬜ |
+| 7 | Tests (test_security.py) | MEDIUM | ⬜ |
 
-## Files Changed
-
-- **NEW:** `modules/exchange/contacts.py` — Exchange EWS contacts CRUD + search
-- **NEW:** `modules/nextcloud/contacts.py` — CardDAV contacts with vCard parsing/serialization, addressbook listing
-- **NEW:** `tests/test_contacts.py` — 13 tests (2 Exchange, 11 Nextcloud/CardDAV)
-- **MODIFIED:** `scripts/nexlink.py` — added `contacts` module routing with `--source` flag
-- **MODIFIED:** `SKILL.md` — added contacts documentation
-
-## Architecture Notes
-
-- `nexlink contacts <cmd>` defaults to Exchange (backward-compat)
-- `nexlink contacts <cmd> --source nextcloud` routes to CardDAV
-- CardDAV implementation uses raw HTTP (requests): PROPFIND for listing, PUT for create/update, DELETE for remove, REPORT for search
-- vCard parsing supports 3.0/4.0 with continuation-line normalization
-- Sync between Exchange and Nextcloud contacts is v2 deferred (architecture prepared)
-
-## Next
-
-Verify and commit.
+## Plan
+- 7 files modified, 2 new
+- --yes flag for destructive ops + NEXLINK_AUTO_APPROVE env var
+- SECURITY.md: dedicated agent account model, CVD, disclosure timeline
+- setup.md: least-privilege deployment guide
+- Remove "persistent memory integration" from description (no LCM code exists)
+- --no-branding flag for internal outputs

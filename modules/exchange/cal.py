@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from connection import get_account
-from utils import out, die, add_json_argument
+from utils import out, die, add_json_argument, confirm_or_die
 
 from logger import get_logger
 
@@ -204,6 +204,8 @@ def cmd_get(args):
 
 def cmd_create(args):
     """Create a new calendar event."""
+    confirm_or_die(f"Create calendar event \"{args.subject}\" at {args.start}")
+
     from exchangelib import EWSDateTime
     from exchangelib.items import CalendarItem
     from exchangelib.properties import Attendee, Mailbox
@@ -361,6 +363,8 @@ def cmd_update(args):
 
 def cmd_delete(args):
     """Delete a calendar event."""
+    confirm_or_die(f"Delete calendar event {args.id}")
+
     account = get_account()
 
     try:
@@ -376,6 +380,8 @@ def cmd_delete(args):
 
 def cmd_respond(args):
     """Accept, decline, or tentatively accept a meeting request."""
+    confirm_or_die(f"{args.response.capitalize()} meeting {args.id}")
+
     account = get_account()
 
     try:
