@@ -1,11 +1,11 @@
 {
   "slug": "nexlink",
-  "name": "NexLink — Nextcloud & Exchange Connector for OpenClaw",
-  "version": "0.13.4",
-  "description": "Unified Exchange (EWS) & Nextcloud workflow assistant: email, calendar, tasks, file management, document understanding (summarize, Q&A), workflow extraction, contacts sync, analytics. The only OpenClaw skill bridging Microsoft Exchange with Nextcloud for cross-workflow automation.",
+  "name": "NexLink — Nextcloud, Exchange & YouTube Connector",
+  "version": "0.14.1",
+  "description": "Exchange & Nextcloud connector + YouTube transcript extraction — email, calendar, tasks, file management, document understanding, video captions with language fallback, contacts, analytics, and persistent memory integration.",
   "author": "Firma de AI",
   "homepage": "https://firmade.ai",
   "repository": "https://github.com/asistent-alex/openclaw-nexlink",
-  "license": "MIT",
+  "license": "MIT-0",
   "categories": ["Workflows", "Automation", "Dev Tools", "Data & APIs"]
 }

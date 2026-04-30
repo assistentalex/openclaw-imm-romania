@@ -212,7 +212,7 @@ pip3 install -r requirements.txt
 
 Use the published listing/slug once the public package is live on ClawHub. The public title is intended to be:
 
-**Firma de AI — Exchange & Nextcloud Assistant**
+**Firma de AI — Nextcloud, Exchange & YouTube Assistant**
 
 The CLI command remains:
 
@@ -224,8 +224,8 @@ nexlink
 
 For public listings, release notes, and marketing copy, prefer:
 
-- **Title:** Firma de AI — Exchange & Nextcloud Assistant
-- **Subtitle:** Email, files, tasks, and document workflows for teams
+- **Title:** Firma de AI — Nextcloud, Exchange & YouTube Assistant
+- **Subtitle:** Email, files, tasks, transcripts, and document workflows for teams
 - **Brand line:** Built by Firma de AI, supported by Firma de IT.
 - **Links:** https://firmade.ai · https://firmade.it
 

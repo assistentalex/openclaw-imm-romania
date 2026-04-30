@@ -255,9 +255,7 @@ If upgrading from 1.x:
 
 ### Planned
 
-- Contacts module
 - Distribution lists management
 - Room booking
-- Delegate access support
+- Delegate access support (full)
 - Docker deployment
-- ClawHub publication
