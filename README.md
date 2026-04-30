@@ -6,7 +6,7 @@
 
 **Built by [Firma de AI](https://firmade.ai) · Supported by [Firma de IT](https://firmade.it)**
 
-[![Version](https://img.shields.io/badge/version-0.15.1-blue.svg)](https://github.com/asistent-alex/openclaw-nexlink)
+[![Version](https://img.shields.io/badge/version-0.15.2-blue.svg)](https://github.com/asistent-alex/openclaw-nexlink)
 [![License: MIT-0](https://img.shields.io/badge/License-MIT--0-yellow.svg)](https://opensource.org/licenses/MIT)
 [![OpenClaw Skill](https://img.shields.io/badge/OpenClaw-Skill-green.svg)](https://clawhub.ai/asistent-alex/nexlink)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-brightgreen.svg)](https://www.python.org/)
@@ -23,7 +23,7 @@
 **NexLink** connects Nextcloud, Microsoft Exchange, and YouTube into one enterprise-grade workflow layer — with built-in security confirmations and least-privilege defaults.
 
 > **Public positioning:** *Firma de AI — Nextcloud, Exchange & YouTube Assistant*  
-> **CLI name:** `nexlink` · **Version:** `v0.15.1` · **License:** `MIT-0`
+> **CLI name:** `nexlink` · **Version:** `v0.15.2` · **License:** `MIT-0`
 
 ### 🔗 Official Links
 

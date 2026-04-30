@@ -1,6 +1,6 @@
 ---
 name: nexlink
-version: 0.15.1
+version: 0.15.2
 description: "🔗 NexLink — Enterprise Connector for Nextcloud, Exchange & YouTube. Built by Firma de AI. Email, calendar, tasks, file management, document understanding, transcript extraction, contacts, analytics — with built-in security confirmations and least-privilege defaults."
 metadata:
   openclaw:

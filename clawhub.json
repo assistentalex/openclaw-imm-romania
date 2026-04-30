@@ -1,7 +1,7 @@
 {
   "slug": "nexlink",
   "name": "NexLink — Enterprise Connector for Nextcloud, Exchange & YouTube",
-  "version": "0.15.1",
+  "version": "0.15.2",
   "description": "Enterprise-grade connector for Nextcloud, Microsoft Exchange, and YouTube. Email, calendar, tasks, file management, document understanding, transcript extraction, contacts, analytics — with built-in security confirmations and least-privilege defaults.",
   "author": "Firma de AI",
   "homepage": "https://firmade.ai",
