@@ -9,7 +9,7 @@ import os
 import re
 import sys
 import urllib.parse
-import xml.etree.ElementTree as ET
+from defusedxml import ElementTree as ET
 import zipfile
 from collections import Counter
 from datetime import datetime
