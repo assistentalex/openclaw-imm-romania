@@ -24,7 +24,7 @@ except ImportError:
 
 from config import get_connection_config
 from connection import get_account, check_dependencies
-from utils import out, die, format_datetime, task_to_dict, add_json_argument, confirm_or_die
+from utils import out, die, format_datetime, task_to_dict, add_json_argument, confirm_or_die, add_yes_argument
 from logger import get_logger
 
 # Sync state file location
@@ -67,7 +67,7 @@ def cmd_sync(args: argparse.Namespace) -> None:
 
     Local changes can be pushed back to Exchange.
     """
-    confirm_or_die("Sync tasks with Exchange")
+    confirm_or_die("Sync tasks with Exchange", getattr(args, 'yes', False))
     check_dependencies()
     account = get_account()
 
@@ -308,7 +308,7 @@ def cmd_link_calendar(args: argparse.Namespace) -> None:
 
     Useful for tasks that need specific time slots or reminders.
     """
-    confirm_or_die(f"Create calendar event from task {args.id}")
+    confirm_or_die(f"Create calendar event from task {args.id}", getattr(args, 'yes', False))
     check_dependencies()
     account = get_account()
 
@@ -440,6 +440,7 @@ def add_parser(subparsers: argparse.ArgumentParser) -> None:
     )
     p_sync.set_defaults(func=cmd_sync)
     add_json_argument(p_sync)
+    add_yes_argument(p_sync)
 
     # reminders
     p_reminders = subparsers.add_parser(
@@ -470,6 +471,7 @@ def add_parser(subparsers: argparse.ArgumentParser) -> None:
     p_link.add_argument("--invite", action="store_true", help="Send invite to self")
     p_link.set_defaults(func=cmd_link_calendar)
     add_json_argument(p_link)
+    add_yes_argument(p_link)
 
     # status
     p_status = subparsers.add_parser("status", help="Show sync status and statistics")

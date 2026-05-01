@@ -33,6 +33,16 @@ def add_json_argument(parser: argparse.ArgumentParser) -> None:
     )
 
 
+def add_yes_argument(parser: argparse.ArgumentParser) -> None:
+    """Add --yes flag for per-command confirmation bypass."""
+    parser.add_argument(
+        "--yes",
+        action="store_true",
+        default=False,
+        help="Skip confirmation for this single command (use only in tightly scoped automation)",
+    )
+
+
 _logger = get_logger()
 
 
@@ -42,16 +52,18 @@ def out(data: Dict[str, Any]) -> None:
     sys.exit(0)
 
 
-def confirm_or_die(action_desc: str) -> None:
+def confirm_or_die(action_desc: str, auto_approved: bool = False) -> None:
     """Prompt for confirmation before a destructive operation.
 
-    Bypassed when NEXLINK_AUTO_APPROVE is set (checks env var).
-    Exits with code 2 on non-confirmation.
+    Exits with code 2 on non-confirmation. When auto_approved is True (e.g.,
+    via the per-command --yes flag), the prompt is skipped for this single
+    invocation only. There is no session-wide or environment bypass.
 
     Args:
         action_desc: Human-readable description of what's about to happen.
+        auto_approved: If True, skip confirmation (from per-command --yes).
     """
-    if os.environ.get("NEXLINK_AUTO_APPROVE", "").lower() in ("1", "true", "yes"):
+    if auto_approved:
         return
 
     if not sys.stdin.isatty():
@@ -59,7 +71,7 @@ def confirm_or_die(action_desc: str) -> None:
             "ok": False,
             "error": (
                 f"Confirmation required: {action_desc}. "
-                "Use --yes flag or set NEXLINK_AUTO_APPROVE=1 to bypass."
+                "Re-run with --yes to confirm this single operation."
             ),
         })
 

@@ -22,17 +22,14 @@ def main():
         sys.exit(1)
 
     # Parse global flags before routing to modules.
-    # --yes/-y: auto-approve destructive operations (sets NEXLINK_AUTO_APPROVE).
     # --no-branding: suppress brand line in public outputs.
     # --no-memory: disable LCM persistent memory for this session.
-    global_flags = {"--yes", "-y", "--no-branding", "--no-memory"}
+    global_flags = {"--no-branding", "--no-memory"}
     module_args = []
     i = 1
     while i < len(sys.argv):
         arg = sys.argv[i]
-        if arg in ("--yes", "-y"):
-            os.environ["NEXLINK_AUTO_APPROVE"] = "1"
-        elif arg == "--no-branding":
+        if arg == "--no-branding":
             os.environ["NEXLINK_NO_BRANDING"] = "1"
         elif arg == "--no-memory":
             os.environ["NEXLINK_NO_MEMORY"] = "1"
@@ -174,7 +171,6 @@ Global Options:
     --json          Output results in JSON format
     --no-branding   Suppress brand line in public outputs
     --no-memory     Disable LCM persistent memory for this session
-    --yes, -y   Auto-approve destructive operations (send, delete, create, etc.)
 
 Modules:
     mail        Email operations (Exchange)

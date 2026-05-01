@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Security (ClawScan Findings — Phase 1)
+
+- **Removed session-wide `NEXLINK_AUTO_APPROVE`** — `--yes` / `-y` is now strictly **per-command**
+  - Old: `nexlink --yes mail send ...` (or `NEXLINK_AUTO_APPROVE=1`) set env var for whole session
+  - New: `--yes` / `-y` must be appended to each individual command; there is no env bypass
+  - Affected modules: `mail`, `cal`, `tasks`, `sync`, `contacts`, `files`, `nextcloud`
+  - `utils.confirm_or_die()` signature changed: `auto_approved` kwarg only, no env check
+  - Nextcloud `run_cli()` uses module-level `_AUTO_APPROVED` instead of env var
+  - Tests updated: removed env-var tests, added per-command tests
+  - Exit code changed from 1 → 2 on non-confirmation (distinguishes permission denial from other errors)
+- **Pinned all pip dependencies to exact versions** in `SKILL.md` + `requirements.txt`
+  - `exchangelib==5.6.0`, `requests-ntlm==1.3.0`, `defusedxml==0.7.1`, `requests==2.31.0`, `lxml==6.0.2`
+  - Removes minimum-version ranges (`>=5.0.0`, `>=1.1.0`) that ClawScan flagged
+  - Installed versions verified against `pip freeze` before pinning
+- **Documentation updated**:
+  - `references/security-best-practices.md`: removed `NEXLINK_AUTO_APPROVE` references, `--yes` now per-command
+  - `SECURITY.md`: updated security model description
+  - `SKILL.md`: updated dependency versions
+  - `CHANGELOG.md`: this entry
+
 ## [0.15.0] - 2026-04-30
 
 ### Security (ClawScan Audit Remediation)

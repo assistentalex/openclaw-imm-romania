@@ -13,7 +13,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from connection import get_account
-from utils import out, die, parse_recipients, add_json_argument, confirm_or_die
+from utils import out, die, parse_recipients, add_json_argument, confirm_or_die, add_yes_argument
 from logger import get_logger
 
 _logger = get_logger()
@@ -213,7 +213,7 @@ def cmd_get(args):
 
 def cmd_send(args):
     """Send an email."""
-    confirm_or_die(f"Send email to {args.to} with subject \"{args.subject}\"")
+    confirm_or_die(f"Send email to {args.to} with subject \"{args.subject}\"", getattr(args, 'yes', False))
 
     from exchangelib import Message, HTMLBody, FileAttachment
 
@@ -281,7 +281,7 @@ def cmd_draft(args):
 
 def cmd_reply(args):
     """Reply to an email."""
-    confirm_or_die(f"Reply to email {args.id}")
+    confirm_or_die(f"Reply to email {args.id}", getattr(args, 'yes', False))
 
     account = get_account()
 
@@ -301,7 +301,7 @@ def cmd_reply(args):
 
 def cmd_forward(args):
     """Forward an email."""
-    confirm_or_die(f"Forward email {args.id} to {args.to}")
+    confirm_or_die(f"Forward email {args.id} to {args.to}", getattr(args, 'yes', False))
 
     account = get_account()
 
@@ -615,6 +615,7 @@ def add_parser(subparsers):
     )
     p_send.set_defaults(func=cmd_send)
     add_json_argument(p_send)
+    add_yes_argument(p_send)
 
     # draft
     p_draft = subparsers.add_parser("draft", help="Create draft")
@@ -638,6 +639,7 @@ def add_parser(subparsers):
     )
     p_reply.set_defaults(func=cmd_reply)
     add_json_argument(p_reply)
+    add_yes_argument(p_reply)
 
     # forward
     p_fwd = subparsers.add_parser("forward", help="Forward email")
@@ -646,6 +648,7 @@ def add_parser(subparsers):
     p_fwd.add_argument("--body", "-b", default="", help="Forward message")
     p_fwd.set_defaults(func=cmd_forward)
     add_json_argument(p_fwd)
+    add_yes_argument(p_fwd)
 
     # mark
     p_mark = subparsers.add_parser("mark", help="Mark email read/unread")

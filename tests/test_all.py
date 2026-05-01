@@ -52,31 +52,16 @@ class TestUtils(unittest.TestCase):
 class TestConfirmOrDie(unittest.TestCase):
     """Tests for the confirm_or_die safety helper."""
 
-    def test_auto_approve_env_var_bypasses(self):
-        """When NEXLINK_AUTO_APPROVE=1, confirm_or_die returns immediately."""
+    def test_auto_approve_per_command_bypasses(self):
+        """When auto_approved=True kwarg is passed, confirm_or_die returns immediately."""
         from utils import confirm_or_die
 
-        with patch.dict(os.environ, {"NEXLINK_AUTO_APPROVE": "1"}, clear=False):
-            # Should not raise or exit
-            confirm_or_die("Delete everything")
-
-    def test_auto_approve_yes_string(self):
-        """NEXLINK_AUTO_APPROVE=yes should also bypass."""
-        from utils import confirm_or_die
-
-        with patch.dict(os.environ, {"NEXLINK_AUTO_APPROVE": "yes"}, clear=False):
-            confirm_or_die("Delete everything")
-
-    def test_auto_approve_true_string(self):
-        """NEXLINK_AUTO_APPROVE=True should also bypass."""
-        from utils import confirm_or_die
-
-        with patch.dict(os.environ, {"NEXLINK_AUTO_APPROVE": "True"}, clear=False):
-            confirm_or_die("Delete everything")
+        # Should not raise or exit when auto_approved is True
+        confirm_or_die("Delete everything", auto_approved=True)
 
     @patch("sys.stdin")
     def test_non_tty_exits_with_json_error(self, mock_stdin):
-        """When stdin is not a TTY and no auto-approve, exits with code 1 via die()."""
+        """When stdin is not a TTY and no auto-approve, exits with code 2."""
         from utils import confirm_or_die
 
         mock_stdin.isatty.return_value = False
@@ -84,8 +69,7 @@ class TestConfirmOrDie(unittest.TestCase):
         with self.assertRaises(SystemExit) as cm:
             confirm_or_die("Delete file.txt")
 
-        # die() uses exit code 1 for errors
-        self.assertEqual(cm.exception.code, 1)
+        self.assertEqual(cm.exception.code, 2)
 
     @patch("sys.stdin")
     @patch("builtins.input", return_value="y")

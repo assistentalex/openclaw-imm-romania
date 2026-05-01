@@ -31,13 +31,14 @@ DEFAULT_TIMEOUT = 30
 CARDDAV_SUCCESS_CODES = {200, 201, 204, 207}
 
 
-def _confirm_or_die(action_desc: str) -> None:
+def _confirm_or_die(action_desc: str, auto_approved: bool = False) -> None:
     """Prompt for confirmation before a destructive operation.
 
-    Bypassed when NEXLINK_AUTO_APPROVE is set.
+    Bypassed when auto_approved is True (e.g., via per-command --yes).
+    There is no session-wide or environment bypass.
     Exits with code 2 on non-confirmation.
     """
-    if os.environ.get("NEXLINK_AUTO_APPROVE", "").lower() in ("1", "true", "yes"):
+    if auto_approved:
         return
 
     if not sys.stdin.isatty():
@@ -46,7 +47,7 @@ def _confirm_or_die(action_desc: str) -> None:
                 "ok": False,
                 "error": (
                     f"Confirmation required: {action_desc}. "
-                    "Use --yes flag or set NEXLINK_AUTO_APPROVE=1 to bypass."
+                    "Re-run with --yes to confirm this single operation."
                 ),
             }),
             file=sys.stderr,

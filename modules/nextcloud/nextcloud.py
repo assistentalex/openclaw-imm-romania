@@ -57,25 +57,26 @@ WEBDAV_SUCCESS_CODES = {200, 201, 204, 207}
 PUBLIC_LINK_SHARE_TYPE = "3"
 
 
-def _confirm_or_die(action_desc: str) -> None:
+def _confirm_or_die(action_desc: str, auto_approved: bool = False) -> None:
     """Prompt for confirmation before a destructive operation.
 
-    Bypassed when NEXLINK_AUTO_APPROVE is set.
+    Bypassed when auto_approved is True (e.g., via per-command --yes).
+    There is no session-wide or environment bypass.
     Exits with code 2 on non-confirmation.
     """
-    if os.environ.get("NEXLINK_AUTO_APPROVE", "").lower() in ("1", "true", "yes"):
+    if auto_approved or _AUTO_APPROVED:
         return
 
     if not sys.stdin.isatty():
         print(json.dumps({
             "ok": False,
             "error": f"Confirmation required: {action_desc}. "
-                      "Use --yes flag or set NEXLINK_AUTO_APPROVE=1 to bypass.",
+                      "Re-run with --yes to confirm this single operation.",
         }), file=sys.stderr)
         sys.exit(2)
 
     try:
-        answer = input(f"\u26a0\ufe0f  {action_desc} [y/N]: ").strip().lower()
+        answer = input(f"⚠️  {action_desc} [y/N]: ").strip().lower()
     except (EOFError, KeyboardInterrupt):
         print("", file=sys.stderr)
         sys.exit(2)
@@ -147,6 +148,7 @@ MONTHS = {
 
 
 _JSON_OUTPUT = False
+_AUTO_APPROVED = False
 
 def get_exchange_account(mailbox: str | None = None) -> Any:
     """Get an Exchange account for task creation."""
@@ -1438,9 +1440,10 @@ def run_cli(argv: list[str] | None = None) -> int:
         _JSON_OUTPUT = True
         args = [a for a in args if a != "--json"]
 
-    # Strip global --yes and set env var
+    # Strip global --yes and set module-level auto-approval
     if "--yes" in args or "-y" in args:
-        os.environ["NEXLINK_AUTO_APPROVE"] = "1"
+        global _AUTO_APPROVED
+        _AUTO_APPROVED = True
         args = [a for a in args if a not in ("--yes", "-y")]
 
     if not args:

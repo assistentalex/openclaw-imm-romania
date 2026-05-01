@@ -59,18 +59,13 @@ grep -rn "EXCHANGE_PASSWORD\|NEXTCLOUD_APP_PASSWORD" ~/.openclaw/skills/nexlink/
 
 ## Confirmation Prompts
 
-All destructive operations require confirmation. To run in automation:
+All destructive operations require confirmation. To run a single operation in automation:
 
 ```bash
-# Option 1: CLI flag
-nexlink --yes mail send --to "client@example.com" --subject "..."
-
-# Option 2: Environment variable (for scripts)
-export NEXLINK_AUTO_APPROVE=1
-nexlink mail send --to "client@example.com" --subject "..."
+nexlink mail send --to "client@example.com" --subject "..." --yes
 ```
 
-**Warning:** `NEXLINK_AUTO_APPROVE=1` bypasses all confirmation prompts. Use only in fully automated, monitored environments.
+**Warning:** `--yes` / `-y` bypasses confirmation for **only that one command**. For multiple operations, add `--yes` to each one.
 
 ## Branding Opt-Out
 

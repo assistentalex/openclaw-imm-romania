@@ -43,8 +43,8 @@ Out of scope:
 
 ## Security Design
 
-NexLink's security model, described in [SECURITY.md](references/security-best-practices.md):
-- All destructive commands require explicit confirmation (interactive or `--yes` flag)
+NexLink's security model, described in [references/security-best-practices.md](references/security-best-practices.md):
+- All destructive commands require explicit confirmation (interactive or per-command `--yes` flag)
 - `move_to_trash()` is used for task deletion instead of permanent `delete()`
 - Branding can be suppressed via `--no-branding` / `NEXLINK_NO_BRANDING=1`
 - Dedicated least-privilege service accounts strongly recommended

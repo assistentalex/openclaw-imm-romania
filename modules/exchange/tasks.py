@@ -22,7 +22,7 @@ except ImportError:
     HAS_EXCHANGELIB = False
 
 from connection import get_account
-from utils import out, die, parse_datetime, format_datetime, task_to_dict, add_json_argument, confirm_or_die
+from utils import out, die, parse_datetime, format_datetime, task_to_dict, add_json_argument, confirm_or_die, add_yes_argument
 
 # Task status mapping
 STATUS_MAP = {
@@ -209,7 +209,7 @@ def cmd_create(args: argparse.Namespace) -> None:
     Use --assign-to to create a task directly in another user's mailbox.
     This requires delegate permissions on the target mailbox.
     """
-    confirm_or_die(f"Create task \"{args.subject}\"")
+    confirm_or_die(f"Create task \"{args.subject}\"", getattr(args, 'yes', False))
 
     # Determine which account to use
     if args.assign_to:
@@ -427,7 +427,7 @@ def cmd_complete(args: argparse.Namespace) -> None:
     
     Use --mailbox to complete a task in another user's mailbox via delegate access.
     """
-    confirm_or_die(f"Mark task {args.id} as completed")
+    confirm_or_die(f"Mark task {args.id} as completed", getattr(args, 'yes', False))
 
     # Determine which account to use
     if getattr(args, 'mailbox', None):
@@ -464,7 +464,7 @@ def cmd_trash(args: argparse.Namespace) -> None:
     Use --mailbox to trash a task in another user's mailbox via delegate access.
     This is safer than hard delete as the task can be recovered from Deleted Items.
     """
-    confirm_or_die(f"Move task {args.id} to trash")
+    confirm_or_die(f"Move task {args.id} to trash", getattr(args, 'yes', False))
 
     # Determine which account to use
     if getattr(args, 'mailbox', None):
@@ -563,6 +563,7 @@ def add_parser(subparsers: argparse.ArgumentParser) -> None:
     )
     p_create.set_defaults(func=cmd_create)
     add_json_argument(p_create)
+    add_yes_argument(p_create)
 
     # assign
     p_assign = subparsers.add_parser(
@@ -622,6 +623,7 @@ def add_parser(subparsers: argparse.ArgumentParser) -> None:
     )
     p_complete.set_defaults(func=cmd_complete)
     add_json_argument(p_complete)
+    add_yes_argument(p_complete)
 
     # trash
     p_trash = subparsers.add_parser("trash", help="Move task to Deleted Items folder")
@@ -632,6 +634,7 @@ def add_parser(subparsers: argparse.ArgumentParser) -> None:
     )
     p_trash.set_defaults(func=cmd_trash)
     add_json_argument(p_trash)
+    add_yes_argument(p_trash)
 
 
 def main() -> None:

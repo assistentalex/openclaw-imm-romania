@@ -20,14 +20,20 @@ metadata:
     dependencies:
       - name: exchangelib
         type: pip
-        version: ">=5.0.0"
-      - name: requests_ntlm
+        version: "==5.6.0"
+      - name: requests-ntlm
         type: pip
-        version: ">=1.1.0"
+        version: "==1.3.0"
       - name: defusedxml
         type: pip
-        version: ">=0.7.1"
-        description: "Secure XML parsing - fixes XXE vulnerability"
+        version: "==0.7.1"
+        description: "Secure XML parsing — fixes XXE vulnerability"
+      - name: requests
+        type: pip
+        version: "==2.31.0"
+      - name: lxml
+        type: pip
+        version: "==6.0.2"
       - name: pdfplumber
         type: pip
         version: ">=0.10.0"

@@ -523,6 +523,7 @@ def main():
     p_respond.add_argument("--body", "-b", help="Response message")
     p_respond.set_defaults(func=cmd_respond)
     add_json_argument(p_respond)
+    add_yes_argument(p_respond)
 
     # availability
     p_avail = sub.add_parser("availability", help="Check availability")
@@ -627,6 +628,7 @@ def add_parser(subparsers):
     p_respond.add_argument("--body", "-b", help="Response message")
     p_respond.set_defaults(func=cmd_respond)
     add_json_argument(p_respond)
+    add_yes_argument(p_respond)
 
     # availability
     p_avail = subparsers.add_parser("availability", help="Check availability")
