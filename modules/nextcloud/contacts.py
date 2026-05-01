@@ -12,7 +12,7 @@ import os
 import re
 import sys
 import urllib.parse
-import xml.etree.ElementTree as ET
+from defusedxml import ElementTree as ET
 from typing import Any, Dict, List, Optional, Tuple
 
 try:
