@@ -1,6 +1,6 @@
 {
   "slug": "nexlink",
-  "name": "NexLink — Enterprise Connector for Nextcloud, Exchange & YouTube",
+  "name": "NexLink — Nextcloud, Exchange & YouTube Connector for OpenClaw",
   "version": "0.15.3",
   "description": "Enterprise-grade connector for Nextcloud, Microsoft Exchange, and YouTube. Email, calendar, tasks, file management, document understanding, transcript extraction, contacts, analytics — with built-in security confirmations and least-privilege defaults.",
   "author": "Firma de AI",
